@@ -1,0 +1,8 @@
+ollama
+fastapi
+uvicorn[standard]
+chromadb
+pandas
+python-dotenv
+pydantic
+httpx

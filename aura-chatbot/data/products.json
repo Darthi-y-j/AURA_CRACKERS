@@ -1,0 +1,252 @@
+[
+  {
+    "id": "8c20a150-b60f-4340-b58d-cab00e81ca7c",
+    "category_id": "3d86f360-0add-4409-8612-fda6129ac135",
+    "name": "Color Sparklers",
+    "slug": "color-sparklers",
+    "description": "Color Sparklers create vibrant, colorful sparkling effects when lit, adding a bright and festive touch to celebrations. They are easy to use and ideal for enjoying colorful spark effects during special occasions.",
+    "specifications": {
+      "Type": "Hand-held Sparkler",
+      "Usage": "Outdoor Celebrations",
+      "Colors": "Multiple Colors",
+      "Effect": "Colorful Sparkling Effect"
+    },
+    "price": 175,
+    "original_price": 250,
+    "discount_percentage": 30,
+    "image_url": "https://fznaboorowrtrqrjnfuv.supabase.co/storage/v1/object/public/product-images/1786440831273-qn36pb98qbp.png",
+    "is_available": true,
+    "is_featured": true,
+    "sort_order": 1,
+    "created_at": "2026-08-11T09:35:20.809172+00:00",
+    "updated_at": "2026-08-11T17:34:24.623783+00:00",
+    "pieces": 10,
+    "brand": "Sivagasi",
+    "category": {
+      "id": "3d86f360-0add-4409-8612-fda6129ac135",
+      "name": "Sparklers",
+      "slug": "sparklers"
+    }
+  },
+  {
+    "id": "7092bd6e-2df2-4bad-9314-092604997f85",
+    "category_id": "3d86f360-0add-4409-8612-fda6129ac135",
+    "name": "15 cm sparklers",
+    "slug": "15-cm-sparklers",
+    "description": "15 cm Sparklers produce a bright and steady shower of sparkling light, making them a popular choice for festive celebrations. Their longer size provides a more extended sparkling experience compared with smaller sparklers.",
+    "specifications": {
+      "Type": "Hand-held Sparkler",
+      "Usage": "Outdoor Celebrations",
+      "Effect": "Bright Sparkling Effect",
+      "Length": "15 cm"
+    },
+    "price": 450,
+    "original_price": 500,
+    "discount_percentage": 10,
+    "image_url": "https://fznaboorowrtrqrjnfuv.supabase.co/storage/v1/object/public/product-images/1786440116776-837re928zf.png",
+    "is_available": true,
+    "is_featured": true,
+    "sort_order": 2,
+    "created_at": "2026-08-11T09:24:28.708595+00:00",
+    "updated_at": "2026-08-12T08:40:37.631071+00:00",
+    "pieces": 20,
+    "brand": "Ajanta Fireworks",
+    "category": {
+      "id": "3d86f360-0add-4409-8612-fda6129ac135",
+      "name": "Sparklers",
+      "slug": "sparklers"
+    }
+  },
+  {
+    "id": "58b0f166-6de0-4613-bb6e-71f41f7c1354",
+    "category_id": "3d86f360-0add-4409-8612-fda6129ac135",
+    "name": "7 cm sparklers",
+    "slug": "7-cm-sparklers",
+    "description": "7 cm Sparklers are compact hand-held fireworks that produce bright, sparkling effects when lit. They are easy to handle and suitable for festive celebrations, offering a steady shower of sparks with a simple and attractive visual effect.",
+    "specifications": {
+      "Type": "Hand-held Sparkler",
+      "Usage": "Outdoor Celebrations",
+      "Effect": "Bright Sparkling Effect",
+      "Length": "7 cm"
+    },
+    "price": 4799.86,
+    "original_price": 5999.82,
+    "discount_percentage": 20,
+    "image_url": "https://fznaboorowrtrqrjnfuv.supabase.co/storage/v1/object/public/product-images/1786439565118-42vfhbd8bk1.png",
+    "is_available": true,
+    "is_featured": true,
+    "sort_order": 3,
+    "created_at": "2026-08-11T09:14:20.806136+00:00",
+    "updated_at": "2026-08-12T08:36:17.248656+00:00",
+    "pieces": 15,
+    "brand": "Ajanta Fireworks",
+    "category": {
+      "id": "3d86f360-0add-4409-8612-fda6129ac135",
+      "name": "Sparklers",
+      "slug": "sparklers"
+    }
+  },
+  {
+    "id": "6d47c985-c601-49ba-8f91-46fc64decf48",
+    "category_id": "3d86f360-0add-4409-8612-fda6129ac135",
+    "name": "Crackling Sparklers",
+    "slug": "crackling-sparklers",
+    "description": "Crackling Sparklers combine bright sparkling light with a lively crackling sound effect. When lit, they produce a shower of sparks accompanied by gentle crackling bursts, adding extra excitement and fun to festive celebrations.",
+    "specifications": {
+      "Type": "Hand-held Sparkler",
+      "Sound": "Crackling Bursts",
+      "Usage": "Outdoor Celebrations",
+      "Effect": "Sparkling & Crackling Effect"
+    },
+    "price": 180,
+    "original_price": 300,
+    "discount_percentage": 40,
+    "image_url": "https://fznaboorowrtrqrjnfuv.supabase.co/storage/v1/object/public/product-images/1786441536139-knfo7jpmam.png",
+    "is_available": true,
+    "is_featured": true,
+    "sort_order": 4,
+    "created_at": "2026-08-11T09:45:07.831974+00:00",
+    "updated_at": "2026-08-12T08:40:14.313035+00:00",
+    "pieces": 40,
+    "brand": "Eagle Crackers",
+    "category": {
+      "id": "3d86f360-0add-4409-8612-fda6129ac135",
+      "name": "Sparklers",
+      "slug": "sparklers"
+    }
+  },
+  {
+    "id": "a108695e-bf74-413e-baf7-7c700a63f01a",
+    "category_id": "3d86f360-0add-4409-8612-fda6129ac135",
+    "name": "Electric sparkler",
+    "slug": "electric-sparkler",
+    "description": "Sparkles brighter and rich in colors 15 cm",
+    "specifications": null,
+    "price": 190,
+    "original_price": 200,
+    "discount_percentage": 5,
+    "image_url": "https://fznaboorowrtrqrjnfuv.supabase.co/storage/v1/object/public/product-images/1786524987234-4mra1lmahev.jpg",
+    "is_available": true,
+    "is_featured": true,
+    "sort_order": 5,
+    "created_at": "2026-08-12T08:58:05.728647+00:00",
+    "updated_at": "2026-08-12T08:58:05.728647+00:00",
+    "pieces": 10,
+    "brand": "Sivagasi",
+    "category": {
+      "id": "3d86f360-0add-4409-8612-fda6129ac135",
+      "name": "Sparklers",
+      "slug": "sparklers"
+    }
+  },
+  {
+    "id": "428fc4d5-7ab9-4d74-9400-b7f27d74e891",
+    "category_id": "141ea351-da79-46af-a7e4-f13fbb7a402c",
+    "name": "Colorfull Rocket",
+    "slug": "colorfull-rocket",
+    "description": "Flies higher then we expect and burst in the sky ",
+    "specifications": null,
+    "price": 190,
+    "original_price": 200,
+    "discount_percentage": 5,
+    "image_url": "https://fznaboorowrtrqrjnfuv.supabase.co/storage/v1/object/public/product-images/1786525274978-q9l4ljcjbj.png",
+    "is_available": true,
+    "is_featured": true,
+    "sort_order": 6,
+    "created_at": "2026-08-12T09:02:13.106734+00:00",
+    "updated_at": "2026-08-12T09:02:13.106734+00:00",
+    "pieces": 2,
+    "brand": null,
+    "category": {
+      "id": "141ea351-da79-46af-a7e4-f13fbb7a402c",
+      "name": "Rockets",
+      "slug": "rockets"
+    }
+  },
+  {
+    "id": "49e2a7e2-0363-4727-8d2b-704d27aee197",
+    "category_id": "154d4019-0998-41c5-acac-2b198bdcdcff",
+    "name": "3cm chakara",
+    "slug": "3cm-chakara",
+    "description": "3cm Chakkara is a traditional ground-spinning firework that rotates rapidly on the ground and produces bright sparkling effects. A fun and colorful choice for festive celebrations.",
+    "specifications": {
+      "Size": "3 cm",
+      "Type": "Ground Spinner",
+      "Usage": "Outdoor",
+      "Effect": "Spinning with Sparks"
+    },
+    "price": 480,
+    "original_price": 600,
+    "discount_percentage": 20,
+    "image_url": "https://fznaboorowrtrqrjnfuv.supabase.co/storage/v1/object/public/product-images/1786525555109-dh62klrl6m7.PNG",
+    "is_available": true,
+    "is_featured": true,
+    "sort_order": 7,
+    "created_at": "2026-08-12T09:08:01.321668+00:00",
+    "updated_at": "2026-08-12T09:08:09.083168+00:00",
+    "pieces": 10,
+    "brand": null,
+    "category": {
+      "id": "154d4019-0998-41c5-acac-2b198bdcdcff",
+      "name": "Chakkars",
+      "slug": "chakkars"
+    }
+  },
+  {
+    "id": "0c9cb4bf-5bab-4fa2-8842-5b127553468c",
+    "category_id": "9b4c968f-1b60-4e03-9fdb-9b073cf7e0d8",
+    "name": "Atom Bomb",
+    "slug": "atom-bomb",
+    "description": "Atom Bomb is a traditional sound cracker that produces a loud bursting sound when ignited. It is commonly used during festive celebrations and is intended for outdoor use.",
+    "specifications": {
+      "Type": "Sound Cracker",
+      "Usage": "Outdoor",
+      "Effect": "Loud Burst"
+    },
+    "price": 270,
+    "original_price": 300,
+    "discount_percentage": 10,
+    "image_url": "https://fznaboorowrtrqrjnfuv.supabase.co/storage/v1/object/public/product-images/1786525698132-e5qug157oym.png",
+    "is_available": true,
+    "is_featured": true,
+    "sort_order": 8,
+    "created_at": "2026-08-12T09:09:09.504981+00:00",
+    "updated_at": "2026-08-12T09:09:09.504981+00:00",
+    "pieces": 10,
+    "brand": null,
+    "category": {
+      "id": "9b4c968f-1b60-4e03-9fdb-9b073cf7e0d8",
+      "name": "Sound Crackers",
+      "slug": "sound-crackers"
+    }
+  },
+  {
+    "id": "f6b5cc44-64c4-45bc-a387-5ad461a95645",
+    "category_id": "9b4c968f-1b60-4e03-9fdb-9b073cf7e0d8",
+    "name": "1000 Wala",
+    "slug": "1000-wala",
+    "description": "1000 Wala is a traditional string cracker containing multiple crackers that burst sequentially to create a continuous series of loud sounds. It is commonly used during Diwali and other festive celebrations and is intended for outdoor use",
+    "specifications": {
+      "Type": "String Cracker",
+      "Count": "1000 Crackers",
+      "Usage": "Outdoor",
+      "Effect": "Sequential Loud Bursts"
+    },
+    "price": 4000,
+    "original_price": 5000,
+    "discount_percentage": 20,
+    "image_url": "https://fznaboorowrtrqrjnfuv.supabase.co/storage/v1/object/public/product-images/1786526125283-mkgec72i8t.png",
+    "is_available": true,
+    "is_featured": true,
+    "sort_order": 9,
+    "created_at": "2026-08-12T09:15:28.414292+00:00",
+    "updated_at": "2026-08-12T09:15:28.414292+00:00",
+    "pieces": 1,
+    "brand": null,
+    "category": {
+      "id": "9b4c968f-1b60-4e03-9fdb-9b073cf7e0d8",
+      "name": "Sound Crackers",
+      "slug": "sound-crackers"
+    }
+  }
+]
