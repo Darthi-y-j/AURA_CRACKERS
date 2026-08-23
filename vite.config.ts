@@ -1,26 +1,33 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type ProxyOptions } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import type { ServerResponse } from 'node:http'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-function chatbotProxy() {
+function chatbotProxy(): ProxyOptions {
   return {
     target: process.env.CHATBOT_API_HOST || 'http://127.0.0.1:8000',
     changeOrigin: true,
-    rewrite: (requestPath: string) => requestPath.replace(/^\/api\/chatbot/, ''),
-    configure: (proxy: { on: (event: string, handler: (...args: unknown[]) => void) => void }) => {
+    rewrite: (requestPath) => requestPath.replace(/^\/api\/chatbot/, ''),
+    configure: (proxy) => {
       proxy.on('error', (_err, _req, res) => {
-        const response = res as { writeHead?: (code: number, headers: Record<string, string>) => void; end?: (body: string) => void; headersSent?: boolean }
-        if (response.writeHead && !response.headersSent) {
+        const response = res as ServerResponse | undefined
+        if (response && !response.headersSent) {
           response.writeHead(503, { 'Content-Type': 'application/json' })
           response.end(JSON.stringify({ status: 'unavailable' }))
         }
       })
     },
   }
+}
+
+const ollamaProxy: ProxyOptions = {
+  target: process.env.OLLAMA_HOST || 'http://127.0.0.1:11434',
+  changeOrigin: true,
+  rewrite: (requestPath) => requestPath.replace(/^\/api\/ollama/, ''),
 }
 
 export default defineConfig({
@@ -35,21 +42,13 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api/ollama': {
-        target: process.env.OLLAMA_HOST || 'http://127.0.0.1:11434',
-        changeOrigin: true,
-        rewrite: (requestPath) => requestPath.replace(/^\/api\/ollama/, ''),
-      },
+      '/api/ollama': ollamaProxy,
       '/api/chatbot': chatbotProxy(),
     },
   },
   preview: {
     proxy: {
-      '/api/ollama': {
-        target: process.env.OLLAMA_HOST || 'http://127.0.0.1:11434',
-        changeOrigin: true,
-        rewrite: (requestPath) => requestPath.replace(/^\/api\/ollama/, ''),
-      },
+      '/api/ollama': ollamaProxy,
       '/api/chatbot': chatbotProxy(),
     },
   },
