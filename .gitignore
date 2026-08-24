@@ -25,7 +25,8 @@ dist-ssr
 *.sln
 *.sw?
 
-# Python chatbot backend
+# Large source assets (compressed versions used in public/)
+img/hero-original.mp4
 aura-chatbot/venv/
 aura-chatbot/vector_db/
 aura-chatbot/**/__pycache__/

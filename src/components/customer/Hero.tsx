@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Sparkles, CheckCircle } from 'lucide-react'
 import { useSettings } from '@/contexts/SettingsContext'
@@ -20,6 +20,7 @@ export function Hero({ categories = [] }: HeroProps) {
   const { settings } = useSettings()
   const { setTheme } = useHeroSlideTheme()
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [videoReady, setVideoReady] = useState(false)
 
   useEffect(() => {
     setTheme('dark')
@@ -37,8 +38,18 @@ export function Hero({ categories = [] }: HeroProps) {
     }
 
     const playVideo = () => {
-      video.play().catch(() => {})
+      if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+        video.play().catch(() => {})
+      }
     }
+
+    const onCanPlay = () => {
+      setVideoReady(true)
+      playVideo()
+    }
+
+    video.addEventListener('canplay', onCanPlay)
+    video.load()
 
     const onVisibility = () => {
       if (document.hidden) video.pause()
@@ -59,6 +70,7 @@ export function Hero({ categories = [] }: HeroProps) {
     return () => {
       observer.disconnect()
       document.removeEventListener('visibilitychange', onVisibility)
+      video.removeEventListener('canplay', onCanPlay)
     }
   }, [])
 
@@ -68,12 +80,12 @@ export function Hero({ categories = [] }: HeroProps) {
         <div className="absolute inset-0 overflow-hidden bg-navy-950 max-sm:min-h-[92vh]">
           <video
             ref={videoRef}
-            className="absolute inset-0 h-full w-full object-cover object-center max-sm:object-[center_30%]"
+            className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-500 max-sm:object-[center_30%] ${videoReady ? 'opacity-100' : 'opacity-0'}`}
             autoPlay
             muted
             loop
             playsInline
-            preload="metadata"
+            preload="auto"
             aria-hidden="true"
           >
             <source src={HERO_VIDEO} type="video/mp4" />
