@@ -36,9 +36,9 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({ product
             alt={product.name}
             loading="lazy"
             decoding="async"
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            className="h-full w-full object-contain p-1 sm:p-1.5"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
           {hasDiscount && (
             <DiscountOfferTag

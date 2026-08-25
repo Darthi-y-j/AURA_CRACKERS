@@ -34,6 +34,7 @@ export function ProductImage({ src, alt, className, priority = false, width = IM
       className={cn(
         priority ? 'opacity-100' : loaded ? 'opacity-100' : 'opacity-0',
         !priority && 'transition-opacity duration-200',
+        'object-contain',
         className,
       )}
     />

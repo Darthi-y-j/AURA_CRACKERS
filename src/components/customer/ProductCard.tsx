@@ -373,14 +373,14 @@ export const ProductCard = memo(function ProductCard({ product, index = 0, varia
               alt={product.name}
               loading="lazy"
               decoding="async"
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+              className="h-full w-full object-contain p-1 sm:p-1.5"
             />
             {hasProductImage && (
             <div className={cn(
-              'absolute inset-0',
+              'pointer-events-none absolute inset-x-0 bottom-0 h-1/3',
               isElite
-                ? 'bg-gradient-to-t from-navy-950 via-indigo-950/25 to-navy-950/30'
-                : 'bg-gradient-to-t from-navy-950 via-transparent to-navy-950/20',
+                ? 'bg-gradient-to-t from-navy-950/80 to-transparent'
+                : 'bg-gradient-to-t from-navy-950/70 to-transparent',
             )} />
             )}
 

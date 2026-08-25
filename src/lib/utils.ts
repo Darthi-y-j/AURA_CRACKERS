@@ -95,5 +95,5 @@ export function getImageUrl(
   if (!width || !url.includes(SUPABASE_OBJECT_PATH)) return url
 
   const renderUrl = url.replace(SUPABASE_OBJECT_PATH, SUPABASE_RENDER_PATH)
-  return `${renderUrl}?width=${width}&quality=80&resize=cover`
+  return `${renderUrl}?width=${width}&quality=80&resize=contain`
 }
