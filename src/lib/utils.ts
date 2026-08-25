@@ -90,10 +90,12 @@ export function getImageUrl(
   url: string | null | undefined,
   fallback = '/placeholder-product.svg',
   width?: number,
+  height?: number,
 ): string {
   if (!url) return fallback
   if (!width || !url.includes(SUPABASE_OBJECT_PATH)) return url
 
   const renderUrl = url.replace(SUPABASE_OBJECT_PATH, SUPABASE_RENDER_PATH)
-  return `${renderUrl}?width=${width}&quality=80&resize=contain`
+  const h = height ?? Math.round((width * 3) / 4)
+  return `${renderUrl}?width=${width}&height=${h}&quality=80&resize=cover`
 }

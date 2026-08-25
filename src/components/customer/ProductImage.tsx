@@ -11,7 +11,7 @@ interface ProductImageProps {
 
 export function ProductImage({ src, alt, className, priority = false, width = IMAGE_WIDTH.detail }: ProductImageProps) {
   const [loaded, setLoaded] = useState(false)
-  const imageSrc = getImageUrl(src, '/placeholder-product.svg', width)
+  const imageSrc = getImageUrl(src, '/placeholder-product.svg', width, width)
 
   const imgRef = useCallback(
     (node: HTMLImageElement | null) => {
@@ -34,7 +34,6 @@ export function ProductImage({ src, alt, className, priority = false, width = IM
       className={cn(
         priority ? 'opacity-100' : loaded ? 'opacity-100' : 'opacity-0',
         !priority && 'transition-opacity duration-200',
-        'object-contain',
         className,
       )}
     />

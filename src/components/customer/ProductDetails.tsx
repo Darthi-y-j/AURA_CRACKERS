@@ -86,7 +86,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               src={product.image_url}
               alt={product.name}
               priority
-              className="h-full w-full object-contain p-2 sm:p-3"
+              className="h-full w-full object-cover object-center transition-transform duration-700 hover:scale-[1.03]"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-navy-950/50 via-transparent to-navy-950/15" />
 
