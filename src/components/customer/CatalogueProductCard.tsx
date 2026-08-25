@@ -2,7 +2,7 @@ import { memo } from 'react'
 import { ProductLink } from './ProductLink'
 import { Eye, ShoppingCart } from 'lucide-react'
 import type { Product } from '@/types/database'
-import { getImageUrl, truncate, cn } from '@/lib/utils'
+import { getImageUrl, IMAGE_WIDTH, truncate, cn } from '@/lib/utils'
 import { useProductCartState } from '@/hooks/useProductCartState'
 import { CartQuantityControl } from './CartQuantityControl'
 import { ProductPiecesBadge } from './ProductPiecesBadge'
@@ -32,7 +32,7 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({ product
       <ProductLink product={product} className="relative block">
         <div className="relative aspect-[4/3] overflow-hidden bg-[#1a120e]">
           <img
-            src={getImageUrl(product.image_url)}
+            src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.card)}
             alt={product.name}
             loading="lazy"
             decoding="async"

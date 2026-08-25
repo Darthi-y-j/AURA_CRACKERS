@@ -76,7 +76,24 @@ export function shuffleArray<T>(items: T[]): T[] {
   return result
 }
 
-export function getImageUrl(url: string | null | undefined, fallback = '/placeholder-product.svg'): string {
+const SUPABASE_OBJECT_PATH = '/storage/v1/object/public/'
+const SUPABASE_RENDER_PATH = '/storage/v1/render/image/public/'
+
+/** Display widths — request 2x for retina where noted in usage */
+export const IMAGE_WIDTH = {
+  thumb: 160,
+  card: 480,
+  detail: 960,
+} as const
+
+export function getImageUrl(
+  url: string | null | undefined,
+  fallback = '/placeholder-product.svg',
+  width?: number,
+): string {
   if (!url) return fallback
-  return url
+  if (!width || !url.includes(SUPABASE_OBJECT_PATH)) return url
+
+  const renderUrl = url.replace(SUPABASE_OBJECT_PATH, SUPABASE_RENDER_PATH)
+  return `${renderUrl}?width=${width}&quality=80&resize=cover`
 }

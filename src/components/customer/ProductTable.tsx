@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ShoppingCart } from 'lucide-react'
 import type { Product } from '@/types/database'
-import { getImageUrl, cn } from '@/lib/utils'
+import { getImageUrl, IMAGE_WIDTH, cn } from '@/lib/utils'
 import { useProductCartState } from '@/hooks/useProductCartState'
 import { QuantitySelector } from './QuantitySelector'
 import { EmptyState } from './EmptyState'
@@ -292,7 +292,7 @@ function ProductTableDesktopCells({
         <Link to={`/products/${product.slug}`} className="flex w-full min-w-0 items-center gap-3 lg:gap-4">
           <div className="shrink-0 overflow-hidden rounded-xl bg-cream-100/80 p-1 ring-1 ring-navy-900/10">
             <img
-              src={getImageUrl(product.image_url)}
+              src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.thumb)}
               alt={product.name}
               className="h-16 w-16 rounded-lg object-cover lg:h-[4.75rem] lg:w-[4.75rem]"
             />
@@ -410,7 +410,7 @@ function ProductTableRow({
           <Link to={`/products/${product.slug}`} className="shrink-0">
             <div className="overflow-hidden rounded-xl bg-cream-100/80 p-1 ring-1 ring-navy-900/10">
               <img
-                src={getImageUrl(product.image_url)}
+                src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.thumb)}
                 alt={product.name}
                 className="h-[4.75rem] w-[4.75rem] rounded-lg object-cover sm:h-20 sm:w-20"
               />

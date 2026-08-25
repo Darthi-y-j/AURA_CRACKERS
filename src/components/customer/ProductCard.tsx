@@ -2,7 +2,7 @@ import { memo } from 'react'
 import { ProductLink } from './ProductLink'
 import { Eye, ShoppingCart, Check, ArrowRight, Sparkles } from 'lucide-react'
 import type { Product } from '@/types/database'
-import { getImageUrl, truncate, cn } from '@/lib/utils'
+import { getImageUrl, IMAGE_WIDTH, truncate, cn } from '@/lib/utils'
 import { isEliteProductTag, SILVER_METALLIC_BG, ELITE_BORDER_GLOW, ELITE_CARD_INNER, FEATURED_CARD_GRADIENT, getCardDescriptionClass, getCardCategoryClass, getCardTitleClass, CARD_TITLE_BASE_CLASS, getCardPricePanelClass, getCardViewButtonClass, getCardPerforationDotClass, getCardPerforationLineClass } from '@/lib/productCardThemes'
 import { useProductCartState } from '@/hooks/useProductCartState'
 import { QuantitySelector } from './QuantitySelector'
@@ -163,7 +163,7 @@ export const ProductCard = memo(function ProductCard({ product, index = 0, varia
             )}
           >
             <img
-              src={getImageUrl(product.image_url)}
+              src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.card)}
               alt={product.name}
               loading="lazy"
               decoding="async"
@@ -257,7 +257,7 @@ export const ProductCard = memo(function ProductCard({ product, index = 0, varia
           )}
         >
           <img
-            src={getImageUrl(product.image_url)}
+            src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.card)}
             alt={product.name}
             loading="lazy"
             decoding="async"
@@ -369,7 +369,7 @@ export const ProductCard = memo(function ProductCard({ product, index = 0, varia
         <ProductLink product={product} className="relative block shrink-0">
           <div className="relative aspect-[4/3] overflow-hidden bg-[#1f1410] sm:aspect-[4/3.2]">
             <img
-              src={getImageUrl(product.image_url, '/placeholder-product-dark.svg')}
+              src={getImageUrl(product.image_url, '/placeholder-product-dark.svg', IMAGE_WIDTH.card)}
               alt={product.name}
               loading="lazy"
               decoding="async"

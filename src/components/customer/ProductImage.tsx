@@ -1,16 +1,17 @@
 import { useCallback, useState } from 'react'
-import { getImageUrl, cn } from '@/lib/utils'
+import { getImageUrl, IMAGE_WIDTH, cn } from '@/lib/utils'
 
 interface ProductImageProps {
   src: string | null | undefined
   alt: string
   className?: string
   priority?: boolean
+  width?: number
 }
 
-export function ProductImage({ src, alt, className, priority = false }: ProductImageProps) {
+export function ProductImage({ src, alt, className, priority = false, width = IMAGE_WIDTH.detail }: ProductImageProps) {
   const [loaded, setLoaded] = useState(false)
-  const imageSrc = getImageUrl(src)
+  const imageSrc = getImageUrl(src, '/placeholder-product.svg', width)
 
   const imgRef = useCallback(
     (node: HTMLImageElement | null) => {
