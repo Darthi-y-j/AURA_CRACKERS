@@ -229,7 +229,8 @@ export function AboutPage() {
     <>
       <SEO
         title="About Us"
-        description="Learn about Aura — your trusted destination for quality fireworks and festive crackers. Where every celebration shines."
+        description="Learn about Aura Crackers — your trusted destination for quality fireworks and festive crackers from Sivakasi, Tamil Nadu."
+        url="/about"
       />
 
       <AboutPageHeader />

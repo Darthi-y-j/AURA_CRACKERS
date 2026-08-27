@@ -26,7 +26,7 @@ export function AccountWishlistPage() {
 
   return (
     <>
-      <SEO title="Wishlist" description="Your saved favourite crackers and fireworks." />
+      <SEO title="Wishlist" description="Your saved favourite crackers and fireworks." noIndex />
 
       <AccountPageHeader backTo="/account" subtitle="Wishlist" />
 

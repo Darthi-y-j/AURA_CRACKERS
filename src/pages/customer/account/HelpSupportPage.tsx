@@ -15,7 +15,7 @@ export function HelpSupportPage() {
 
   return (
     <>
-      <SEO title="Help & Support" description="Get help with enquiries, delivery, and your account." />
+      <SEO title="Help & Support" description="Get help with enquiries, delivery, and your account." noIndex />
 
       <AccountPageHeader backTo="/account" subtitle="Help & Support" />
 

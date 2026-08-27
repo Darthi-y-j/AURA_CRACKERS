@@ -74,7 +74,7 @@ export function PersonalInfoPage() {
 
   return (
     <>
-      <SEO title="Personal Information" description="Update your personal details." />
+      <SEO title="Personal Information" description="Update your personal details." noIndex />
 
       <AccountPageHeader backTo="/account" subtitle="Personal Information" />
 

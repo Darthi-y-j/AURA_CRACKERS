@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, ShoppingCart, Heart, User } from 'lucide-react'
+import { Menu, X, ShoppingCart, Heart, User, ChevronDown } from 'lucide-react'
 import { useSettings } from '@/contexts/SettingsContext'
 import { useCart } from '@/contexts/CartContext'
 import { useWishlist } from '@/contexts/WishlistContext'
@@ -8,15 +8,23 @@ import { useHeroSlideTheme } from '@/contexts/HeroSlideContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { BackButton } from '@/components/customer/BackButton'
 import { UserProfileMenu } from '@/components/customer/UserProfileMenu'
+import { ProductsMegaMenu, ProductsMegaMenuMobile } from '@/components/customer/ProductsMegaMenu'
+import { getCategories } from '@/services/categories'
+import type { Category } from '@/types/database'
 import { cn } from '@/lib/utils'
 
 const navLinks = [
   { to: '/', label: 'Home' },
-  { to: '/products', label: 'Products' },
   { to: '/gift-box', label: 'Gift Box' },
   { to: '/about', label: 'About' },
   { to: '/contact', label: 'Contact' },
   { to: '/faq', label: 'FAQ' },
+]
+
+const secondaryNavLinks = [
+  { to: '/products', label: 'All Products' },
+  { to: '/categories', label: 'Categories' },
+  { to: '/gift-box', label: 'Gift Box' },
 ]
 
 export function Navbar() {
@@ -27,9 +35,33 @@ export function Navbar() {
   const { theme: heroTheme } = useHeroSlideTheme()
   const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [megaMenuOpen, setMegaMenuOpen] = useState(false)
+  const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([])
   const [badgePop, setBadgePop] = useState(false)
   const [wishlistBadgePop, setWishlistBadgePop] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const megaMenuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const openMegaMenu = useCallback(() => {
+    if (megaMenuCloseTimer.current) {
+      clearTimeout(megaMenuCloseTimer.current)
+      megaMenuCloseTimer.current = null
+    }
+    setMegaMenuOpen(true)
+  }, [])
+
+  const closeMegaMenu = useCallback(() => {
+    megaMenuCloseTimer.current = setTimeout(() => setMegaMenuOpen(false), 120)
+  }, [])
+
+  const closeMegaMenuNow = useCallback(() => {
+    if (megaMenuCloseTimer.current) {
+      clearTimeout(megaMenuCloseTimer.current)
+      megaMenuCloseTimer.current = null
+    }
+    setMegaMenuOpen(false)
+  }, [])
 
   const isHeroPage = location.pathname === '/' || location.pathname === '/products' || location.pathname === '/gift-box'
   const isTransparent = isHeroPage && !scrolled
@@ -62,7 +94,21 @@ export function Navbar() {
 
   useEffect(() => {
     setMobileOpen(false)
-  }, [location.pathname])
+    setMobileCategoriesOpen(false)
+    closeMegaMenuNow()
+  }, [location.pathname, closeMegaMenuNow])
+
+  useEffect(() => {
+    getCategories()
+      .then(setCategories)
+      .catch(() => setCategories([]))
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (megaMenuCloseTimer.current) clearTimeout(megaMenuCloseTimer.current)
+    }
+  }, [])
 
   const isActive = (to: string) => {
     const path = to.split('?')[0]
@@ -79,6 +125,7 @@ export function Navbar() {
             ? 'border-transparent bg-white/75 backdrop-blur-md'
             : 'border-b border-navy-800/10 bg-white/95 shadow-sm backdrop-blur-md',
       )}
+      onMouseLeave={closeMegaMenu}
     >
       <nav className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-3 px-3 py-2.5 sm:gap-4 sm:px-6 sm:py-3.5 lg:px-8">
         <div className="flex items-center gap-1 sm:gap-2.5">
@@ -237,6 +284,52 @@ export function Navbar() {
         </div>
       </nav>
 
+      <div
+        className={cn(
+          'hidden border-t lg:block',
+          isDarkNav ? 'border-white/10 bg-navy-900/95' : 'border-navy-100 bg-navy-900',
+        )}
+      >
+        <div className="mx-auto flex max-w-7xl items-center gap-1 px-6 py-2 lg:px-8">
+          {secondaryNavLinks.map((link) => (
+            <Link
+              key={link.label}
+              to={link.to}
+              className={cn(
+                'rounded-md px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white',
+                isActive(link.to) && 'bg-white/10 text-gold-300',
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
+          <button
+            type="button"
+            className={cn(
+              'inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition',
+              megaMenuOpen
+                ? 'bg-white/15 text-gold-300'
+                : 'text-white/80 hover:bg-white/10 hover:text-white',
+            )}
+            onMouseEnter={openMegaMenu}
+            onFocus={openMegaMenu}
+            aria-expanded={megaMenuOpen}
+            aria-haspopup="true"
+          >
+            Shop by Category
+            <ChevronDown
+              className={cn('h-4 w-4 transition-transform', megaMenuOpen && 'rotate-180')}
+            />
+          </button>
+        </div>
+      </div>
+
+      {megaMenuOpen && (
+        <div onMouseEnter={openMegaMenu}>
+          <ProductsMegaMenu categories={categories} onNavigate={closeMegaMenuNow} />
+        </div>
+      )}
+
       {mobileOpen && (
         <div className="animate-fade-down border-t border-white/10 bg-navy-950/95 px-4 py-4 backdrop-blur-lg lg:hidden">
           <div className="flex flex-col gap-1">
@@ -255,6 +348,37 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
+            <Link
+              to="/products"
+              onClick={() => setMobileOpen(false)}
+              className={cn(
+                'rounded-xl px-3 py-2.5 text-sm font-medium transition',
+                isActive('/products')
+                  ? 'bg-white/10 text-gold-400'
+                  : 'text-white/80 hover:bg-white/5',
+              )}
+            >
+              All Products
+            </Link>
+            <button
+              type="button"
+              onClick={() => setMobileCategoriesOpen((open) => !open)}
+              className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/5"
+            >
+              Shop by Category
+              <ChevronDown
+                className={cn('h-4 w-4 transition-transform', mobileCategoriesOpen && 'rotate-180')}
+              />
+            </button>
+            {mobileCategoriesOpen && (
+              <ProductsMegaMenuMobile
+                categories={categories}
+                onNavigate={() => {
+                  setMobileOpen(false)
+                  setMobileCategoriesOpen(false)
+                }}
+              />
+            )}
             <Link
               to="/wishlist"
               onClick={() => setMobileOpen(false)}

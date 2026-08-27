@@ -21,7 +21,7 @@ export function CustomerLayout() {
         <main
           className={cn(
             'flex-1',
-            !isHeroPage && 'pt-16',
+            !isHeroPage && 'pt-16 lg:pt-[6.25rem]',
             isCataloguePage ? 'pb-20 sm:pb-24' : 'pb-4',
           )}
         >

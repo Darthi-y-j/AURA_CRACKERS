@@ -8,6 +8,7 @@ export function SafetyPage() {
       <SEO
         title="Safety Guidelines"
         description="Fireworks dos and don'ts — celebrate safely with Aura Crackers' responsible usage guide."
+        url="/safety"
       />
 
       <div className="bg-white pt-10 sm:pt-14">

@@ -85,7 +85,7 @@ export function RegisterPage() {
   if (success) {
     return (
       <>
-        <SEO title="Register" description="Create your Aura Crackers account." />
+        <SEO title="Register" description="Create your Aura Crackers account." noIndex />
         <div className="mx-auto max-w-md px-4 py-12 text-center sm:py-16">
           <div className="rounded-2xl border border-navy-900/10 bg-white p-8 shadow-sm">
             <h1 className="font-display text-2xl font-bold text-navy-900">Account Created</h1>
@@ -107,7 +107,7 @@ export function RegisterPage() {
 
   return (
     <>
-      <SEO title="Register" description="Create your Aura Crackers account to send enquiries." />
+      <SEO title="Register" description="Create your Aura Crackers account to send enquiries." noIndex />
 
       <div className="mx-auto max-w-md px-4 py-12 sm:px-6 sm:py-16">
         <div className="text-center">

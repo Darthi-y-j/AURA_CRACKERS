@@ -58,7 +58,7 @@ export function SecurityPage() {
 
   return (
     <>
-      <SEO title="Password & Security" description="Manage your account security settings." />
+      <SEO title="Password & Security" description="Manage your account security settings." noIndex />
 
       <AccountPageHeader backTo="/account" subtitle="Password & Security" />
 

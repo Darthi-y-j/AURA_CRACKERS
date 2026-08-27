@@ -133,6 +133,7 @@ export function GiftBoxPage() {
       <SEO
         title="Build a Gift Box"
         description="Create a custom fireworks gift box. Choose your products, review the box, and send an enquiry on WhatsApp."
+        url="/gift-box"
       />
 
       <CatalogueHero withWave>

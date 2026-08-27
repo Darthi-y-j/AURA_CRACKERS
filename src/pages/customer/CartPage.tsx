@@ -100,7 +100,7 @@ export function CartPage() {
   if (items.length === 0) {
     return (
       <>
-        <SEO title="Cart" description="Review your selected products and send enquiry on WhatsApp" />
+        <SEO title="Cart" description="Review your selected products and send enquiry on WhatsApp" noIndex />
         <EmptyState
           title="Your cart is empty"
           description="Browse our catalogue and add products to send a combined enquiry on WhatsApp."
@@ -129,7 +129,7 @@ export function CartPage() {
 
   return (
     <>
-      <SEO title="Cart" description="Review your selected products and send enquiry on WhatsApp" />
+      <SEO title="Cart" description="Review your selected products and send enquiry on WhatsApp" noIndex />
 
       <div className="bg-cream-50 pb-28 sm:pb-8">
         <div className="border-b border-navy-900/10 bg-navy-950">

@@ -136,7 +136,7 @@ export function AddressesPage() {
 
   return (
     <>
-      <SEO title="My Addresses" description="Manage your delivery addresses." />
+      <SEO title="My Addresses" description="Manage your delivery addresses." noIndex />
 
       <AccountPageHeader backTo="/account" subtitle="My Addresses" />
 

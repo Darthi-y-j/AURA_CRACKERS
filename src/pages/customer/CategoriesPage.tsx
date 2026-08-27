@@ -24,6 +24,7 @@ export function CategoriesPage() {
       <SEO
         title="Categories"
         description="Browse all fireworks and cracker categories at Aura Crackers — sparklers, rockets, aerial crackers, and more."
+        url="/categories"
       />
 
       <CatalogueHero withWave>

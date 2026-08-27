@@ -37,7 +37,7 @@ export function NotificationsPage() {
 
   return (
     <>
-      <SEO title="Notifications" description="Manage how we contact you about enquiries." />
+      <SEO title="Notifications" description="Manage how we contact you about enquiries." noIndex />
 
       <AccountPageHeader backTo="/account" subtitle="Notifications" />
 

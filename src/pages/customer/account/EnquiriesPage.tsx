@@ -38,7 +38,7 @@ export function EnquiriesPage() {
 
   return (
     <>
-      <SEO title="My Enquiries" description="View your WhatsApp and cart enquiry history." />
+      <SEO title="My Enquiries" description="View your WhatsApp and cart enquiry history." noIndex />
 
       <AccountPageHeader backTo="/account" subtitle="My Enquiries" />
 

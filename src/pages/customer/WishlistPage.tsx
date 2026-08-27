@@ -27,7 +27,7 @@ export function WishlistPage() {
   if (items.length === 0) {
     return (
       <>
-        <SEO title="Liked Products" description="Your saved favourite fireworks and crackers." />
+        <SEO title="Liked Products" description="Your saved favourite fireworks and crackers." noIndex />
         <EmptyState
           title="No liked products yet"
           description="Tap the heart on any product to save it here for later."
@@ -46,7 +46,7 @@ export function WishlistPage() {
 
   return (
     <>
-      <SEO title="Liked Products" description="Your saved favourite fireworks and crackers." />
+      <SEO title="Liked Products" description="Your saved favourite fireworks and crackers." noIndex />
 
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
         <div className="mb-6 flex items-end justify-between gap-4">

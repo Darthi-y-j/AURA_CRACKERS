@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /admin/
+Disallow: /account
+Disallow: /account/
+Disallow: /login
+Disallow: /register
+
+Sitemap: https://www.auracrackers.com/sitemap.xml

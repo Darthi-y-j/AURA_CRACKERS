@@ -83,6 +83,7 @@ export function ProductDetailPage() {
         title={product.name}
         description={product.description || `${product.name} - Premium fireworks from Aura Crackers`}
         image={product.image_url || undefined}
+        url={`/products/${slug}`}
         type="product"
       />
 

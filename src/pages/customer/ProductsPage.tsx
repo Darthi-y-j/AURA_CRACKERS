@@ -180,6 +180,7 @@ export function ProductsPage() {
       <SEO
         title="Products"
         description="Browse our complete catalogue of premium fireworks and crackers. Filter by category and send enquiries on WhatsApp."
+        url="/products"
       />
 
       <CatalogueHero withWave tall>

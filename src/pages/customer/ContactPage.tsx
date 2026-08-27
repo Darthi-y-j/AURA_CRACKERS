@@ -37,6 +37,7 @@ export function ContactPage() {
       <SEO
         title="Contact Us"
         description={`Contact ${settings.business_name}. Reach us via WhatsApp, phone, or email — available 24/7.`}
+        url="/contact"
       />
 
       <div className="bg-cream-50">

@@ -43,7 +43,7 @@ export function SearchPage() {
 
   return (
     <>
-      <SEO title="Search" description="Search our fireworks and crackers catalogue" />
+      <SEO title="Search" description="Search our fireworks and crackers catalogue" noIndex />
 
       <CatalogueHero tall>
         <div className="max-w-2xl">

@@ -48,7 +48,7 @@ export function AccountDashboard() {
 
   return (
     <>
-      <SEO title="My Profile" description="Manage your Aura Crackers account and enquiries." />
+      <SEO title="My Profile" description="Manage your Aura Crackers account and enquiries." noIndex />
 
       <AccountPageHeader showEdit>
         <div className="mt-6 flex flex-col items-center text-center sm:flex-row sm:items-center sm:text-left">

@@ -6,6 +6,8 @@ import { FeaturedProductsShowcase } from '@/components/customer/FeaturedProducts
 import { TaggedProductsSection } from '@/components/customer/TaggedProductsSection'
 import { ContactSection } from '@/components/customer/ContactSection'
 import { DosAndDontsSection } from '@/components/customer/DosAndDontsSection'
+import { InstagramFeedSection } from '@/components/customer/InstagramFeedSection'
+import { TrustHighlightsBar } from '@/components/customer/TrustHighlightsBar'
 import { LoadingState } from '@/components/customer/LoadingState'
 import { HowItWorksSection } from '@/components/customer/HowItWorksSection'
 import { WhyChooseUsSection } from '@/components/customer/WhyChooseUsSection'
@@ -61,7 +63,11 @@ export function HomePage() {
     <>
       <SEO
         title={settings.business_name}
-        description={settings.tagline || 'Premium fireworks and crackers catalogue. Browse products and send enquiries on WhatsApp.'}
+        description={
+          settings.tagline ||
+          'Premium fireworks and crackers catalogue from Sivakasi. Browse products by category and send enquiries on WhatsApp — delivery across India.'
+        }
+        url="/"
       />
 
       <Hero categories={categories} />
@@ -95,6 +101,10 @@ export function HomePage() {
       <HowItWorksSection />
 
       <DosAndDontsSection />
+
+      <InstagramFeedSection />
+
+      <TrustHighlightsBar />
 
       <ContactSection />
     </>

@@ -130,6 +130,7 @@ export function FAQPage() {
       <SEO
         title="FAQ"
         description="Frequently asked questions about browsing products and sending enquiries at Aura Crackers."
+        url="/faq"
       />
 
       <div className="bg-cream-50">

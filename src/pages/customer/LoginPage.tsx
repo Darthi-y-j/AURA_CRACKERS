@@ -77,7 +77,7 @@ export function LoginPage() {
 
   return (
     <>
-      <SEO title="Login" description="Sign in to your Aura Crackers account to send enquiries." />
+      <SEO title="Login" description="Sign in to your Aura Crackers account to send enquiries." noIndex />
 
       <div className="mx-auto max-w-md px-4 py-12 sm:px-6 sm:py-16">
         <div className="text-center">
