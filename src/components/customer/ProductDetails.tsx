@@ -11,6 +11,7 @@ import { resolveProductPrice, resolveOriginalPriceForDisplay } from '@/lib/prici
 import { QuantitySelector } from './QuantitySelector'
 import { ProductPiecesBadge } from './ProductPiecesBadge'
 import { DiscountOfferTag } from './DiscountOfferTag'
+import { ProductHighlightBadges } from './ProductHighlightBadges'
 import { useCart } from '@/contexts/CartContext'
 import { useToast } from '@/contexts/ToastContext'
 import { WishlistButton } from './WishlistButton'
@@ -322,6 +323,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               )}
 
               <div className="absolute left-3 top-3 z-10 flex flex-col gap-2 sm:left-4 sm:top-4">
+                <ProductHighlightBadges product={product} />
                 {product.tag && <ProductTagBadge tag={product.tag} variant="overlay" />}
                 <WishlistButton
                   product={product}

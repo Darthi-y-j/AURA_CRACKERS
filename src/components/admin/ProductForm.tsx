@@ -86,6 +86,8 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
     youtube_url: product?.youtube_url || '',
     is_available: product?.is_available ?? true,
     is_featured: product?.is_featured ?? false,
+    is_recommended: product?.is_recommended ?? false,
+    is_best_seller: product?.is_best_seller ?? false,
     sort_order:
       product?.sort_order?.toString() || getNextSortOrder(existingProducts).toString(),
     pieces: product?.pieces?.toString() || '',
@@ -261,6 +263,8 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
       youtube_url: form.youtube_url.trim() || null,
       is_available: form.is_available,
       is_featured: form.is_featured,
+      is_recommended: form.is_recommended,
+      is_best_seller: form.is_best_seller,
       sort_order: sortOrder,
       specifications: Object.keys(specs).length > 0 ? specs : null,
     }
@@ -556,25 +560,49 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
             )}
           </div>
 
-          <div className="flex gap-6">
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={form.is_available}
-                onChange={(e) => setForm({ ...form, is_available: e.target.checked })}
-                className="rounded"
-              />
-              Available
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={form.is_featured}
-                onChange={(e) => setForm({ ...form, is_featured: e.target.checked })}
-                className="rounded"
-              />
-              Featured
-            </label>
+          <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+            <p className="mb-3 text-sm font-semibold text-slate-800">Product status & badges</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={form.is_available}
+                  onChange={(e) => setForm({ ...form, is_available: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-festive-500"
+                />
+                Available
+              </label>
+              <label className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={form.is_featured}
+                  onChange={(e) => setForm({ ...form, is_featured: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-festive-500"
+                />
+                Featured (home carousel)
+              </label>
+              <label className="flex items-center gap-2.5 rounded-lg border border-amber-200 bg-amber-50/50 px-3 py-2.5 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={form.is_recommended}
+                  onChange={(e) => setForm({ ...form, is_recommended: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-festive-500"
+                />
+                Recommended badge
+              </label>
+              <label className="flex items-center gap-2.5 rounded-lg border border-pink-200 bg-pink-50/50 px-3 py-2.5 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={form.is_best_seller}
+                  onChange={(e) => setForm({ ...form, is_best_seller: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-festive-500"
+                />
+                Best Seller badge (blinks)
+              </label>
+            </div>
+            <p className="mt-2 text-xs text-slate-500">
+              Recommended and Best Seller show as badges on product cards across the shop.
+            </p>
           </div>
         </div>
       </div>

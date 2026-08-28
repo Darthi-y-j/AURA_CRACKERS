@@ -11,7 +11,7 @@ const inflight = new Map<string, Promise<Product[]>>()
 
 /** Catalogue pages — omit specifications & media URLs to cut payload size */
 const CATALOGUE_PRODUCT_SELECT =
-  'id, category_id, name, slug, description, price, original_price, discount_percentage, pieces, brand, tag, image_url, stock_quantity, stock_alert_limit, is_available, is_featured, is_archived, sort_order, created_at, category:categories(id, name, slug, sort_order, is_active, is_archived)'
+  'id, category_id, name, slug, description, price, original_price, discount_percentage, pieces, brand, tag, image_url, stock_quantity, stock_alert_limit, is_available, is_featured, is_recommended, is_best_seller, is_archived, sort_order, created_at, category:categories(id, name, slug, sort_order, is_active, is_archived)'
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -311,6 +311,8 @@ export async function archiveProduct(id: string): Promise<{ error: string | null
     archived_at: new Date().toISOString(),
     is_available: false,
     is_featured: false,
+    is_recommended: false,
+    is_best_seller: false,
   })
   if (error && isMissingColumnError(error, 'is_archived')) {
     return { error: 'Archive is not available yet. Run migration 014_archive_products_categories.sql in Supabase.' }

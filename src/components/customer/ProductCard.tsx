@@ -13,6 +13,7 @@ import { CatalogueProductCard } from './CatalogueProductCard'
 import { ProductBrandBadge } from './ProductBrandBadge'
 import { ProductTagBadge } from './ProductTagBadge'
 import { WishlistButton } from './WishlistButton'
+import { ProductHighlightBadges } from './ProductHighlightBadges'
 import { isCardVisibleProductTag } from '@/lib/productTags'
 
 interface ProductCardProps {
@@ -179,6 +180,7 @@ export const ProductCard = memo(function ProductCard({ product, index = 0, varia
               />
             </div>
             <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-1.5 sm:bottom-4 sm:left-4 sm:gap-2">
+              <ProductHighlightBadges product={product} />
               {product.tag ? (
                 <ProductTagBadge tag={product.tag} variant="overlay" />
               ) : (
@@ -280,24 +282,17 @@ export const ProductCard = memo(function ProductCard({ product, index = 0, varia
             <DiscountOfferTag percentage={product.discount_percentage} />
           )}
 
-          {product.tag ? (
-            <div className="absolute left-2 top-2 z-20 flex flex-col items-start gap-1.5 sm:left-3 sm:top-3">
+          <div className="absolute left-2 top-2 z-20 flex flex-col items-start gap-1.5 sm:left-3 sm:top-3">
+            <ProductHighlightBadges product={product} />
+            {product.tag ? (
               <ProductTagBadge tag={product.tag} variant="overlay" compact />
-              <WishlistButton
-                product={product}
-                className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/55"
-                size="sm"
-              />
-            </div>
-          ) : (
-            <div className="absolute left-2 top-2 z-20 sm:left-3 sm:top-3">
-              <WishlistButton
-                product={product}
-                className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/55"
-                size="sm"
-              />
-            </div>
-          )}
+            ) : null}
+            <WishlistButton
+              product={product}
+              className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/55"
+              size="sm"
+            />
+          </div>
 
           <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
             {(product.category || product.brand) && (
@@ -414,6 +409,7 @@ export const ProductCard = memo(function ProductCard({ product, index = 0, varia
             )}
 
             <div className="absolute left-2 top-2 z-20 flex flex-col items-start gap-1.5 sm:left-2.5 sm:top-2.5">
+              <ProductHighlightBadges product={product} />
               {product.tag && (
                 <ProductTagBadge tag={product.tag} variant="overlay" compact />
               )}

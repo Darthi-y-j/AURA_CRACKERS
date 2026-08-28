@@ -10,6 +10,7 @@ import { DiscountOfferTag } from './DiscountOfferTag'
 import { WishlistButton } from './WishlistButton'
 import { ProductBrandBadge } from './ProductBrandBadge'
 import { ProductTagBadge } from './ProductTagBadge'
+import { ProductHighlightBadges } from './ProductHighlightBadges'
 import { getCardDescriptionClass, getCardCategoryClass, getCardTitleClass, CARD_TITLE_BASE_CLASS, getCardViewButtonClass, getCardPerforationDotClass, getCardPerforationLineClass, isEliteProductTag } from '@/lib/productCardThemes'
 import { isCardVisibleProductTag } from '@/lib/productTags'
 
@@ -48,7 +49,8 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({ product
             />
           )}
 
-          <div className="absolute left-2 top-2 z-10 flex flex-col items-start gap-1.5 sm:left-2.5 sm:top-2.5">
+          <div className="absolute left-2 top-2 z-20 flex flex-col items-start gap-1.5 sm:left-2.5 sm:top-2.5">
+            <ProductHighlightBadges product={product} />
             {product.tag && (
               <ProductTagBadge tag={product.tag} variant="overlay" compact />
             )}

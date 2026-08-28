@@ -90,6 +90,8 @@ async function upsertProducts(categoryIds: Map<string, string>) {
       tag: product.tag,
       is_available: true,
       is_featured: product.is_featured,
+      is_recommended: false,
+      is_best_seller: false,
       is_archived: false,
       archived_at: null,
       sort_order: product.sort_order,

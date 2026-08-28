@@ -11,6 +11,7 @@ import { DiscountOfferTag } from './DiscountOfferTag'
 import { CartQuantityControl } from './CartQuantityControl'
 import { QuantitySelector } from './QuantitySelector'
 import { ProductPiecesBadge } from './ProductPiecesBadge'
+import { ProductHighlightBadges } from './ProductHighlightBadges'
 import {
   isEliteProductTag,
   ELITE_BORDER_GLOW,
@@ -176,6 +177,7 @@ function MobileProductTableRow({ product }: { product: Product }) {
           <h3 className="font-product-name truncate text-sm font-bold leading-tight text-cream-100 sm:text-[13px]">
             {product.name}
           </h3>
+          <ProductHighlightBadges product={product} compact className="mt-1" />
           <div className="mt-1 flex min-w-0 items-center gap-1.5">
             {product.brand?.trim() ? (
               <ProductBrandBadge

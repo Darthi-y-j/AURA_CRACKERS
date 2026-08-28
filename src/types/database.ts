@@ -35,6 +35,8 @@ export interface Product {
   stock_alert_limit: number | null
   is_available: boolean
   is_featured: boolean
+  is_recommended: boolean
+  is_best_seller: boolean
   is_archived: boolean
   archived_at: string | null
   sort_order: number

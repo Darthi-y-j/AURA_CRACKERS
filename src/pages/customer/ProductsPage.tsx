@@ -258,7 +258,7 @@ export function ProductsPage() {
             </aside>
 
             <div className="min-w-0 max-w-full">
-              <div className="sticky top-14 z-40 mb-4 flex w-full min-w-0 max-w-full items-center gap-1.5 overflow-hidden rounded-2xl border border-navy-900/8 bg-gradient-to-r from-cream-50 via-white to-cream-50/80 p-2 shadow-[0_4px_24px_rgba(12,8,6,0.06)] sm:gap-3 sm:p-2.5 sm:top-[4.25rem]">
+              <div className="sticky top-14 z-40 mb-4 flex w-full min-w-0 max-w-full items-center gap-1.5 overflow-x-clip overflow-y-visible rounded-2xl border border-navy-900/8 bg-gradient-to-r from-cream-50 via-white to-cream-50/80 p-2 shadow-[0_4px_24px_rgba(12,8,6,0.06)] sm:gap-3 sm:p-2.5 sm:top-[4.25rem]">
                 <SearchBar
                   value={localSearch}
                   onChange={setLocalSearch}
@@ -277,7 +277,7 @@ export function ProductsPage() {
 
                 <div
                   className={cn(
-                    'relative z-10 min-w-0 flex-1 overflow-hidden transition-opacity duration-200',
+                    'relative z-10 min-w-0 flex-1 overflow-x-clip overflow-y-visible transition-opacity duration-200',
                     searchExpanded && 'max-sm:pointer-events-none max-sm:invisible max-sm:w-0 max-sm:overflow-hidden max-sm:opacity-0',
                   )}
                 >
