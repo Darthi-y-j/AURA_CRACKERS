@@ -1,5 +1,6 @@
 import { Helmet } from 'react-helmet-async'
 import { useLocation } from 'react-router-dom'
+import { buildCanonicalUrl } from '@/lib/seo'
 import { DEFAULT_DESCRIPTION, DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from '@/lib/siteConfig'
 
 interface SEOProps {
@@ -14,9 +15,7 @@ interface SEOProps {
 }
 
 function resolveCanonical(url: string | undefined, pathname: string): string {
-  if (url?.startsWith('http')) return url
-  if (url) return `${SITE_URL}${url.startsWith('/') ? url : `/${url}`}`
-  return `${SITE_URL}${pathname}`
+  return buildCanonicalUrl(pathname, url)
 }
 
 function resolveOgImage(image: string | undefined): string {
@@ -40,7 +39,7 @@ export function SEO({
   const robots = noIndex ? 'noindex, nofollow' : 'index, follow'
 
   return (
-    <Helmet>
+    <Helmet prioritizeSeoTags>
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <meta name="robots" content={robots} />

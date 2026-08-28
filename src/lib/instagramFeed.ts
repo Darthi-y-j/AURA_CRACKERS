@@ -12,7 +12,7 @@ export const INSTAGRAM_FEED_IMAGES: InstagramFeedImage[] = [
 ]
 
 export function getInstagramHandle(instagramUrl?: string): string {
-  if (!instagramUrl) return '@auracrackers'
+  if (!instagramUrl) return '@aura_crackers'
   const match = instagramUrl.match(/instagram\.com\/([^/?#]+)/i)
   if (match?.[1]) return `@${match[1]}`
   return instagramUrl.startsWith('@') ? instagramUrl : `@${instagramUrl}`

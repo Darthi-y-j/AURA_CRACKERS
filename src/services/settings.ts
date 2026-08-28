@@ -7,6 +7,13 @@ import {
 } from '@/lib/businessInfo'
 import type { WebsiteSettings } from '@/types/database'
 
+export const SOCIAL_LINKS = {
+  youtube: 'https://www.youtube.com/@AuraCrackers',
+  facebook: 'https://www.facebook.com/share/192L4T2prh/?mibextid=wwXIfr',
+  instagram:
+    'https://www.instagram.com/aura_crackers?igsi=MTA0aHFzM3VwOHRpOA%3D%3D&utm_source=qr',
+} as const
+
 export const DEFAULT_SETTINGS: WebsiteSettings = {
   id: 'default',
   business_name: 'Aura Crackers',
@@ -19,6 +26,7 @@ export const DEFAULT_SETTINGS: WebsiteSettings = {
   about_text:
     'Aura Crackers is your trusted partner for premium quality fireworks and crackers, serving customers across India for over 4 years. We offer a wide variety of products for Diwali, weddings, and all festive celebrations — with 24/7 WhatsApp support and delivery nationwide.',
   social_links: {
+    ...SOCIAL_LINKS,
     whatsapp_numbers: [...WHATSAPP_NUMBERS],
     policies: BUSINESS_POLICIES,
   },
@@ -72,6 +80,10 @@ function mergeSettings(data: Record<string, unknown> | null): WebsiteSettings {
     social_links: {
       ...DEFAULT_SETTINGS.social_links,
       ...socialLinks,
+      facebook: socialLinks.facebook?.trim() || DEFAULT_SETTINGS.social_links.facebook,
+      instagram: socialLinks.instagram?.trim() || DEFAULT_SETTINGS.social_links.instagram,
+      youtube: socialLinks.youtube?.trim() || DEFAULT_SETTINGS.social_links.youtube,
+      twitter: socialLinks.twitter?.trim() || undefined,
       whatsapp_numbers: socialLinks.whatsapp_numbers?.length
         ? socialLinks.whatsapp_numbers
         : DEFAULT_SETTINGS.social_links.whatsapp_numbers,

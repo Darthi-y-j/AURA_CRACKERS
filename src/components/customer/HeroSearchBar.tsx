@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Search, Sparkles, ArrowRight } from 'lucide-react'
 import type { Category } from '@/types/database'
 import { CategorySelect } from './CategorySelect'
@@ -15,8 +15,16 @@ const warmGlassShell =
 
 export function HeroSearchBar({ categories, compact = false }: HeroSearchBarProps) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
+
+  useEffect(() => {
+    if (location.pathname !== '/products') return
+    const params = new URLSearchParams(location.search)
+    setSearch(params.get('q') || '')
+    setCategory(params.get('category') || '')
+  }, [location.pathname, location.search])
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()

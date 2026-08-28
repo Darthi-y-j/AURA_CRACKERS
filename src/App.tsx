@@ -32,6 +32,10 @@ const RegisterPage = lazy(() => import('@/pages/customer/RegisterPage').then((m)
 const AccountPage = lazy(() => import('@/pages/customer/AccountPage').then((m) => ({ default: m.AccountPage })))
 const FAQPage = lazy(() => import('@/pages/customer/FAQPage').then((m) => ({ default: m.FAQPage })))
 const SafetyPage = lazy(() => import('@/pages/customer/SafetyPage').then((m) => ({ default: m.SafetyPage })))
+const PrivacyPolicyPage = lazy(() =>
+  import('@/pages/customer/PrivacyPolicyPage').then((m) => ({ default: m.PrivacyPolicyPage })),
+)
+const TermsPage = lazy(() => import('@/pages/customer/TermsPage').then((m) => ({ default: m.TermsPage })))
 const GiftBoxPage = lazy(() =>
   import('@/pages/customer/GiftBoxPage').then((m) => ({ default: m.GiftBoxPage })),
 )
@@ -99,6 +103,8 @@ function App() {
                         <Route path="/account/*" element={<AccountPage />} />
                         <Route path="/faq" element={<FAQPage />} />
                         <Route path="/safety" element={<SafetyPage />} />
+                        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                        <Route path="/terms" element={<TermsPage />} />
                         <Route path="/gift-box" element={<GiftBoxPage />} />
                         <Route path="/cart" element={<CartPage />} />
                         <Route path="/wishlist" element={<WishlistPage />} />

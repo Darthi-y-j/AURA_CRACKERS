@@ -1,6 +1,8 @@
 import { supabase, getSupabaseErrorMessage } from '@/lib/supabase'
 
-export type StorageBucket = 'product-images' | 'category-images' | 'logos'
+export type StorageBucket = 'product-images' | 'product-videos' | 'category-images' | 'logos'
+
+const VIDEO_MIME_TYPES = new Set(['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'])
 
 export async function uploadImage(
   bucket: StorageBucket,
@@ -13,6 +15,32 @@ export async function uploadImage(
   const { error: uploadError } = await supabase.storage.from(bucket).upload(fileName, file, {
     cacheControl: '31536000',
     upsert: true,
+  })
+
+  if (uploadError) {
+    return { url: null, error: getSupabaseErrorMessage(uploadError) }
+  }
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(fileName)
+  return { url: data.publicUrl, error: null }
+}
+
+export async function uploadVideo(
+  bucket: 'product-videos',
+  file: File,
+  path?: string,
+): Promise<{ url: string | null; error: string | null }> {
+  if (!VIDEO_MIME_TYPES.has(file.type)) {
+    return { url: null, error: 'Please select an MP4, WebM, or MOV video file' }
+  }
+
+  const fileExt = file.name.split('.').pop() || 'mp4'
+  const fileName = path || `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
+
+  const { error: uploadError } = await supabase.storage.from(bucket).upload(fileName, file, {
+    cacheControl: '31536000',
+    upsert: true,
+    contentType: file.type,
   })
 
   if (uploadError) {

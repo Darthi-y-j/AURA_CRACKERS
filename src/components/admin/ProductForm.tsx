@@ -12,7 +12,9 @@ import {
 import { createProduct, updateProduct } from '@/services/products'
 import { PRODUCT_TAGS, getProductTagLabel } from '@/lib/productTags'
 import { ImageUploader } from './ImageUploader'
+import { VideoUploader } from './VideoUploader'
 import { useToast } from '@/contexts/ToastContext'
+import { isValidYouTubeUrl } from '@/lib/youtube'
 
 interface ProductFormProps {
   product?: Product
@@ -80,6 +82,8 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
     discount_percentage: initialPricing.discount_percentage,
     selling_price: initialPricing.selling_price,
     image_url: product?.image_url || '',
+    video_url: product?.video_url || '',
+    youtube_url: product?.youtube_url || '',
     is_available: product?.is_available ?? true,
     is_featured: product?.is_featured ?? false,
     sort_order:
@@ -224,6 +228,11 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
       stock_alert_limit = parsedLimit
     }
 
+    if (form.youtube_url.trim() && !isValidYouTubeUrl(form.youtube_url)) {
+      showToast('Enter a valid YouTube link (watch, shorts, or youtu.be URL).', 'error')
+      return
+    }
+
     setLoading(true)
 
     const specs: Record<string, string> = {}
@@ -248,6 +257,8 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
       brand: form.brand.trim() || null,
       tag: form.tag || null,
       image_url: form.image_url || null,
+      video_url: form.video_url.trim() || null,
+      youtube_url: form.youtube_url.trim() || null,
       is_available: form.is_available,
       is_featured: form.is_featured,
       sort_order: sortOrder,
@@ -495,6 +506,26 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
             onUpload={(url) => setForm({ ...form, image_url: url })}
             onRemove={() => setForm({ ...form, image_url: '' })}
           />
+
+          <VideoUploader
+            currentUrl={form.video_url}
+            onUpload={(url) => setForm({ ...form, video_url: url })}
+            onRemove={() => setForm({ ...form, video_url: '' })}
+          />
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">YouTube link</label>
+            <input
+              type="url"
+              value={form.youtube_url}
+              onChange={(e) => setForm({ ...form, youtube_url: e.target.value })}
+              className={inputClass}
+              placeholder="https://www.youtube.com/watch?v=..."
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Optional. Paste a YouTube watch, Shorts, or youtu.be link. You can add an upload and a YouTube link.
+            </p>
+          </div>
 
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">

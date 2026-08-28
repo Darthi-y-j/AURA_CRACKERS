@@ -7,6 +7,7 @@ import {
   Loader2,
   User,
   Phone,
+  MapPin,
   Sparkles,
   ArrowRight,
   Package,
@@ -20,6 +21,13 @@ import { useSettings } from '@/contexts/SettingsContext'
 import { useToast } from '@/contexts/ToastContext'
 import { createCartEnquiry } from '@/services/enquiries'
 import { buildCartWhatsAppMessage, buildWhatsAppUrl } from '@/lib/whatsapp'
+import { getCurrentDeliveryAddress, geolocationErrorMessage } from '@/lib/geolocation'
+import {
+  buildFullDeliveryAddress,
+  emptyAddressFields,
+  validateDeliveryAddress,
+  type DeliveryAddressFields,
+} from '@/lib/deliveryAddress'
 import { formatPrice, getImageUrl, validatePhone, cn } from '@/lib/utils'
 import { formatDisplayPhone } from '@/lib/businessInfo'
 
@@ -32,8 +40,10 @@ export function CartPage() {
   const { showToast } = useToast()
   const [customerName, setCustomerName] = useState('')
   const [customerPhone, setCustomerPhone] = useState('')
+  const [addressFields, setAddressFields] = useState<DeliveryAddressFields>(emptyAddressFields)
   const [customerMessage, setCustomerMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [locating, setLocating] = useState(false)
 
   const estimatedTotal = useMemo(
     () =>
@@ -45,6 +55,23 @@ export function CartPage() {
   )
 
   const hasPricedItems = items.some((item) => item.price != null)
+
+  const updateAddress = (patch: Partial<DeliveryAddressFields>) => {
+    setAddressFields((prev) => ({ ...prev, ...patch }))
+  }
+
+  const handleUseCurrentLocation = async () => {
+    setLocating(true)
+    try {
+      const locationSnapshot = await getCurrentDeliveryAddress()
+      updateAddress({ locationSnapshot })
+      showToast('Area detected — add door no. and street below', 'success')
+    } catch (error) {
+      showToast(geolocationErrorMessage(error), 'error')
+    } finally {
+      setLocating(false)
+    }
+  }
 
   const handleSendEnquiry = async () => {
     if (items.length === 0) {
@@ -62,6 +89,14 @@ export function CartPage() {
       return
     }
 
+    const addressError = validateDeliveryAddress(addressFields)
+    if (addressError) {
+      showToast(addressError, 'error')
+      return
+    }
+
+    const customerAddress = buildFullDeliveryAddress(addressFields)
+
     if (!settings.whatsapp_number) {
       showToast('WhatsApp contact is not configured. Please call us instead.', 'error')
       return
@@ -73,6 +108,7 @@ export function CartPage() {
       items,
       customerName: customerName.trim(),
       customerPhone,
+      customerAddress,
       customerMessage,
     }
 
@@ -89,6 +125,7 @@ export function CartPage() {
       clearCart()
       setCustomerName('')
       setCustomerPhone('')
+      setAddressFields(emptyAddressFields())
       setCustomerMessage('')
     } catch {
       showToast('Something went wrong. Please try again.', 'error')
@@ -343,12 +380,101 @@ export function CartPage() {
                         className={inputClass}
                       />
                     </div>
+                    <div className="space-y-3 rounded-xl border border-navy-900/8 bg-cream-50/40 p-3.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <label className="flex items-center gap-1.5 text-sm font-semibold text-navy-800">
+                          <MapPin className="h-3.5 w-3.5 text-gold-500" />
+                          Delivery Address *
+                        </label>
+                        <button
+                          type="button"
+                          onClick={handleUseCurrentLocation}
+                          disabled={locating}
+                          className="inline-flex items-center gap-1 rounded-full border border-gold-400/35 bg-gold-500/10 px-2.5 py-1 text-[11px] font-semibold text-gold-700 transition hover:bg-gold-500/20 disabled:opacity-60"
+                        >
+                          {locating ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <MapPin className="h-3 w-3" />
+                          )}
+                          Use my location
+                        </button>
+                      </div>
+
+                      {addressFields.locationSnapshot ? (
+                        <div className="rounded-xl border border-gold-400/25 bg-white px-3 py-2.5 text-xs leading-relaxed text-navy-700/80">
+                          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-gold-600/80">
+                            Detected area
+                          </p>
+                          <p className="whitespace-pre-wrap">{addressFields.locationSnapshot}</p>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-navy-700/50">
+                          Tap &quot;Use my location&quot; for area &amp; map, then fill door details below.
+                        </p>
+                      )}
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-1 block text-xs font-semibold text-navy-800">
+                            Door / Flat No. *
+                          </label>
+                          <input
+                            type="text"
+                            value={addressFields.doorNo}
+                            onChange={(e) => updateAddress({ doorNo: e.target.value })}
+                            placeholder="e.g. 12B, Flat 3"
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-semibold text-navy-800">
+                            Street / Building *
+                          </label>
+                          <input
+                            type="text"
+                            value={addressFields.street}
+                            onChange={(e) => updateAddress({ street: e.target.value })}
+                            placeholder="Street name, apartment"
+                            className={inputClass}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-1 block text-xs font-semibold text-navy-800">
+                            Landmark (optional)
+                          </label>
+                          <input
+                            type="text"
+                            value={addressFields.landmark}
+                            onChange={(e) => updateAddress({ landmark: e.target.value })}
+                            placeholder="Near temple, school…"
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-semibold text-navy-800">
+                            Pincode (optional)
+                          </label>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={addressFields.pincode}
+                            onChange={(e) => updateAddress({ pincode: e.target.value })}
+                            placeholder="6-digit pincode"
+                            className={inputClass}
+                          />
+                        </div>
+                      </div>
+                    </div>
                     <div>
                       <label className="mb-1.5 block text-sm font-semibold text-navy-800">Message (optional)</label>
                       <textarea
                         value={customerMessage}
                         onChange={(e) => setCustomerMessage(e.target.value)}
-                        placeholder="Delivery area, event date, bulk quantity…"
+                        placeholder="Event date, bulk quantity, special instructions…"
                         rows={3}
                         className={cn(inputClass, 'resize-none')}
                       />

@@ -4,7 +4,7 @@ import { ShoppingCart, MessageCircle, X, ChevronUp, Trash2, Gift } from 'lucide-
 import { useCart } from '@/contexts/CartContext'
 import { useSettings } from '@/contexts/SettingsContext'
 import { QuantitySelector } from './QuantitySelector'
-import { getImageUrl, cn } from '@/lib/utils'
+import { getImageUrl, formatPrice, cn } from '@/lib/utils'
 
 export function CollectiveCartBar() {
   const { items, itemCount, removeItem, updateQuantity, clearCart } = useCart()
@@ -90,10 +90,19 @@ export function CollectiveCartBar() {
                   className="h-8 w-8 shrink-0 rounded object-cover"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="flex min-w-0 items-center gap-1 truncate text-[11px] font-medium text-white">
-                    {item.isGiftBox && <Gift className="h-3 w-3 shrink-0 text-gold-400" />}
-                    <span className="truncate">{item.productName}</span>
-                  </p>
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="flex min-w-0 items-center gap-1 truncate text-[11px] font-medium text-white">
+                      {item.isGiftBox && <Gift className="h-3 w-3 shrink-0 text-gold-400" />}
+                      <span className="truncate">{item.productName}</span>
+                    </p>
+                    {formatPrice(item.price) ? (
+                      <span className="shrink-0 text-[11px] font-bold tabular-nums text-gold-400">
+                        {formatPrice(item.price)}
+                      </span>
+                    ) : (
+                      <span className="shrink-0 text-[10px] font-semibold text-festive-400">Enquire</span>
+                    )}
+                  </div>
                   <QuantitySelector
                     value={item.quantity}
                     onChange={(qty) => updateQuantity(item.productId, qty)}

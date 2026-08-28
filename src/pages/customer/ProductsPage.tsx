@@ -2,13 +2,13 @@ import { useEffect, useState, useMemo, useCallback, useLayoutEffect } from 'reac
 import { useSearchParams } from 'react-router-dom'
 import { SEO } from '@/components/shared/SEO'
 import { CatalogueHero, CatalogueOverlap } from '@/components/customer/CatalogueHero'
-import { HeroSearchBar } from '@/components/customer/HeroSearchBar'
 import { ShopByCategoryNav, FilterByPanel, MobileFilterDropdown } from '@/components/customer/ShopBySidebar'
 import { CategoryIconStrip } from '@/components/customer/CategoryIconStrip'
 import { ProductGrid } from '@/components/customer/ProductGrid'
 import { ProductTable } from '@/components/customer/ProductTable'
 import { CategoryGroupedProducts, groupProductsByCategory } from '@/components/customer/CategoryGroupedProducts'
 import { LoadingState } from '@/components/customer/LoadingState'
+import { SearchBar } from '@/components/customer/SearchBar'
 import {
   CatalogueToolbar,
   sortProducts,
@@ -18,6 +18,8 @@ import {
 import { getProducts } from '@/services/products'
 import { getCategories } from '@/services/categories'
 import { scrollToCategorySectionReliable, scrollToElement } from '@/lib/scrollToCategory'
+import { useRestoreScrollAfterLoad } from '@/hooks/useRestoreScrollAfterLoad'
+import { cn } from '@/lib/utils'
 import type { Product, Category } from '@/types/database'
 
 const MAX_PRICE = 5000
@@ -34,11 +36,19 @@ export function ProductsPage() {
   const [scrollRequest, setScrollRequest] = useState<{ categoryId: string; key: number } | null>(
     null,
   )
+  const [localSearch, setLocalSearch] = useState('')
+  const [searchExpanded, setSearchExpanded] = useState(false)
 
   const categoryId = searchParams.get('category') || ''
   const brand = searchParams.get('brand') || ''
   const tag = searchParams.get('tag') || ''
   const search = searchParams.get('q') || ''
+
+  useRestoreScrollAfterLoad(loading)
+
+  useEffect(() => {
+    setLocalSearch(search)
+  }, [search])
 
   useEffect(() => {
     async function load() {
@@ -76,6 +86,14 @@ export function ProductsPage() {
     const params = new URLSearchParams(searchParams)
     if (value) params.set('brand', value)
     else params.delete('brand')
+    setSearchParams(params)
+  }
+
+  const applySearch = (value: string) => {
+    const params = new URLSearchParams(searchParams)
+    const trimmed = value.trim()
+    if (trimmed) params.set('q', trimmed)
+    else params.delete('q')
     setSearchParams(params)
   }
 
@@ -183,7 +201,7 @@ export function ProductsPage() {
         url="/products"
       />
 
-      <CatalogueHero withWave tall>
+      <CatalogueHero withWave>
         <div className="max-w-2xl">
           <div className="mb-4 inline-flex rounded-full border border-gold-500/50 px-4 py-1">
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-400">
@@ -206,9 +224,6 @@ export function ProductsPage() {
               : 'Browse our complete range of premium fireworks and crackers for every celebration.'}
           </p>
         </div>
-        <div className="mt-8">
-          <HeroSearchBar categories={categories} />
-        </div>
       </CatalogueHero>
 
       <CatalogueOverlap>
@@ -227,25 +242,50 @@ export function ProductsPage() {
             </aside>
 
             <div className="min-w-0">
-              <CatalogueToolbar
-                itemCount={filteredProducts.length}
-                sort={sort}
-                onSortChange={setSort}
-                view={view}
-                onViewChange={setView}
-                filterSlot={
-                  <MobileFilterDropdown
-                    {...navProps}
-                    priceRange={priceRange}
-                    onPriceRangeChange={setPriceRange}
-                    brands={brands}
-                    selectedBrand={brand}
-                    onBrandChange={updateBrand}
-                    maxPrice={MAX_PRICE}
+              <div className="sticky top-14 z-40 mb-4 flex items-center gap-2 rounded-2xl border border-navy-900/8 bg-gradient-to-r from-cream-50 via-white to-cream-50/80 p-2 shadow-[0_4px_24px_rgba(12,8,6,0.06)] sm:gap-3 sm:p-2.5 sm:top-[4.25rem]">
+                <SearchBar
+                  value={localSearch}
+                  onChange={setLocalSearch}
+                  onSubmit={() => applySearch(localSearch)}
+                  onFocus={() => setSearchExpanded(true)}
+                  onBlur={() => setSearchExpanded(false)}
+                  placeholder="Search crackers, sparklers..."
+                  compact
+                  className={cn(
+                    'relative z-0 min-w-0 transition-[flex-grow,max-width] duration-300',
+                    searchExpanded
+                      ? 'max-sm:flex-[1_1_100%] max-sm:max-w-full'
+                      : 'max-sm:max-w-[9.5rem] max-sm:flex-[0_1_9.5rem] sm:flex-1',
+                  )}
+                />
+
+                <div
+                  className={cn(
+                    'relative z-10 shrink-0 transition-opacity duration-200',
+                    searchExpanded && 'max-sm:pointer-events-none max-sm:invisible max-sm:w-0 max-sm:overflow-hidden max-sm:opacity-0',
+                  )}
+                >
+                  <CatalogueToolbar
+                    sort={sort}
+                    onSortChange={setSort}
+                    view={view}
+                    onViewChange={setView}
                     inline
+                    filterSlot={
+                      <MobileFilterDropdown
+                        {...navProps}
+                        priceRange={priceRange}
+                        onPriceRangeChange={setPriceRange}
+                        brands={brands}
+                        selectedBrand={brand}
+                        onBrandChange={updateBrand}
+                        maxPrice={MAX_PRICE}
+                        inline
+                      />
+                    }
                   />
-                }
-              />
+                </div>
+              </div>
 
               {!loading && categories.length > 0 && (
                 <div className="mb-5 min-w-0 overflow-hidden">

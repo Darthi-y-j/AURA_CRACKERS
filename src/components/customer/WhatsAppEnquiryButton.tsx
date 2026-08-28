@@ -14,6 +14,7 @@ interface WhatsAppEnquiryButtonProps {
   quantity: number
   customerName: string
   customerPhone: string
+  customerAddress: string
   customerMessage?: string
   className?: string
   size?: 'sm' | 'md' | 'lg'
@@ -27,6 +28,7 @@ export function WhatsAppEnquiryButton({
   quantity,
   customerName,
   customerPhone,
+  customerAddress,
   customerMessage,
   className,
   size = 'md',
@@ -50,6 +52,11 @@ export function WhatsAppEnquiryButton({
       return
     }
 
+    if (!customerAddress.trim()) {
+      showToast('Please enter your delivery address', 'error')
+      return
+    }
+
     if (!settings.whatsapp_number) {
       showToast('WhatsApp contact is not configured. Please call us instead.', 'error')
       return
@@ -63,6 +70,7 @@ export function WhatsAppEnquiryButton({
       quantity,
       customerName: customerName.trim(),
       customerPhone,
+      customerAddress: customerAddress.trim(),
       customerMessage,
     }
 

@@ -47,7 +47,7 @@ export function CartQuantityControl({
         variant={variant}
         compact={compact}
         min={min}
-        className="min-w-0 flex-1 animate-fade-up"
+        className="min-w-[4.5rem] shrink-0 animate-fade-up"
       />
     </div>
   )

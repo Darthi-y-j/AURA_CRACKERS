@@ -157,6 +157,12 @@ async function upsertCustomer(name: string, phone: string, email?: string | null
   }
 }
 
+function formatCustomerNotes(address: string, message?: string): string | null {
+  const parts: string[] = [`Delivery Address:\n${address.trim()}`]
+  if (message?.trim()) parts.push(`Message:\n${message.trim()}`)
+  return parts.join('\n\n')
+}
+
 export async function createEnquiry(
   formData: EnquiryFormData,
 ): Promise<{ data: Enquiry | null; error: string | null }> {
@@ -182,7 +188,7 @@ export async function createEnquiry(
     quantity: formData.quantity,
     customer_name: formData.customerName,
     customer_phone: phone,
-    customer_message: formData.customerMessage || null,
+    customer_message: formatCustomerNotes(formData.customerAddress, formData.customerMessage),
     items,
     status: 'new',
   })
@@ -218,7 +224,7 @@ export async function createCartEnquiry(
     quantity: totalQuantity,
     customer_name: formData.customerName,
     customer_phone: phone,
-    customer_message: formData.customerMessage || null,
+    customer_message: formatCustomerNotes(formData.customerAddress, formData.customerMessage),
     items: enquiryItems,
     status: 'new',
   })

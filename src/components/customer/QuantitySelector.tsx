@@ -42,7 +42,8 @@ export function QuantitySelector({
         isTable
           ? 'rounded-full border border-navy-900/10 bg-white p-0.5'
           : cn(
-              'w-full rounded-lg border',
+              'rounded-lg border',
+              !className?.includes('w-') && !className?.includes('min-w-') && 'w-full',
               isEmber
                 ? 'border-gold-500/25 bg-white/[0.04]'
                 : isElite
@@ -78,6 +79,7 @@ export function QuantitySelector({
       <span
         className={cn(
           'flex items-center justify-center text-center font-semibold tabular-nums',
+          !isTable && 'min-w-0 flex-1',
           valueSize,
           isTable
             ? 'text-navy-950'

@@ -29,6 +29,8 @@ export interface Product {
   brand: string | null
   tag: string | null
   image_url: string | null
+  video_url: string | null
+  youtube_url: string | null
   stock_quantity: number | null
   stock_alert_limit: number | null
   is_available: boolean
@@ -102,6 +104,7 @@ export interface CartEnquiryFormData {
   items: CartItem[]
   customerName: string
   customerPhone: string
+  customerAddress: string
   customerMessage?: string
 }
 
@@ -181,6 +184,7 @@ export interface EnquiryFormData {
   quantity: number
   customerName: string
   customerPhone: string
+  customerAddress: string
   customerMessage?: string
 }
 

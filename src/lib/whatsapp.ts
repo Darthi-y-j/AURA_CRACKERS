@@ -13,6 +13,7 @@ export function buildWhatsAppEnquiryMessage(data: EnquiryFormData): string {
     '',
     `Customer Name: ${data.customerName}`,
     `Phone: ${data.customerPhone}`,
+    `Address: ${data.customerAddress}`,
   ]
 
   if (data.customerMessage?.trim()) {
@@ -47,7 +48,8 @@ export function buildCartWhatsAppMessage(data: CartEnquiryFormData): string {
   lines.push(
     '',
     `Customer Name: ${data.customerName}`,
-    `Phone: ${data.customerPhone}`
+    `Phone: ${data.customerPhone}`,
+    `Address: ${data.customerAddress}`,
   )
 
   if (data.customerMessage?.trim()) {

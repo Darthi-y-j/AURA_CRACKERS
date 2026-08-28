@@ -16,54 +16,47 @@ const SORT_OPTIONS: {
 ]
 
 interface CatalogueToolbarProps {
-  itemCount: number
   sort: CatalogueSort
   onSortChange: (sort: CatalogueSort) => void
   view: CatalogueView
   onViewChange: (view: CatalogueView) => void
   filterSlot?: React.ReactNode
   className?: string
+  /** Strip outer card chrome — use when nested inside a shared toolbar row */
+  inline?: boolean
 }
 
 export function CatalogueToolbar({
-  itemCount,
   sort,
   onSortChange,
   view,
   onViewChange,
   filterSlot,
   className,
+  inline = false,
 }: CatalogueToolbarProps) {
   return (
     <div
       className={cn(
-        'relative mb-4 flex items-center gap-2 overflow-visible rounded-2xl border border-navy-900/8 bg-gradient-to-r from-cream-50 via-white to-cream-50/80 p-2.5 shadow-[0_4px_24px_rgba(12,8,6,0.06)] sm:gap-3 sm:p-3',
+        'relative flex items-center gap-2 overflow-visible sm:gap-3',
+        !inline &&
+          'mb-4 rounded-2xl border border-navy-900/8 bg-gradient-to-r from-cream-50 via-white to-cream-50/80 p-2.5 shadow-[0_4px_24px_rgba(12,8,6,0.06)] sm:p-3',
+        inline && 'shrink-0',
         className,
       )}
     >
       {filterSlot}
 
-      <div className="hidden shrink-0 items-center gap-2 sm:flex">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-navy-950 sm:h-9 sm:w-9 sm:rounded-xl">
-          <Sparkles className="h-3.5 w-3.5 text-gold-400 sm:h-4 sm:w-4" />
-        </span>
-        <div className="hidden min-[420px]:block">
-          <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-navy-700/45 sm:text-[10px]">
-            Showing
-          </p>
-          <p className="font-display text-xs font-bold tabular-nums text-navy-900 sm:text-sm">
-            {itemCount} product{itemCount !== 1 ? 's' : ''}
-          </p>
-        </div>
-      </div>
-
       <div
-        className="flex min-w-0 flex-1 items-center justify-end gap-2"
+        className="flex min-w-0 items-center justify-end gap-2"
         role="toolbar"
         aria-label="Sort and view products"
       >
         <div
-          className="flex min-w-0 flex-1 items-center justify-start gap-1 overflow-x-auto rounded-full border border-navy-900/8 bg-white/80 p-0.5 scrollbar-hide sm:justify-end"
+          className={cn(
+            'flex min-w-0 items-center gap-1 overflow-x-auto rounded-full border border-navy-900/8 bg-white/80 p-0.5 scrollbar-hide',
+            inline ? 'shrink-0' : 'flex-1 justify-start sm:justify-end',
+          )}
           role="group"
           aria-label="Sort products"
         >

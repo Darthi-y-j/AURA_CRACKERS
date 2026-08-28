@@ -52,20 +52,33 @@ export function HelpSupportPage() {
             description="Delivery areas across India"
           />
           <Link
-            to="/safety"
+            to="/terms"
             className="flex items-center gap-4 rounded-xl px-3 py-3.5 transition hover:bg-navy-900/[0.03]"
           >
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy-900/[0.04]">
               <FileText className="h-5 w-5 text-navy-700" />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-sm font-semibold text-navy-900">Terms & Safety</span>
-              <span className="mt-0.5 block text-xs text-navy-700/55">Safety guidelines and terms</span>
+              <span className="block text-sm font-semibold text-navy-900">Terms &amp; Conditions</span>
+              <span className="mt-0.5 block text-xs text-navy-700/55">Ordering and website terms</span>
             </span>
             <span className="text-navy-700/30">›</span>
           </Link>
           <Link
-            to="/contact"
+            to="/safety"
+            className="flex items-center gap-4 rounded-xl px-3 py-3.5 transition hover:bg-navy-900/[0.03]"
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy-900/[0.04]">
+              <Shield className="h-5 w-5 text-navy-700" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold text-navy-900">Safety Guidelines</span>
+              <span className="mt-0.5 block text-xs text-navy-700/55">Responsible fireworks use</span>
+            </span>
+            <span className="text-navy-700/30">›</span>
+          </Link>
+          <Link
+            to="/privacy"
             className="flex items-center gap-4 rounded-xl px-3 py-3.5 transition hover:bg-navy-900/[0.03]"
           >
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy-900/[0.04]">
