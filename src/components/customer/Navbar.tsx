@@ -82,8 +82,8 @@ export function Navbar() {
             : 'border-b border-navy-800/10 bg-white/95 shadow-sm backdrop-blur-md',
       )}
     >
-      <nav className="mx-auto grid h-full max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-3 px-3 sm:gap-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-1 sm:gap-2.5">
+      <nav className="mx-auto grid h-full max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-6 lg:gap-3 lg:px-8">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2.5">
           {showBack && <BackButton variant={isDarkNav ? 'dark' : 'light'} />}
           <Link to="/" className="flex items-center gap-2.5">
           {settings.logo_url ? (
@@ -111,7 +111,7 @@ export function Navbar() {
               </span>
             </div>
           )}
-          <div className="hidden sm:block">
+          <div className="hidden xl:block">
             <span
               className={cn(
                 'font-display text-base font-bold leading-tight transition-colors sm:text-lg',
@@ -127,7 +127,7 @@ export function Navbar() {
         <div className="hidden min-w-0 justify-center lg:flex">
           <div
             className={cn(
-              'flex max-w-full flex-nowrap items-center gap-0.5 rounded-full p-1',
+              'flex w-full max-w-full flex-nowrap items-center justify-center gap-0.5 overflow-hidden rounded-full p-0.5 lg:p-1',
               isDarkNav
                 ? 'border border-white/10 bg-black/15 backdrop-blur-md'
                 : 'bg-navy-900/[0.04]',
@@ -138,7 +138,7 @@ export function Navbar() {
                 key={link.label}
                 to={link.to}
                 className={cn(
-                  'shrink-0 whitespace-nowrap rounded-full px-2 py-1.5 text-xs font-medium transition-all duration-200 lg:px-2.5 lg:py-2 xl:px-3.5 xl:text-sm',
+                  'shrink-0 whitespace-nowrap rounded-full px-1.5 py-1 text-[11px] font-medium transition-all duration-200 lg:px-2 lg:py-1.5 lg:text-xs xl:px-3 xl:py-2 xl:text-sm',
                   isDarkNav
                     ? isActive(link.to)
                       ? 'bg-white/20 text-gold-300 shadow-sm'
@@ -154,16 +154,16 @@ export function Navbar() {
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex shrink-0 items-center justify-end gap-0.5 sm:gap-1 xl:gap-2">
           <Link
             to="/wishlist"
             className={cn(
-              'relative rounded-full p-2.5 transition-all duration-300 hover:scale-110 active:scale-95',
+              'relative rounded-full p-2 transition-all duration-300 hover:scale-110 active:scale-95 xl:p-2.5',
               isDarkNav ? 'text-white hover:bg-white/10' : 'text-navy-700 hover:bg-navy-800/5',
             )}
             aria-label="Liked products"
           >
-            <Heart className="h-5 w-5" />
+            <Heart className="h-4 w-4 xl:h-5 xl:w-5" />
             {wishlistCount > 0 && (
               <span
                 className={`absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ${wishlistBadgePop ? 'animate-badge-pop' : ''}`}
@@ -176,12 +176,12 @@ export function Navbar() {
           <Link
             to="/cart"
             className={cn(
-              'relative rounded-full p-2.5 transition-all duration-300 hover:scale-110 active:scale-95',
+              'relative rounded-full p-2 transition-all duration-300 hover:scale-110 active:scale-95 lg:hidden',
               isDarkNav ? 'text-white hover:bg-white/10' : 'text-navy-700 hover:bg-navy-800/5',
             )}
             aria-label="Cart"
           >
-            <ShoppingCart className="h-5 w-5" />
+            <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
             {itemCount > 0 && (
               <span
                 className={`absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold-500 px-1 text-[10px] font-bold text-navy-950 ${badgePop ? 'animate-badge-pop' : ''}`}
@@ -194,11 +194,11 @@ export function Navbar() {
           <UserProfileMenu isDarkNav={isDarkNav} className="sm:hidden" />
 
           {!user && (
-            <div className="hidden items-center gap-1.5 sm:flex">
+            <div className="hidden items-center gap-1 xl:flex">
               <Link
                 to="/login"
                 className={cn(
-                  'rounded-full px-4 py-2 text-sm font-semibold transition',
+                  'rounded-full px-3 py-1.5 text-xs font-semibold transition',
                   isDarkNav
                     ? 'text-white/85 hover:bg-white/10 hover:text-white'
                     : 'text-navy-700 hover:bg-navy-900/5 hover:text-navy-900',
@@ -209,7 +209,7 @@ export function Navbar() {
               <Link
                 to="/register"
                 className={cn(
-                  'rounded-full px-4 py-2 text-sm font-semibold transition',
+                  'rounded-full px-3 py-1.5 text-xs font-semibold transition',
                   isDarkNav
                     ? 'border border-gold-400/35 text-gold-300 hover:bg-gold-400/10'
                     : 'border border-gold-500/30 bg-gold-500/10 text-gold-700 hover:bg-gold-500/20',
@@ -222,7 +222,10 @@ export function Navbar() {
 
           {user && <UserProfileMenu isDarkNav={isDarkNav} className="hidden sm:inline-flex" />}
 
-          <Link to="/cart" className="hidden rounded-full btn-festive px-5 py-2.5 text-sm font-bold sm:inline-flex">
+          <Link
+            to="/cart"
+            className="btn-festive hidden shrink-0 rounded-full px-3 py-1.5 text-xs font-bold lg:inline-flex xl:px-5 xl:py-2.5 xl:text-sm"
+          >
             Get Quote
           </Link>
 
