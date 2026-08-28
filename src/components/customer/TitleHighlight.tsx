@@ -13,7 +13,7 @@ export function TitleHighlight({ children, variant = 'light', className }: Title
   return (
     <span
       className={cn(
-        'inline-block bg-clip-text text-transparent',
+        'inline bg-clip-text text-transparent',
         variant === 'dark'
           ? 'bg-gradient-to-b from-gold-300 via-gold-400 to-festive-500'
           : variant === 'silver'

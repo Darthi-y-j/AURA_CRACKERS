@@ -114,7 +114,7 @@ export function Hero({ categories = [] }: HeroProps) {
             </AnimateIn>
 
             <AnimateIn animation="fade-up" delay={250}>
-              <h1 className="font-display text-[2rem] font-bold leading-[1.15] text-white sm:text-[3.25rem] sm:leading-[1.12] lg:text-[3.75rem]">
+              <h1 className="font-display text-[2rem] font-bold leading-[1.15] text-white sm:text-[3.25rem] sm:leading-[1.12] lg:text-[3.75rem] lg:whitespace-nowrap">
                 Light Up Your <TitleHighlight variant="dark">Celebration</TitleHighlight>
               </h1>
             </AnimateIn>
