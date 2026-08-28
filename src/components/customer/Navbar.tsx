@@ -124,10 +124,10 @@ export function Navbar() {
         </Link>
         </div>
 
-        <div className="hidden justify-center lg:flex">
+        <div className="hidden min-w-0 justify-center lg:flex">
           <div
             className={cn(
-              'flex items-center gap-0.5 rounded-full p-1',
+              'flex max-w-full flex-nowrap items-center gap-0.5 rounded-full p-1',
               isDarkNav
                 ? 'border border-white/10 bg-black/15 backdrop-blur-md'
                 : 'bg-navy-900/[0.04]',
@@ -138,7 +138,7 @@ export function Navbar() {
                 key={link.label}
                 to={link.to}
                 className={cn(
-                  'rounded-full px-2.5 py-2 text-sm font-medium transition-all duration-200 xl:px-3.5',
+                  'shrink-0 whitespace-nowrap rounded-full px-2 py-1.5 text-xs font-medium transition-all duration-200 lg:px-2.5 lg:py-2 xl:px-3.5 xl:text-sm',
                   isDarkNav
                     ? isActive(link.to)
                       ? 'bg-white/20 text-gold-300 shadow-sm'
