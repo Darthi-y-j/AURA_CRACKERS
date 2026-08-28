@@ -26,6 +26,6 @@ export function writeSessionCache<T>(key: string, data: T): void {
 }
 
 export const CACHE_KEYS = {
-  catalogueProducts: 'aura-catalogue-products-v1',
+  catalogueProducts: 'aura-catalogue-products-v2',
   catalogueCategories: 'aura-catalogue-categories-v1',
 } as const

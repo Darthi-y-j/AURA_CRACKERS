@@ -302,6 +302,9 @@ function ProductTableRowCard({ product }: { product: Product }) {
             </ProductLink>
 
             <div className="min-w-0 flex-1">
+              <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+                <ProductHighlightBadges product={product} compact />
+              </div>
               <ProductLink product={product} className="block min-w-0">
                 <h3 className={cn(CARD_TITLE_BASE_CLASS, getCardTitleClass(product.tag), 'text-sm lg:text-[15px]')}>
                   {product.name}

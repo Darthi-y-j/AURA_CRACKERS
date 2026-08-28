@@ -161,6 +161,11 @@ async function queryProductsWithArchiveFallbackRest(filters: ProductFilters): Pr
   try {
     return await fetchProductsFromRest(filters, true)
   } catch (error) {
+    if (isMissingColumnError(error, 'is_recommended') || isMissingColumnError(error, 'is_best_seller')) {
+      throw new Error(
+        'Product badges are not set up yet. Run migration 021_product_highlight_badges.sql in Supabase SQL Editor.',
+      )
+    }
     if (isMissingColumnError(error, 'is_archived')) {
       if (archived === 'archived') return []
       return fetchProductsFromRest(filters, false)
