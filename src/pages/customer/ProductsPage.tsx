@@ -287,7 +287,7 @@ export function ProductsPage() {
                     view={view}
                     onViewChange={setView}
                     inline
-                    className="w-full min-w-0 justify-between"
+                    className="w-full min-w-0"
                     filterSlot={
                       <MobileFilterDropdown
                         {...navProps}

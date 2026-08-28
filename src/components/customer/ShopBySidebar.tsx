@@ -303,19 +303,17 @@ export function MobileFilterDropdown({
           aria-haspopup="true"
           className={cn(
             'relative inline-flex shrink-0 items-center justify-center gap-1 rounded-full border font-semibold transition-colors lg:hidden',
-            'h-9 w-9 p-0 text-xs',
-            'px-2.5 py-1.5 text-[11px] sm:h-auto sm:w-auto sm:gap-1.5 sm:px-2.5',
+            'h-9 px-2.5 text-[11px]',
             open || hasActiveFilters
               ? 'border-festive-500/30 bg-festive-500/10 text-festive-600'
               : 'border-navy-900/10 bg-white text-navy-800 hover:border-gold-500/30',
             className,
           )}
         >
-          <SlidersHorizontal className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
-          <span className="sr-only">Filter</span>
-          <span className="hidden sm:inline">Filter</span>
+          <SlidersHorizontal className="h-4 w-4 shrink-0" />
+          <span>Filter</span>
           {hasActiveFilters && <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-festive-500" />}
-          <ChevronDown className={cn('hidden h-3 w-3 transition-transform sm:block', open && 'rotate-180')} />
+          <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 transition-transform', open && 'rotate-180')} />
         </button>
         {panel}
       </>
