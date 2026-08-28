@@ -12,6 +12,7 @@ import { DiscountOfferTag } from './DiscountOfferTag'
 import { CatalogueProductCard } from './CatalogueProductCard'
 import { ProductBrandBadge } from './ProductBrandBadge'
 import { ProductTagBadge } from './ProductTagBadge'
+import { WishlistButton } from './WishlistButton'
 import { isCardVisibleProductTag } from '@/lib/productTags'
 
 interface ProductCardProps {
@@ -170,6 +171,13 @@ export const ProductCard = memo(function ProductCard({ product, index = 0, varia
               className="image-zoom h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-navy-950/50 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-navy-950/20" />
+            <div className="absolute right-3 top-3 z-20 sm:right-4 sm:top-4">
+              <WishlistButton
+                product={product}
+                className="rounded-full bg-navy-950/60 backdrop-blur-sm hover:bg-navy-950/80"
+                size="sm"
+              />
+            </div>
             <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-1.5 sm:bottom-4 sm:left-4 sm:gap-2">
               {product.tag ? (
                 <ProductTagBadge tag={product.tag} variant="overlay" />
@@ -272,9 +280,22 @@ export const ProductCard = memo(function ProductCard({ product, index = 0, varia
             <DiscountOfferTag percentage={product.discount_percentage} />
           )}
 
-          {product.tag && (
-            <div className="absolute left-2 top-2 z-10 sm:left-3 sm:top-3">
+          {product.tag ? (
+            <div className="absolute left-2 top-2 z-20 flex flex-col items-start gap-1.5 sm:left-3 sm:top-3">
               <ProductTagBadge tag={product.tag} variant="overlay" compact />
+              <WishlistButton
+                product={product}
+                className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/55"
+                size="sm"
+              />
+            </div>
+          ) : (
+            <div className="absolute left-2 top-2 z-20 sm:left-3 sm:top-3">
+              <WishlistButton
+                product={product}
+                className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/55"
+                size="sm"
+              />
             </div>
           )}
 
@@ -392,11 +413,16 @@ export const ProductCard = memo(function ProductCard({ product, index = 0, varia
               />
             )}
 
-            {product.tag && (
-              <div className="absolute left-2 top-2 z-10 sm:left-2.5 sm:top-2.5">
+            <div className="absolute left-2 top-2 z-20 flex flex-col items-start gap-1.5 sm:left-2.5 sm:top-2.5">
+              {product.tag && (
                 <ProductTagBadge tag={product.tag} variant="overlay" compact />
-              </div>
-            )}
+              )}
+              <WishlistButton
+                product={product}
+                className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/55"
+                size="sm"
+              />
+            </div>
 
             {product.brand && (
               <div className="absolute inset-x-2 bottom-2 z-10 sm:inset-x-2.5 sm:bottom-2.5">

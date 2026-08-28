@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 
 export type ProductViewMode = 'card' | 'table'
 
-const STORAGE_KEY = 'aura-product-view-mode'
+const STORAGE_KEY = 'aura-product-view-mode-v2'
 
-export function useProductViewMode(defaultMode: ProductViewMode = 'card') {
+export function useProductViewMode(defaultMode: ProductViewMode = 'table') {
   const [view, setView] = useState<ProductViewMode>(() => {
     const stored = localStorage.getItem(STORAGE_KEY)
     return stored === 'card' || stored === 'table' ? stored : defaultMode

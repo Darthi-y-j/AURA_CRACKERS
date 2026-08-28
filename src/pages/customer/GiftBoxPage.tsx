@@ -8,9 +8,10 @@ import { EmptyState } from '@/components/customer/EmptyState'
 import { ProductBrandBadge } from '@/components/customer/ProductBrandBadge'
 import { useCart } from '@/contexts/CartContext'
 import { useToast } from '@/contexts/ToastContext'
-import { getProducts } from '@/services/products'
-import { getCategories } from '@/services/categories'
+import { getProducts, getCachedCatalogueProducts } from '@/services/products'
+import { getCategories, getCachedCatalogueCategories } from '@/services/categories'
 import { resolveProductPrice } from '@/lib/pricing'
+import { filterProductsByQuery } from '@/lib/productSearch'
 import { createGiftBoxCartItem, giftBoxItemCount, giftBoxLineTotal } from '@/lib/giftBox'
 import { formatPrice, getImageUrl, IMAGE_WIDTH, cn } from '@/lib/utils'
 import type { Category, GiftBoxContentItem, Product } from '@/types/database'
@@ -110,26 +111,29 @@ export function GiftBoxPage() {
   const navigate = useNavigate()
   const { addItem } = useCart()
   const { showToast } = useToast()
-  const [products, setProducts] = useState<Product[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
+  const [products, setProducts] = useState<Product[]>(() => getCachedCatalogueProducts() ?? [])
+  const [categories, setCategories] = useState<Category[]>(() => getCachedCatalogueCategories() ?? [])
+  const [loading, setLoading] = useState(() => !getCachedCatalogueProducts()?.length)
   const [search, setSearch] = useState('')
   const [categoryId, setCategoryId] = useState('')
   const [boxItems, setBoxItems] = useState<GiftBoxContentItem[]>(loadDraft)
 
   useEffect(() => {
     let cancelled = false
-    Promise.all([getCategories(), getProducts({ sortBy: 'sort_order' })])
-      .then(([cats, prods]) => {
-        if (cancelled) return
-        setCategories(cats)
-        setProducts(prods)
+    void getCategories()
+      .then((cats) => {
+        if (!cancelled) setCategories(cats)
       })
       .catch(() => {
-        if (!cancelled) {
-          setCategories([])
-          setProducts([])
-        }
+        if (!cancelled && !getCachedCatalogueCategories()?.length) setCategories([])
+      })
+
+    void getProducts({ sortBy: 'sort_order', lite: true })
+      .then((prods) => {
+        if (!cancelled) setProducts(prods)
+      })
+      .catch(() => {
+        if (!cancelled && !getCachedCatalogueProducts()?.length) setProducts([])
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -145,16 +149,10 @@ export function GiftBoxPage() {
   }, [boxItems])
 
   const filteredProducts = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    return products.filter((product) => {
-      if (!product.is_available) return false
-      if (categoryId && product.category_id !== categoryId) return false
-      if (!q) return true
-      return (
-        product.name.toLowerCase().includes(q) ||
-        (product.brand?.toLowerCase().includes(q) ?? false)
-      )
-    })
+    let result = products.filter((product) => product.is_available)
+    if (categoryId) result = result.filter((product) => product.category_id === categoryId)
+    if (search.trim()) result = filterProductsByQuery(result, search)
+    return result
   }, [products, categoryId, search])
 
   const boxCount = giftBoxItemCount(boxItems)

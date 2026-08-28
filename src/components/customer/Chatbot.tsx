@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useLocation } from 'react-router-dom'
-import { Bot, X, Send, Loader2, Sparkles } from 'lucide-react'
+import { Bot, X, Send, Loader2 } from 'lucide-react'
 import { useSettings } from '@/contexts/SettingsContext'
 import { buildOllamaMessages } from '@/lib/chatbotPrompt'
 import { CHATBOT_GREETING_REPLY } from '@/lib/chatbotKnowledge'
@@ -69,7 +69,6 @@ export function Chatbot() {
   const [loading, setLoading] = useState(false)
   const [online, setOnline] = useState<boolean | null>(null)
   const [mode, setMode] = useState<'rag' | 'direct' | null>(null)
-  const [llmInfo, setLlmInfo] = useState<{ provider: string; model: string } | null>(null)
   const [showHint, setShowHint] = useState(false)
   const [hintExiting, setHintExiting] = useState(false)
   const [hintIndex, setHintIndex] = useState(0)
@@ -89,7 +88,6 @@ export function Chatbot() {
         if (health?.status === 'ok') {
           setMode('rag')
           setOnline(true)
-          setLlmInfo({ provider: health.llm_provider, model: health.llm_model })
           return
         }
       }
@@ -258,22 +256,7 @@ export function Chatbot() {
   }, [open])
 
   const statusLabel =
-    online === false
-      ? 'Offline'
-      : mode === 'rag'
-        ? llmInfo?.provider === 'groq'
-          ? 'RAG · Groq'
-          : 'RAG · Ollama'
-        : online
-          ? 'Powered by Ollama'
-          : 'Checking…'
-
-  const footerModel =
-    mode === 'rag' && llmInfo
-      ? llmInfo.provider === 'groq'
-        ? `Groq · ${llmInfo.model}`
-        : llmInfo.model
-      : import.meta.env.VITE_OLLAMA_MODEL || 'llama3.2:1b'
+    online === false ? 'Offline' : online ? 'Online' : 'Checking…'
 
   return (
     <>
@@ -395,10 +378,6 @@ export function Chatbot() {
                 )}
               </button>
             </div>
-            <p className="mt-2 flex items-center justify-center gap-1 text-[10px] text-cream-100/35">
-              <Sparkles className="h-3 w-3" />
-              {mode === 'rag' ? 'RAG + AI' : 'Local AI'} · {footerModel}
-            </p>
           </div>
         </div>
       )}
@@ -413,10 +392,10 @@ export function Chatbot() {
               if (hintExiting) finishHintDismiss()
             }}
           >
-            <div className="rounded-2xl border border-gold-500/35 bg-navy-950 px-3.5 py-2 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+            <div className="rounded-2xl border border-gold-400/40 bg-navy-950/95 px-3.5 py-2 shadow-[0_4px_24px_rgba(0,0,0,0.5)] backdrop-blur-md">
               <p
                 key={hintIndex}
-                className="max-w-[13rem] animate-fade-in text-center text-[11px] font-medium leading-snug text-cream-50 sm:max-w-[15rem] sm:text-xs"
+                className="max-w-[13rem] animate-fade-in text-center text-[11px] font-semibold leading-snug text-white sm:max-w-[15rem] sm:text-xs"
               >
                 {CHAT_HINTS[hintIndex]}
               </p>

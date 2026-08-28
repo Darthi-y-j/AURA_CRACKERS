@@ -192,11 +192,14 @@ export interface ProductFilters {
   search?: string
   categoryId?: string
   tag?: string
+  tags?: string[]
   availability?: 'all' | 'available' | 'unavailable'
   archived?: 'active' | 'archived' | 'all'
   featured?: boolean
   sortBy?: 'name' | 'price_asc' | 'price_desc' | 'newest' | 'sort_order'
   limit?: number
+  /** Lighter select for catalogue/list pages — skips heavy JSON fields */
+  lite?: boolean
 }
 
 export interface DashboardStats {

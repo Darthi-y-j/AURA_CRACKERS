@@ -10,8 +10,31 @@ export const isSupabaseConfigured = Boolean(
     supabaseAnonKey !== 'your-anon-key-here'
 )
 
+const supabaseFetch: typeof fetch = (input, init) => {
+  const timeoutMs = 12_000
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+
+  const cleanup = () => clearTimeout(timer)
+
+  if (init?.signal) {
+    init.signal.addEventListener('abort', () => controller.abort(), { once: true })
+  }
+
+  return fetch(input, { ...init, signal: controller.signal })
+    .finally(cleanup)
+    .catch((error) => {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        throw new Error('Supabase request timed out')
+      }
+      throw error
+    })
+}
+
 export const supabase: SupabaseClient = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      global: { fetch: supabaseFetch },
+    })
   : createClient('https://placeholder.supabase.co', 'placeholder-key')
 
 export function getSupabaseErrorMessage(error: unknown): string {

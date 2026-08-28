@@ -1,37 +1,47 @@
 import { supabase, getSupabaseErrorMessage, isMissingColumnError } from '@/lib/supabase'
+import { supabaseRestGet } from '@/lib/supabaseRest'
+import { CACHE_KEYS, readSessionCache, writeSessionCache } from '@/lib/sessionCache'
 import type { Category } from '@/types/database'
 
 export type CategoryArchiveFilter = 'active' | 'archived' | 'all'
+
+export function getCachedCatalogueCategories(): Category[] | null {
+  return readSessionCache<Category[]>(CACHE_KEYS.catalogueCategories)
+}
 
 export async function getCategories(
   activeOnly = true,
   archived: CategoryArchiveFilter = 'active',
 ): Promise<Category[]> {
-  const buildQuery = (withArchiveFilter: boolean) => {
-    let query = supabase.from('categories').select('*').order('sort_order', { ascending: true })
-
+  const fetchRest = (withArchiveFilter: boolean) => {
+    const parts = ['select=*', 'order=sort_order.asc']
     if (activeOnly) {
-      query = query.eq('is_active', true)
-      if (withArchiveFilter) query = query.eq('is_archived', false)
+      parts.push('is_active=eq.true')
+      if (withArchiveFilter) parts.push('is_archived=eq.false')
     } else if (withArchiveFilter) {
-      if (archived === 'archived') query = query.eq('is_archived', true)
-      else if (archived !== 'all') query = query.eq('is_archived', false)
+      if (archived === 'archived') parts.push('is_archived=eq.true')
+      else if (archived !== 'all') parts.push('is_archived=eq.false')
     }
-
-    return query
+    return supabaseRestGet<Category[]>('categories', parts.join('&'))
   }
 
-  const { data, error } = await buildQuery(true)
-  if (!error) return (data as Category[]) || []
-
-  if (isMissingColumnError(error, 'is_archived')) {
-    if (archived === 'archived') return []
-    const { data: fallbackData, error: fallbackError } = await buildQuery(false)
-    if (fallbackError) throw new Error(getSupabaseErrorMessage(fallbackError))
-    return (fallbackData as Category[]) || []
+  try {
+    const data = await fetchRest(true)
+    if (activeOnly && archived === 'active') {
+      writeSessionCache(CACHE_KEYS.catalogueCategories, data)
+    }
+    return data
+  } catch (error) {
+    if (isMissingColumnError(error, 'is_archived')) {
+      if (archived === 'archived') return []
+      const data = await fetchRest(false)
+      if (activeOnly && archived === 'active') {
+        writeSessionCache(CACHE_KEYS.catalogueCategories, data)
+      }
+      return data
+    }
+    throw error
   }
-
-  throw new Error(getSupabaseErrorMessage(error))
 }
 
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {

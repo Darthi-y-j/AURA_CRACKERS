@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { SEO } from '@/components/shared/SEO'
@@ -7,35 +7,45 @@ import { SearchBar } from '@/components/customer/SearchBar'
 import { ProductCatalogue } from '@/components/customer/ProductCatalogue'
 import { LoadingState } from '@/components/customer/LoadingState'
 import { useProductViewMode } from '@/hooks/useProductViewMode'
-import { getProducts } from '@/services/products'
+import { getProducts, getCachedCatalogueProducts } from '@/services/products'
+import { filterProductsByQuery } from '@/lib/productSearch'
 import type { Product } from '@/types/database'
 
 export function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const query = searchParams.get('q') || ''
   const [localQuery, setLocalQuery] = useState(query)
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(false)
+  const [catalogue, setCatalogue] = useState<Product[]>(() => getCachedCatalogueProducts() ?? [])
+  const [loading, setLoading] = useState(() => !getCachedCatalogueProducts()?.length)
   const [view, setView] = useProductViewMode()
 
   useEffect(() => {
-    async function search() {
-      if (!query.trim()) {
-        setProducts([])
-        return
-      }
-      setLoading(true)
-      try {
-        const data = await getProducts({ search: query })
-        setProducts(data)
-      } catch {
-        setProducts([])
-      } finally {
-        setLoading(false)
-      }
-    }
-    search()
+    setLocalQuery(query)
   }, [query])
+
+  useEffect(() => {
+    let cancelled = false
+
+    void getProducts({ sortBy: 'sort_order', lite: true })
+      .then((data) => {
+        if (!cancelled) setCatalogue(data)
+      })
+      .catch(() => {
+        if (!cancelled && !getCachedCatalogueProducts()?.length) setCatalogue([])
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const products = useMemo(() => {
+    if (!query.trim()) return []
+    return filterProductsByQuery(catalogue, query)
+  }, [catalogue, query])
 
   const handleSearch = () => {
     setSearchParams(localQuery.trim() ? { q: localQuery } : {})
@@ -92,7 +102,7 @@ export function SearchPage() {
                 onViewChange={setView}
                 columns={3}
                 emptyTitle="No results found"
-                emptyDescription={`No products match "${query}". Try a different search term.`}
+                emptyDescription={`No products match "${query}". Try a different spelling or a shorter keyword.`}
               />
             ) : (
               <p className="text-navy-700/70">Enter a search term to find products.</p>

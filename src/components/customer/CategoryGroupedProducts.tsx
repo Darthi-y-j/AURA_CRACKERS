@@ -1,7 +1,7 @@
 import type { Category, Product } from '@/types/database'
 import type { CatalogueView } from './CatalogueToolbar'
 import { ProductGrid } from './ProductGrid'
-import { ProductTable } from './ProductTable'
+import { ProductTable, ProductTableHeader } from './ProductTable'
 
 export interface CategoryProductGroup {
   id: string
@@ -88,7 +88,7 @@ function CategoryProductSection({
       </div>
 
       {view === 'table' ? (
-        <ProductTable products={group.products} />
+        <ProductTable products={group.products} showHeader={false} />
       ) : (
         <ProductGrid
           products={group.products}
@@ -105,6 +105,7 @@ function CategoryProductSection({
 export function CategoryGroupedProducts({ groups, view }: CategoryGroupedProductsProps) {
   return (
     <div className="space-y-10 sm:space-y-14">
+      {view === 'table' ? <ProductTableHeader className="mb-3" /> : null}
       {groups.map((group) => (
         <CategoryProductSection key={group.id} group={group} view={view} />
       ))}

@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react'
 import { Upload, X, Loader2 } from 'lucide-react'
-import { uploadImage, type StorageBucket } from '@/services/storage'
+import { uploadImage, type ImageStorageBucket } from '@/services/storage'
 import { cn } from '@/lib/utils'
 
 interface ImageUploaderProps {
-  bucket: StorageBucket
+  bucket: ImageStorageBucket
   currentUrl?: string | null
   onUpload: (url: string) => void
   onRemove?: () => void
@@ -30,8 +30,8 @@ export function ImageUploader({
       return
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image must be less than 5MB')
+    if (file.size > 12 * 1024 * 1024) {
+      setError('Image must be less than 12MB')
       return
     }
 
@@ -79,6 +79,7 @@ export function ImageUploader({
             <>
               <Upload className="h-8 w-8" />
               <span className="mt-2 text-sm">Click to upload</span>
+              <span className="mt-1 text-[10px] text-slate-400">Auto-compressed to WebP</span>
             </>
           )}
         </button>

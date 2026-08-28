@@ -8,17 +8,19 @@ import { ProductGrid } from '@/components/customer/ProductGrid'
 import { ProductTable } from '@/components/customer/ProductTable'
 import { CategoryGroupedProducts, groupProductsByCategory } from '@/components/customer/CategoryGroupedProducts'
 import { LoadingState } from '@/components/customer/LoadingState'
+import { EmptyState } from '@/components/customer/EmptyState'
 import { SearchBar } from '@/components/customer/SearchBar'
 import {
   CatalogueToolbar,
   sortProducts,
   type CatalogueSort,
-  type CatalogueView,
 } from '@/components/customer/CatalogueToolbar'
-import { getProducts } from '@/services/products'
-import { getCategories } from '@/services/categories'
+import { getProducts, getCachedCatalogueProducts } from '@/services/products'
+import { getCategories, getCachedCatalogueCategories } from '@/services/categories'
 import { scrollToCategorySectionReliable, scrollToElement } from '@/lib/scrollToCategory'
+import { filterProductsByQuery } from '@/lib/productSearch'
 import { useRestoreScrollAfterLoad } from '@/hooks/useRestoreScrollAfterLoad'
+import { useProductViewMode } from '@/hooks/useProductViewMode'
 import { cn } from '@/lib/utils'
 import type { Product, Category } from '@/types/database'
 
@@ -26,10 +28,10 @@ const MAX_PRICE = 5000
 
 export function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [products, setProducts] = useState<Product[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
-  const [view, setView] = useState<CatalogueView>('card')
+  const [products, setProducts] = useState<Product[]>(() => getCachedCatalogueProducts() ?? [])
+  const [categories, setCategories] = useState<Category[]>(() => getCachedCatalogueCategories() ?? [])
+  const [loading, setLoading] = useState(() => !getCachedCatalogueProducts()?.length)
+  const [view, setView] = useProductViewMode('table')
   const [sort, setSort] = useState<CatalogueSort>('popular')
   const [priceRange, setPriceRange] = useState<[number, number]>([0, MAX_PRICE])
   const [scrollCategoryId, setScrollCategoryId] = useState('')
@@ -51,22 +53,30 @@ export function ProductsPage() {
   }, [search])
 
   useEffect(() => {
-    async function load() {
-      try {
-        const [cats, prods] = await Promise.all([
-          getCategories(),
-          getProducts({ sortBy: 'sort_order' }),
-        ])
-        setCategories(cats)
-        setProducts(prods)
-      } catch {
-        setCategories([])
-        setProducts([])
-      } finally {
-        setLoading(false)
-      }
+    let cancelled = false
+
+    void getCategories()
+      .then((cats) => {
+        if (!cancelled) setCategories(cats)
+      })
+      .catch(() => {
+        if (!cancelled && !getCachedCatalogueCategories()?.length) setCategories([])
+      })
+
+    void getProducts({ sortBy: 'sort_order', lite: true })
+      .then((prods) => {
+        if (!cancelled) setProducts(prods)
+      })
+      .catch(() => {
+        if (!cancelled && !getCachedCatalogueProducts()?.length) setProducts([])
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
     }
-    load()
   }, [])
 
   const updateCategory = (value: string) => {
@@ -97,6 +107,17 @@ export function ProductsPage() {
     setSearchParams(params)
   }
 
+  const clearFilters = () => {
+    setLocalSearch('')
+    setPriceRange([0, MAX_PRICE])
+    setSearchParams(new URLSearchParams())
+  }
+
+  const hasActiveFilters =
+    Boolean(categoryId || brand || tag || localSearch.trim() || priceRange[1] < MAX_PRICE)
+
+  const activeQuery = localSearch.trim().toLowerCase()
+
   const brands = useMemo(() => {
     const names = new Set<string>()
     for (const product of products) {
@@ -119,20 +140,15 @@ export function ProductsPage() {
     if (categoryId) result = result.filter((p) => p.category_id === categoryId)
     if (brand) result = result.filter((p) => p.brand?.trim() === brand)
     if (tag) result = result.filter((p) => p.tag === tag)
-    if (search) {
-      const q = search.toLowerCase()
-      result = result.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          (p.description?.toLowerCase().includes(q) ?? false),
-      )
-    }
     const [, maxPrice] = priceRange
     if (maxPrice < MAX_PRICE) {
       result = result.filter((p) => p.price == null || p.price <= maxPrice)
     }
+    if (activeQuery) {
+      return filterProductsByQuery(result, activeQuery)
+    }
     return sortProducts(result, sort)
-  }, [products, categoryId, brand, tag, search, priceRange, sort])
+  }, [products, categoryId, brand, tag, activeQuery, priceRange, sort])
 
   const groupedProducts = useMemo(
     () => groupProductsByCategory(filteredProducts, categories),
@@ -300,10 +316,34 @@ export function ProductsPage() {
               {loading ? (
                 <LoadingState message="Loading products..." />
               ) : filteredProducts.length === 0 ? (
-                <ProductGrid
-                  products={[]}
-                  emptyTitle="No products found"
-                  emptyDescription="Try selecting a different category or adjusting your filters."
+                <EmptyState
+                  title={products.length === 0 ? 'Products unavailable' : 'No products found'}
+                  description={
+                    products.length === 0
+                      ? 'We could not load the catalogue right now. Please refresh or try again shortly.'
+                      : activeQuery
+                        ? `No matches for "${localSearch.trim()}". Try another name, brand, or category.`
+                        : 'Try selecting a different category or adjusting your filters.'
+                  }
+                  action={
+                    products.length === 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => window.location.reload()}
+                        className="rounded-lg bg-gold-500 px-6 py-2.5 text-sm font-semibold text-navy-950 hover:bg-gold-400"
+                      >
+                        Refresh page
+                      </button>
+                    ) : hasActiveFilters ? (
+                      <button
+                        type="button"
+                        onClick={clearFilters}
+                        className="rounded-lg bg-gold-500 px-6 py-2.5 text-sm font-semibold text-navy-950 hover:bg-gold-400"
+                      >
+                        Clear search & filters
+                      </button>
+                    ) : undefined
+                  }
                 />
               ) : showGrouped ? (
                 <div id="catalogue-products" className="scroll-mt-32">

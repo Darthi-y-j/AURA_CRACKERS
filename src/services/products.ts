@@ -1,10 +1,33 @@
 import { supabase, getSupabaseErrorMessage, isMissingColumnError } from '@/lib/supabase'
+import { supabaseRestGet } from '@/lib/supabaseRest'
+import { CACHE_KEYS, readSessionCache, writeSessionCache } from '@/lib/sessionCache'
 import { isLowStock } from '@/lib/stock'
 import type { Product, ProductFilters } from '@/types/database'
 
 const PRODUCT_CACHE_MS = 2 * 60 * 1000
+const REQUEST_TIMEOUT_MS = 12_000
 const productCache = new Map<string, { data: Product[]; at: number }>()
 const inflight = new Map<string, Promise<Product[]>>()
+
+/** Catalogue pages — omit specifications & media URLs to cut payload size */
+const CATALOGUE_PRODUCT_SELECT =
+  'id, category_id, name, slug, description, price, original_price, discount_percentage, pieces, brand, tag, image_url, stock_quantity, stock_alert_limit, is_available, is_featured, is_archived, sort_order, created_at, category:categories(id, name, slug, sort_order, is_active, is_archived)'
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('Product request timed out')), ms)
+    promise.then(
+      (value) => {
+        clearTimeout(timer)
+        resolve(value)
+      },
+      (error) => {
+        clearTimeout(timer)
+        reject(error)
+      },
+    )
+  })
+}
 
 function getProductCacheKey(filters: ProductFilters): string {
   return JSON.stringify(filters)
@@ -23,7 +46,7 @@ async function withProductCache(
   const pending = inflight.get(key)
   if (pending) return pending
 
-  const request = fetcher()
+  const request = withTimeout(fetcher(), REQUEST_TIMEOUT_MS)
     .then((data) => {
       productCache.set(key, { data, at: Date.now() })
       inflight.delete(key)
@@ -68,64 +91,112 @@ async function queryProductsWithArchiveFallback(
   throw new Error(getSupabaseErrorMessage(error))
 }
 
-export async function getProducts(filters: ProductFilters = {}): Promise<Product[]> {
+function buildProductsRestQuery(filters: ProductFilters, withArchiveFilter: boolean): string {
+  const parts: string[] = []
+  const select = filters.lite ? CATALOGUE_PRODUCT_SELECT : '*,category:categories(*)'
+  parts.push(`select=${encodeURIComponent(select)}`)
+  parts.push('is_available=eq.true')
+
+  const archived = filters.archived ?? 'active'
+  if (withArchiveFilter) {
+    if (archived === 'archived') parts.push('is_archived=eq.true')
+    else if (archived !== 'all') parts.push('is_archived=eq.false')
+  }
+
+  if (filters.categoryId) parts.push(`category_id=eq.${filters.categoryId}`)
+  if (filters.featured) parts.push('is_featured=eq.true')
+
+  if (filters.tags?.length) {
+    const tagList = filters.tags.map((tag) => `"${tag.replace(/"/g, '')}"`).join(',')
+    parts.push(`tag=in.(${tagList})`)
+  } else if (filters.tag) {
+    parts.push(`tag=eq.${encodeURIComponent(filters.tag)}`)
+  }
+
+  if (filters.search) {
+    const term = encodeURIComponent(`%${filters.search.trim()}%`)
+    parts.push(`or=(name.ilike.${term},description.ilike.${term})`)
+  }
+
+  if (filters.availability === 'available') {
+    parts.push('is_available=eq.true')
+  } else if (filters.availability === 'unavailable') {
+    parts.push('is_available=eq.false')
+  }
+
+  switch (filters.sortBy) {
+    case 'name':
+      parts.push('order=name.asc')
+      break
+    case 'price_asc':
+      parts.push('order=price.asc')
+      break
+    case 'price_desc':
+      parts.push('order=price.desc')
+      break
+    case 'newest':
+      parts.push('order=created_at.desc')
+      break
+    case 'sort_order':
+    default:
+      parts.push('order=sort_order.asc')
+  }
+
+  if (filters.limit) parts.push(`limit=${filters.limit}`)
+
+  return parts.join('&')
+}
+
+async function fetchProductsFromRest(
+  filters: ProductFilters,
+  withArchiveFilter: boolean,
+): Promise<Product[]> {
+  const query = buildProductsRestQuery(filters, withArchiveFilter)
+  return supabaseRestGet<Product[]>('products', query)
+}
+
+async function queryProductsWithArchiveFallbackRest(filters: ProductFilters): Promise<Product[]> {
   const archived = filters.archived ?? 'active'
 
-  return withProductCache(filters, () =>
-    queryProductsWithArchiveFallback(archived, (withArchiveFilter) => {
-    let query = supabase
-      .from('products')
-      .select('*, category:categories(*)')
-      .eq('is_available', true)
-
-    query = applyArchivedFilter(query, archived, withArchiveFilter)
-
-    if (filters.categoryId) {
-      query = query.eq('category_id', filters.categoryId)
+  try {
+    return await fetchProductsFromRest(filters, true)
+  } catch (error) {
+    if (isMissingColumnError(error, 'is_archived')) {
+      if (archived === 'archived') return []
+      return fetchProductsFromRest(filters, false)
     }
+    throw error
+  }
+}
 
-    if (filters.featured) {
-      query = query.eq('is_featured', true)
-    }
 
-    if (filters.tag) {
-      query = query.eq('tag', filters.tag)
-    }
-
-    if (filters.search) {
-      query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
-    }
-
-    if (filters.availability === 'available') {
-      query = query.eq('is_available', true)
-    } else if (filters.availability === 'unavailable') {
-      query = query.eq('is_available', false)
-    }
-
-    switch (filters.sortBy) {
-      case 'name':
-        query = query.order('name', { ascending: true })
-        break
-      case 'price_asc':
-        query = query.order('price', { ascending: true, nullsFirst: false })
-        break
-      case 'price_desc':
-        query = query.order('price', { ascending: false, nullsFirst: false })
-        break
-      case 'newest':
-        query = query.order('created_at', { ascending: false })
-        break
-      default:
-        query = query.order('sort_order', { ascending: true })
-    }
-
-    if (filters.limit) {
-      query = query.limit(filters.limit)
-    }
-
-    return query
-  }),
+function isCatalogueFilters(filters: ProductFilters): boolean {
+  return (
+    filters.lite === true &&
+    filters.sortBy === 'sort_order' &&
+    !filters.categoryId &&
+    !filters.featured &&
+    !filters.tag &&
+    !filters.tags?.length &&
+    !filters.search &&
+    !filters.limit &&
+    (filters.archived === undefined || filters.archived === 'active') &&
+    (filters.availability === undefined || filters.availability === 'available')
   )
+}
+
+export function getCachedCatalogueProducts(): Product[] | null {
+  return readSessionCache<Product[]>(CACHE_KEYS.catalogueProducts)
+}
+
+export async function getProducts(filters: ProductFilters = {}): Promise<Product[]> {
+  return withProductCache(filters, async () => {
+    const data = await queryProductsWithArchiveFallbackRest(filters)
+    if (isCatalogueFilters(filters) && data.length > 0) {
+      writeSessionCache(CACHE_KEYS.catalogueProducts, data)
+    }
+    return data
+  })
 }
 
 export async function getAllProducts(filters: ProductFilters = {}): Promise<Product[]> {
@@ -189,17 +260,8 @@ export async function getProductById(id: string): Promise<Product | null> {
 }
 
 export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
-  return queryProductsWithArchiveFallback('active', (withArchiveFilter) => {
-    let query = supabase
-      .from('products')
-      .select('*, category:categories(*)')
-      .eq('is_featured', true)
-      .eq('is_available', true)
-
-    if (withArchiveFilter) query = query.eq('is_archived', false)
-
-    return query.order('sort_order', { ascending: true }).limit(limit)
-  })
+  const filters: ProductFilters = { featured: true, sortBy: 'sort_order', lite: true, limit }
+  return withProductCache(filters, () => queryProductsWithArchiveFallbackRest(filters))
 }
 
 export async function getProductsByCategory(categoryId: string): Promise<Product[]> {

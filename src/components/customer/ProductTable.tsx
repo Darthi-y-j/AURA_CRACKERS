@@ -28,10 +28,51 @@ interface ProductTableProps {
   products: Product[]
   emptyTitle?: string
   emptyDescription?: string
+  showHeader?: boolean
 }
 
 const DESKTOP_ROW_GRID =
   'grid grid-cols-[minmax(0,1.6fr)_4.75rem_9rem_4.75rem_4.25rem_5.5rem_minmax(11.5rem,1fr)] items-center gap-x-2'
+
+/** Sits below fixed navbar + sticky search toolbar on the products page */
+const TABLE_HEADER_STICKY_CLASS = 'sticky top-[6.75rem] z-30 sm:top-32'
+
+function ProductTableHeader({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        DESKTOP_ROW_GRID,
+        TABLE_HEADER_STICKY_CLASS,
+        'hidden rounded-xl border border-gold-500/15 bg-navy-950/95 px-4 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.25)] backdrop-blur-sm md:grid lg:px-5',
+        className,
+      )}
+    >
+      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-gold-400/90 lg:text-[11px]">
+        Product
+      </span>
+      <span className="text-center text-[10px] font-bold uppercase tracking-[0.14em] text-white/45 lg:text-[11px]">
+        Pcs
+      </span>
+      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-festive-400/90 lg:text-[11px]">
+        Brand
+      </span>
+      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-gold-400/90 lg:text-[11px]">
+        Price
+      </span>
+      <span className="text-center text-[10px] font-bold uppercase tracking-[0.14em] text-festive-400/80 lg:text-[11px]">
+        Off
+      </span>
+      <span className="text-center text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-400/80 lg:text-[11px]">
+        Status
+      </span>
+      <span className="text-right text-[10px] font-bold uppercase tracking-[0.14em] text-white/45 lg:text-[11px]">
+        Action
+      </span>
+    </div>
+  )
+}
+
+export { ProductTableHeader }
 
 function TablePrice({
   price,
@@ -380,6 +421,7 @@ export function ProductTable({
   products,
   emptyTitle = 'No products found',
   emptyDescription = 'Try adjusting your filters or check back later.',
+  showHeader = true,
 }: ProductTableProps) {
   if (products.length === 0) {
     return (
@@ -403,7 +445,12 @@ export function ProductTable({
       {/* Mobile — compact table list */}
       <div className="rounded-xl border border-navy-900/10 bg-navy-950 shadow-[0_4px_24px_rgba(0,0,0,0.28)] md:hidden">
         <div className="h-0.5 bg-gradient-to-r from-gold-400 via-festive-500 to-gold-400" aria-hidden="true" />
-        <div className="flex items-center justify-between gap-2 border-b border-white/[0.08] bg-navy-950/95 px-3 py-2 sm:px-3.5">
+        <div
+          className={cn(
+            'flex items-center justify-between gap-2 border-b border-white/[0.08] bg-navy-950/95 px-3 py-2 backdrop-blur-sm sm:px-3.5',
+            TABLE_HEADER_STICKY_CLASS,
+          )}
+        >
           <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-gold-400/85">Product</span>
           <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-white/45">Price · Add</span>
         </div>
@@ -412,34 +459,7 @@ export function ProductTable({
         ))}
       </div>
 
-      <div
-        className={cn(
-          DESKTOP_ROW_GRID,
-          'hidden rounded-xl border border-gold-500/15 bg-navy-950/95 px-4 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.25)] backdrop-blur-sm md:grid lg:px-5',
-        )}
-      >
-        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-gold-400/90 lg:text-[11px]">
-          Product
-        </span>
-        <span className="text-center text-[10px] font-bold uppercase tracking-[0.14em] text-white/45 lg:text-[11px]">
-          Pcs
-        </span>
-        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-festive-400/90 lg:text-[11px]">
-          Brand
-        </span>
-        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-gold-400/90 lg:text-[11px]">
-          Price
-        </span>
-        <span className="text-center text-[10px] font-bold uppercase tracking-[0.14em] text-festive-400/80 lg:text-[11px]">
-          Off
-        </span>
-        <span className="text-center text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-400/80 lg:text-[11px]">
-          Status
-        </span>
-        <span className="text-right text-[10px] font-bold uppercase tracking-[0.14em] text-white/45 lg:text-[11px]">
-          Action
-        </span>
-      </div>
+      {showHeader ? <ProductTableHeader /> : null}
 
       <div className="hidden space-y-3 md:block">
         {products.map((product) => (

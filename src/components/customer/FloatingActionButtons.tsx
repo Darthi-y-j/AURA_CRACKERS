@@ -1,41 +1,22 @@
-import { MessageCircle, Phone } from 'lucide-react'
 import { useSettings } from '@/contexts/SettingsContext'
-import { buildWhatsAppContactUrl, buildTelUrl } from '@/lib/whatsapp'
 
 export function FloatingActionButtons({ embedded = false }: { embedded?: boolean }) {
   const { settings } = useSettings()
-
-  const whatsappUrl = settings.whatsapp_number
-    ? buildWhatsAppContactUrl(settings.whatsapp_number, 'Hello! I would like to enquire about your products.')
-    : null
 
   const instagramUrl = settings.social_links.instagram
   const facebookUrl = settings.social_links.facebook
   const youtubeUrl = settings.social_links.youtube
 
-  if (!whatsappUrl && !settings.phone && !instagramUrl && !facebookUrl && !youtubeUrl) return null
+  if (!instagramUrl && !facebookUrl && !youtubeUrl) return null
 
   const buttons = (
     <>
-      {whatsappUrl && (
-        <a
-          href={whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-green-500/30 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-green-500/40 animate-scale-in"
-          aria-label="WhatsApp"
-          title="Chat on WhatsApp"
-        >
-          <MessageCircle className="h-6 w-6 transition-transform group-hover:scale-110" />
-        </a>
-      )}
-
       {instagramUrl && (
         <a
           href={instagramUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#f58529] via-[#dd2a7b] to-[#8134af] text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl animate-scale-in [animation-delay:100ms]"
+          className="group flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#f58529] via-[#dd2a7b] to-[#8134af] text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl animate-scale-in"
           aria-label="Instagram"
           title="Follow on Instagram"
         >
@@ -52,7 +33,7 @@ export function FloatingActionButtons({ embedded = false }: { embedded?: boolean
           href={facebookUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex h-12 w-12 items-center justify-center rounded-full bg-[#1877F2] text-white shadow-lg shadow-blue-500/25 transition-all duration-300 hover:scale-110 hover:shadow-xl animate-scale-in [animation-delay:150ms]"
+          className="group flex h-12 w-12 items-center justify-center rounded-full bg-[#1877F2] text-white shadow-lg shadow-blue-500/25 transition-all duration-300 hover:scale-110 hover:shadow-xl animate-scale-in [animation-delay:100ms]"
           aria-label="Facebook"
           title="Follow on Facebook"
         >
@@ -67,24 +48,13 @@ export function FloatingActionButtons({ embedded = false }: { embedded?: boolean
           href={youtubeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex h-12 w-12 items-center justify-center rounded-full bg-[#FF0000] text-white shadow-lg shadow-red-500/25 transition-all duration-300 hover:scale-110 hover:shadow-xl animate-scale-in [animation-delay:175ms]"
+          className="group flex h-12 w-12 items-center justify-center rounded-full bg-[#FF0000] text-white shadow-lg shadow-red-500/25 transition-all duration-300 hover:scale-110 hover:shadow-xl animate-scale-in [animation-delay:150ms]"
           aria-label="YouTube"
           title="Subscribe on YouTube"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
           </svg>
-        </a>
-      )}
-
-      {settings.phone && (
-        <a
-          href={buildTelUrl(settings.phone)}
-          className="group flex h-12 w-12 items-center justify-center rounded-full bg-navy-800 text-white shadow-lg shadow-black/20 transition-all duration-300 hover:scale-110 hover:bg-navy-700 hover:shadow-xl animate-scale-in [animation-delay:200ms]"
-          aria-label="Call us"
-          title="Call us"
-        >
-          <Phone className="h-5 w-5" />
         </a>
       )}
     </>

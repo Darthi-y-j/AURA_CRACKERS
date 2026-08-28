@@ -13,46 +13,61 @@ import { HowItWorksSection } from '@/components/customer/HowItWorksSection'
 import { WhyChooseUsSection } from '@/components/customer/WhyChooseUsSection'
 import { BrandMarquee } from '@/components/customer/BrandMarquee'
 import { GiftBoxPromoSection } from '@/components/customer/GiftBoxPromoSection'
-import { getCategories } from '@/services/categories'
-import { getFeaturedProducts, getProducts } from '@/services/products'
+import { getCategories, getCachedCatalogueCategories } from '@/services/categories'
+import { getProducts, getCachedCatalogueProducts } from '@/services/products'
 import { PRODUCT_TAGS } from '@/lib/productTags'
 import { useSettings } from '@/contexts/SettingsContext'
 import type { Category, Product } from '@/types/database'
 
 const TAGGED_SECTION_LIMIT = 8
 
+function buildTaggedSections(products: Product[]) {
+  return PRODUCT_TAGS.map((tag) => ({
+    tag,
+    products: products
+      .filter((product) => product.tag === tag)
+      .slice(0, TAGGED_SECTION_LIMIT),
+  })).filter((section) => section.products.length > 0)
+}
+
 export function HomePage() {
   const { settings } = useSettings()
-  const [categories, setCategories] = useState<Category[]>([])
-  const [featured, setFeatured] = useState<Product[]>([])
-  const [taggedSections, setTaggedSections] = useState<{ tag: string; products: Product[] }[]>([])
-  const [loading, setLoading] = useState(true)
+  const cachedProducts = getCachedCatalogueProducts()
+  const [categories, setCategories] = useState<Category[]>(() => getCachedCatalogueCategories()?.slice(0, 6) ?? [])
+  const [featured, setFeatured] = useState<Product[]>(
+    () => cachedProducts?.filter((product) => product.is_featured).slice(0, 8) ?? [],
+  )
+  const [taggedSections, setTaggedSections] = useState<{ tag: string; products: Product[] }[]>(
+    () => (cachedProducts?.length ? buildTaggedSections(cachedProducts) : []),
+  )
+  const [loading, setLoading] = useState(() => !cachedProducts?.length)
 
   useEffect(() => {
     let cancelled = false
 
-    Promise.all([
-      getCategories()
-        .then((cats) => cats.slice(0, 6))
-        .catch(() => [] as Category[]),
-      getFeaturedProducts(8).catch(() => [] as Product[]),
-      ...PRODUCT_TAGS.map((tag) =>
-        getProducts({ tag, limit: TAGGED_SECTION_LIMIT, sortBy: 'sort_order' }).catch(
-          () => [] as Product[],
-        ),
-      ),
-    ]).then(([cats, featuredProducts, ...taggedProducts]) => {
-      if (cancelled) return
-      setCategories(cats)
-      setFeatured(featuredProducts)
-      setTaggedSections(
-        PRODUCT_TAGS.map((tag, index) => ({
-          tag,
-          products: taggedProducts[index] ?? [],
-        })).filter((section) => section.products.length > 0),
-      )
-      setLoading(false)
-    })
+    void getCategories()
+      .then((items) => {
+        if (!cancelled) setCategories(items.slice(0, 6))
+      })
+      .catch(() => {
+        if (!cancelled && !getCachedCatalogueCategories()?.length) setCategories([])
+      })
+
+    void getProducts({ sortBy: 'sort_order', lite: true })
+      .then((products) => {
+        if (cancelled) return
+        setFeatured(products.filter((product) => product.is_featured).slice(0, 8))
+        setTaggedSections(buildTaggedSections(products))
+      })
+      .catch(() => {
+        if (!cancelled && !getCachedCatalogueProducts()?.length) {
+          setFeatured([])
+          setTaggedSections([])
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
 
     return () => {
       cancelled = true
