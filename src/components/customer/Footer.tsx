@@ -3,6 +3,7 @@ import { Phone, Mail, MapPin, MessageCircle, Clock } from 'lucide-react'
 import { useSettings } from '@/contexts/SettingsContext'
 import { buildWhatsAppContactUrl, buildTelUrl, buildMailtoUrl } from '@/lib/whatsapp'
 import { formatDisplayPhone, getWhatsAppNumbers } from '@/lib/businessInfo'
+import { DEVELOPER_CREDIT } from '@/lib/siteConfig'
 
 export function Footer() {
   const { settings } = useSettings()
@@ -95,14 +96,31 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 sm:flex-row">
-          <p className="text-sm text-white/50">
-            &copy; {currentYear} {settings.business_name}. All rights reserved.
-          </p>
-          <div className="flex gap-4 text-sm text-white/50">
-            <Link to="/privacy" className="hover:text-gold-400">Privacy Policy</Link>
-            <Link to="/terms" className="hover:text-gold-400">Terms &amp; Conditions</Link>
+        <div className="mt-10 space-y-4 border-t border-white/10 pt-8">
+          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <p className="text-sm text-white/50">
+              &copy; {currentYear} {settings.business_name}. All rights reserved.
+            </p>
+            <div className="flex gap-4 text-sm text-white/50">
+              <Link to="/privacy" className="hover:text-gold-400">Privacy Policy</Link>
+              <Link to="/terms" className="hover:text-gold-400">Terms &amp; Conditions</Link>
+            </div>
           </div>
+          <p className="text-center text-xs text-white/35 sm:text-left">
+            {DEVELOPER_CREDIT.label}{' '}
+            {DEVELOPER_CREDIT.url ? (
+              <a
+                href={DEVELOPER_CREDIT.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-white/50 transition hover:text-gold-400/80"
+              >
+                {DEVELOPER_CREDIT.name}
+              </a>
+            ) : (
+              <span className="font-semibold text-white/50">{DEVELOPER_CREDIT.name}</span>
+            )}
+          </p>
         </div>
       </div>
     </footer>

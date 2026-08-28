@@ -3,6 +3,14 @@ export const SITE_URL = 'https://www.auracrackers.com'
 
 export const SITE_NAME = 'Aura Crackers'
 
+/** Freelance / agency credit shown in the site footer. */
+export const DEVELOPER_CREDIT = {
+  label: 'Website designed & developed by',
+  name: 'IHTRAD TECHNOLOGIES',
+  /** Set when you have a company site, e.g. https://ihtradtechnologies.com */
+  url: null as string | null,
+} as const
+
 export const DEFAULT_DESCRIPTION =
   'Premium fireworks and crackers catalogue from Sivakasi. Browse products by category and send enquiries on WhatsApp — delivery across India.'
 
