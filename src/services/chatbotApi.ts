@@ -34,8 +34,8 @@ const API_BASE = import.meta.env.VITE_CHATBOT_API || '/api/chatbot'
 let healthCache: { checkedAt: number; value: ChatbotHealth | null } | null = null
 const HEALTH_CACHE_MS = 30_000
 
-export function isRagChatbotEnabled(): boolean {
-  return import.meta.env.VITE_CHATBOT_RAG !== 'false'
+export function isChatbotEnabled(): boolean {
+  return import.meta.env.VITE_CHATBOT_ENABLED !== 'false'
 }
 
 export async function checkChatbotApiHealth(): Promise<ChatbotHealth | null> {

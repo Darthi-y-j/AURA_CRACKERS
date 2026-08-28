@@ -2,22 +2,14 @@ import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 're
 import { useLocation } from 'react-router-dom'
 import { Bot, X, Send, Loader2 } from 'lucide-react'
 import { useSettings } from '@/contexts/SettingsContext'
-import { buildOllamaMessages } from '@/lib/chatbotPrompt'
-import { CHATBOT_GREETING_REPLY } from '@/lib/chatbotKnowledge'
+import { CHATBOT_GREETING_REPLY, getOfflineChatbotReply } from '@/lib/chatbotKnowledge'
 import {
   checkChatbotApiHealth,
-  isRagChatbotEnabled,
+  isChatbotEnabled,
   sendChatbotMessage,
   type ChatbotProduct,
   type ChatHistoryTurn,
 } from '@/services/chatbotApi'
-import {
-  checkOllamaHealth,
-  isChatbotEnabled,
-  preloadOllamaModel,
-  streamOllamaChat,
-  type ChatMessage,
-} from '@/services/ollama'
 import { ChatbotProductCard } from '@/components/customer/ChatbotProductCard'
 import { FloatingActionButtons } from '@/components/customer/FloatingActionButtons'
 import { cn } from '@/lib/utils'
@@ -68,7 +60,6 @@ export function Chatbot() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [online, setOnline] = useState<boolean | null>(null)
-  const [mode, setMode] = useState<'rag' | 'direct' | null>(null)
   const [showHint, setShowHint] = useState(false)
   const [hintExiting, setHintExiting] = useState(false)
   const [hintIndex, setHintIndex] = useState(0)
@@ -82,30 +73,16 @@ export function Chatbot() {
     let cancelled = false
 
     async function init() {
-      if (isRagChatbotEnabled()) {
-        const health = await checkChatbotApiHealth()
-        if (cancelled) return
-        if (health?.status === 'ok') {
-          setMode('rag')
-          setOnline(true)
-          return
-        }
-      }
-
-      const ollamaOk = await checkOllamaHealth()
+      const health = await checkChatbotApiHealth()
       if (cancelled) return
-      setMode('direct')
-      setOnline(ollamaOk)
-      if (ollamaOk) {
-        void preloadOllamaModel(buildOllamaMessages(settings, [], 'ready'))
-      }
+      setOnline(health?.status === 'ok')
     }
 
     void init()
     return () => {
       cancelled = true
     }
-  }, [open, settings])
+  }, [open])
 
   useEffect(() => {
     if (open) return
@@ -183,57 +160,29 @@ export function Chatbot() {
       ])
     }
 
-    const appendToken = (token: string) => {
-      setMessages((prev) => {
-        const existing = prev.find((m) => m.id === assistantId)
-        if (!existing) {
-          return [...prev, { id: assistantId, role: 'assistant', content: token }]
-        }
-        return prev.map((m) =>
-          m.id === assistantId ? { ...m, content: m.content + token } : m,
-        )
-      })
-    }
-
     try {
-      if (mode === 'rag') {
-        const result = await sendChatbotMessage(
-          text,
-          conversationHistory,
-          abortRef.current.signal,
-        )
-        appendAssistant(result.response, result.products)
-        setOnline(true)
+      if (online === false) {
+        appendAssistant(getOfflineChatbotReply(text, settings.whatsapp_number))
         return
       }
 
-      const ollamaMessages = buildOllamaMessages(
-        settings,
-        conversationHistory as ChatMessage[],
+      const result = await sendChatbotMessage(
         text,
-      )
-      await preloadOllamaModel(buildOllamaMessages(settings, [], 'ready'))
-
-      await streamOllamaChat(
-        ollamaMessages,
-        appendToken,
+        conversationHistory,
         abortRef.current.signal,
       )
+      appendAssistant(result.response, result.products)
       setOnline(true)
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return
 
       setOnline(false)
-      appendAssistant(
-        mode === 'rag'
-          ? 'Sorry, the AURA chatbot server is offline. Start it with `npm run chatbot` from the project root.'
-          : 'Sorry, I could not reach the AI assistant. Make sure Ollama is running locally (`ollama serve`) and the model is pulled (`ollama pull llama3.2:1b`).',
-      )
+      appendAssistant(getOfflineChatbotReply(text, settings.whatsapp_number))
     } finally {
       setLoading(false)
       abortRef.current = null
     }
-  }, [input, loading, messages, mode, settings])
+  }, [input, loading, messages, online, settings])
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -256,7 +205,7 @@ export function Chatbot() {
   }, [open])
 
   const statusLabel =
-    online === false ? 'Offline' : online ? 'Online' : 'Checking…'
+    online === false ? 'Quick help' : online ? 'Online' : 'Checking…'
 
   return (
     <>
@@ -292,7 +241,7 @@ export function Chatbot() {
                   <span
                     className={cn(
                       'h-1.5 w-1.5 rounded-full',
-                      online === false ? 'bg-red-400' : online ? 'bg-emerald-400' : 'bg-gold-400',
+                      online === false ? 'bg-gold-400' : online ? 'bg-emerald-400' : 'bg-gold-400',
                     )}
                   />
                   {statusLabel}

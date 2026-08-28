@@ -24,12 +24,6 @@ function chatbotProxy(): ProxyOptions {
   }
 }
 
-const ollamaProxy: ProxyOptions = {
-  target: process.env.OLLAMA_HOST || 'http://127.0.0.1:11434',
-  changeOrigin: true,
-  rewrite: (requestPath) => requestPath.replace(/^\/api\/ollama/, ''),
-}
-
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
@@ -42,13 +36,11 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api/ollama': ollamaProxy,
       '/api/chatbot': chatbotProxy(),
     },
   },
   preview: {
     proxy: {
-      '/api/ollama': ollamaProxy,
       '/api/chatbot': chatbotProxy(),
     },
   },
