@@ -67,17 +67,16 @@ function MobileSortDropdown({
         aria-haspopup="listbox"
         aria-label={`Sort products, currently ${activeOption.menuLabel}`}
         className={cn(
-          'inline-flex shrink-0 items-center gap-1.5 rounded-full border font-semibold transition-colors',
-          'min-h-9 px-3 py-2 text-xs',
+          'inline-flex shrink-0 items-center justify-center gap-1 rounded-full border font-semibold transition-colors',
+          'h-9 w-9 p-0',
           open
             ? 'border-festive-500/30 bg-festive-500/10 text-festive-600'
             : 'border-navy-900/10 bg-white text-navy-800 hover:border-gold-500/30',
         )}
       >
-        <ArrowUpDown className="h-4 w-4" />
-        <span className="hidden min-[380px]:inline">{activeOption.label}</span>
-        <span className="min-[380px]:hidden">Sort</span>
-        <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', open && 'rotate-180')} />
+        <ArrowUpDown className="h-4 w-4 shrink-0" />
+        <span className="sr-only">{activeOption.menuLabel}</span>
+        <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 transition-transform', open && 'rotate-180')} />
       </button>
 
       {open ? (
@@ -153,14 +152,14 @@ export function CatalogueToolbar({
         'relative flex min-w-0 items-center gap-1.5 overflow-x-clip overflow-y-visible sm:gap-3',
         !inline &&
           'mb-4 rounded-2xl border border-navy-900/8 bg-gradient-to-r from-cream-50 via-white to-cream-50/80 p-2.5 shadow-[0_4px_24px_rgba(12,8,6,0.06)] sm:p-3',
-        inline && 'w-full min-w-0',
+        inline && 'w-full min-w-0 justify-between',
         className,
       )}
     >
       {filterSlot}
 
       <div
-        className="flex min-w-0 flex-1 items-center justify-end gap-1.5 overflow-visible max-sm:gap-1 sm:gap-2"
+        className="flex min-w-0 flex-1 items-center justify-end gap-1.5 sm:gap-2"
         role="toolbar"
         aria-label="Sort and view products"
       >
@@ -205,8 +204,8 @@ export function CatalogueToolbar({
         >
           <span
             className={cn(
-              'absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full bg-gradient-to-r from-gold-400 to-festive-500 shadow-[0_2px_8px_rgba(245,158,11,0.35)] transition-all duration-300 ease-out',
-              view === 'card' ? 'left-1' : 'left-[calc(50%+0px)]',
+              'pointer-events-none absolute top-1 bottom-1 w-9 rounded-full bg-gradient-to-r from-gold-400 to-festive-500 shadow-[0_2px_8px_rgba(245,158,11,0.35)] transition-all duration-300 ease-out sm:w-[calc(50%-4px)]',
+              view === 'card' ? 'left-1 sm:left-1' : 'left-10 sm:left-[calc(50%+0px)]',
             )}
             aria-hidden="true"
           />
@@ -215,9 +214,7 @@ export function CatalogueToolbar({
             onClick={() => onViewChange('card')}
             aria-pressed={view === 'card'}
             className={cn(
-              'relative z-10 inline-flex items-center justify-center gap-1 rounded-full font-bold transition-colors',
-              'max-sm:min-h-9 max-sm:min-w-9 max-sm:px-2.5 max-sm:py-2 max-sm:text-xs',
-              'px-2 py-1 text-[11px] sm:gap-1.5 sm:px-2.5 sm:py-1.5 sm:text-xs',
+              'relative z-10 inline-flex h-9 w-9 items-center justify-center rounded-full font-bold transition-colors sm:h-auto sm:w-auto sm:gap-1.5 sm:px-2.5 sm:py-1.5 sm:text-xs',
               view === 'card' ? 'text-navy-950' : 'text-white/55 hover:text-white/80',
             )}
           >
@@ -229,9 +226,7 @@ export function CatalogueToolbar({
             onClick={() => onViewChange('table')}
             aria-pressed={view === 'table'}
             className={cn(
-              'relative z-10 inline-flex items-center justify-center gap-1 rounded-full font-bold transition-colors',
-              'max-sm:min-h-9 max-sm:min-w-9 max-sm:px-2.5 max-sm:py-2 max-sm:text-xs',
-              'px-2 py-1 text-[11px] sm:gap-1.5 sm:px-2.5 sm:py-1.5 sm:text-xs',
+              'relative z-10 inline-flex h-9 w-9 items-center justify-center rounded-full font-bold transition-colors sm:h-auto sm:w-auto sm:gap-1.5 sm:px-2.5 sm:py-1.5 sm:text-xs',
               view === 'table' ? 'text-navy-950' : 'text-white/55 hover:text-white/80',
             )}
           >

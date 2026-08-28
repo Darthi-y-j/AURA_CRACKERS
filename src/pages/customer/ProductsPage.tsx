@@ -258,7 +258,7 @@ export function ProductsPage() {
             </aside>
 
             <div className="min-w-0 max-w-full">
-              <div className="sticky top-14 z-40 mb-4 flex w-full min-w-0 max-w-full items-center gap-1.5 overflow-x-clip overflow-y-visible rounded-2xl border border-navy-900/8 bg-gradient-to-r from-cream-50 via-white to-cream-50/80 p-2 shadow-[0_4px_24px_rgba(12,8,6,0.06)] sm:gap-3 sm:p-2.5 sm:top-[4.25rem]">
+              <div className="sticky top-14 z-40 mb-4 flex w-full min-w-0 max-w-full flex-col gap-2 overflow-visible rounded-2xl border border-navy-900/8 bg-gradient-to-r from-cream-50 via-white to-cream-50/80 p-2 shadow-[0_4px_24px_rgba(12,8,6,0.06)] sm:flex-row sm:items-center sm:gap-3 sm:p-2.5 sm:top-[4.25rem]">
                 <SearchBar
                   value={localSearch}
                   onChange={setLocalSearch}
@@ -268,17 +268,17 @@ export function ProductsPage() {
                   placeholder="Search crackers, sparklers..."
                   compact
                   className={cn(
-                    'relative z-0 min-w-0 transition-[flex-grow,max-width] duration-300',
+                    'relative z-0 w-full min-w-0 transition-[flex-grow,max-width] duration-300',
                     searchExpanded
                       ? 'max-sm:flex-[1_1_100%] max-sm:max-w-full'
-                      : 'max-sm:max-w-[6.75rem] max-sm:flex-[0_1_6.75rem] sm:flex-1',
+                      : 'sm:flex-1',
                   )}
                 />
 
                 <div
                   className={cn(
-                    'relative z-10 min-w-0 flex-1 overflow-x-clip overflow-y-visible transition-opacity duration-200',
-                    searchExpanded && 'max-sm:pointer-events-none max-sm:invisible max-sm:w-0 max-sm:overflow-hidden max-sm:opacity-0',
+                    'relative z-10 flex w-full min-w-0 items-center sm:w-auto sm:shrink-0 transition-opacity duration-200',
+                    searchExpanded && 'max-sm:pointer-events-none max-sm:hidden max-sm:overflow-hidden max-sm:opacity-0',
                   )}
                 >
                   <CatalogueToolbar
@@ -287,7 +287,7 @@ export function ProductsPage() {
                     view={view}
                     onViewChange={setView}
                     inline
-                    className="w-full min-w-0"
+                    className="w-full min-w-0 justify-between"
                     filterSlot={
                       <MobileFilterDropdown
                         {...navProps}
