@@ -16,9 +16,10 @@ export function CustomerLayout() {
   const location = useLocation()
 
   useEffect(() => {
+    if (location.pathname === '/') return
     void getCategories().catch(() => undefined)
     void getProducts({ sortBy: 'sort_order', lite: true }).catch(() => undefined)
-  }, [])
+  }, [location.pathname])
   const isCataloguePage = location.pathname === '/products'
   const isProductDetailPage = /^\/products\/[^/]+$/.test(location.pathname)
   const isCartPage = location.pathname === '/cart'
@@ -32,12 +33,12 @@ export function CustomerLayout() {
   return (
     <HeroSlideProvider>
       <RouteSEO />
-      <div className="flex min-h-screen flex-col">
+      <div className="flex min-h-screen min-w-0 flex-col overflow-x-clip">
         <ImportantNoticeModal />
         <Navbar />
         <main
           className={cn(
-            'flex-1',
+            'flex-1 min-w-0 overflow-x-clip',
             !isHeroPage && 'pt-14 sm:pt-[4.25rem]',
             isCataloguePage && 'pb-20 sm:pb-24',
             isProductDetailPage && 'pb-0',

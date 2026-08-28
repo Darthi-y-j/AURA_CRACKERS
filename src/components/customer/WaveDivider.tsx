@@ -50,7 +50,7 @@ function WaveSvg({
 export function WaveDivider() {
   return (
     <div
-      className="relative z-20 -mt-1 block w-full overflow-visible leading-[0] sm:-mt-2 md:-mt-2"
+      className="relative z-20 -mt-1 block w-full overflow-hidden leading-[0] sm:-mt-2 md:-mt-2"
       aria-hidden="true"
     >
       <WaveSvg gradientId="hero-wave-gradient-cream" />

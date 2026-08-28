@@ -259,11 +259,24 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    overflow-x: clip;
+    max-width: 100%;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
     @apply bg-white text-navy-900 antialiased;
     font-family: var(--font-sans);
+    overflow-x: clip;
+    max-width: 100%;
+  }
+
+  #root {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
   }
 }
 

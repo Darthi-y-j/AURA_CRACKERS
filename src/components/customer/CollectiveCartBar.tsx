@@ -23,7 +23,7 @@ export function CollectiveCartBar() {
   return (
     <div className="fixed bottom-4 left-4 z-40 sm:bottom-6 sm:left-6">
       {showClearConfirm && (
-        <div className="mb-2 w-[min(calc(100vw-2rem),18rem)] animate-fade-up overflow-hidden rounded-xl border border-red-500/30 bg-navy-950 shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
+        <div className="mb-2 w-[min(18rem,calc(100dvw-2rem))] animate-fade-up overflow-hidden rounded-xl border border-red-500/30 bg-navy-950 shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
           <div className="p-3">
             <p className="text-sm font-semibold text-white">Clear entire cart?</p>
             <p className="mt-1 text-xs text-white/60">
@@ -51,7 +51,7 @@ export function CollectiveCartBar() {
       )}
 
       {open && !showClearConfirm && (
-        <div className="mb-2 w-[min(calc(100vw-2rem),18rem)] animate-fade-up overflow-hidden rounded-xl border border-gold-500/25 bg-navy-950 shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
+        <div className="mb-2 w-[min(18rem,calc(100dvw-2rem))] animate-fade-up overflow-hidden rounded-xl border border-gold-500/25 bg-navy-950 shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
           <div className="flex items-center justify-between border-b border-white/10 px-3 py-2">
             <p className="text-xs font-semibold text-cream-100">
               {itemCount} item{itemCount !== 1 ? 's' : ''} in cart

@@ -13,13 +13,14 @@ import { HowItWorksSection } from '@/components/customer/HowItWorksSection'
 import { WhyChooseUsSection } from '@/components/customer/WhyChooseUsSection'
 import { BrandMarquee } from '@/components/customer/BrandMarquee'
 import { GiftBoxPromoSection } from '@/components/customer/GiftBoxPromoSection'
+import { LazySection } from '@/components/customer/LazySection'
 import { getCategories, getCachedCatalogueCategories } from '@/services/categories'
 import { getProducts, getCachedCatalogueProducts } from '@/services/products'
 import { PRODUCT_TAGS } from '@/lib/productTags'
 import { useSettings } from '@/contexts/SettingsContext'
 import type { Category, Product } from '@/types/database'
 
-const TAGGED_SECTION_LIMIT = 8
+const TAGGED_SECTION_LIMIT = 6
 
 function buildTaggedSections(products: Product[]) {
   return PRODUCT_TAGS.map((tag) => ({
@@ -74,8 +75,10 @@ export function HomePage() {
     }
   }, [])
 
+  const hasProductContent = featured.length > 0 || taggedSections.length > 0
+
   return (
-    <>
+    <div className="min-w-0 overflow-x-clip">
       <SEO
         title={settings.business_name}
         description={
@@ -87,41 +90,64 @@ export function HomePage() {
 
       <Hero categories={categories} />
 
-      <BrandMarquee />
+      <LazySection minHeight="120px">
+        <BrandMarquee />
+      </LazySection>
 
       {categories.length > 0 && <ShopByCategorySection categories={categories} />}
 
-      {loading ? (
+      {loading && !hasProductContent ? (
         <div className="bg-white py-10">
           <LoadingState message="Loading products..." />
         </div>
       ) : (
         <>
-          {featured.length > 0 && <FeaturedProductsShowcase products={featured} />}
+          {featured.length > 0 && (
+            <LazySection minHeight="320px">
+              <FeaturedProductsShowcase products={featured} />
+            </LazySection>
+          )}
 
           {taggedSections.map((section) => (
-            <TaggedProductsSection
-              key={section.tag}
-              tag={section.tag}
-              products={section.products}
-            />
+            <LazySection key={section.tag} minHeight="280px">
+              <TaggedProductsSection
+                tag={section.tag}
+                products={section.products}
+                initialVisible={4}
+                batchSize={6}
+              />
+            </LazySection>
           ))}
         </>
       )}
 
-      <GiftBoxPromoSection />
+      <LazySection minHeight="200px">
+        <GiftBoxPromoSection />
+      </LazySection>
 
-      <WhyChooseUsSection />
+      <LazySection minHeight="240px">
+        <WhyChooseUsSection />
+      </LazySection>
 
-      <HowItWorksSection />
+      <LazySection minHeight="200px">
+        <HowItWorksSection />
+      </LazySection>
 
-      <DosAndDontsSection />
+      <LazySection minHeight="200px">
+        <DosAndDontsSection />
+      </LazySection>
 
-      <InstagramFeedSection />
+      <LazySection minHeight="180px">
+        <InstagramFeedSection />
+      </LazySection>
 
-      <TrustHighlightsBar />
+      <LazySection minHeight="80px">
+        <TrustHighlightsBar />
+      </LazySection>
 
-      <ContactSection />
-    </>
+      <LazySection minHeight="200px">
+        <ContactSection />
+      </LazySection>
+    </div>
   )
 }

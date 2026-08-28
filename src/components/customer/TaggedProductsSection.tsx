@@ -10,9 +10,16 @@ import { cn } from '@/lib/utils'
 interface TaggedProductsSectionProps {
   tag: string
   products: Product[]
+  initialVisible?: number
+  batchSize?: number
 }
 
-export function TaggedProductsSection({ tag, products }: TaggedProductsSectionProps) {
+export function TaggedProductsSection({
+  tag,
+  products,
+  initialVisible = 8,
+  batchSize = 12,
+}: TaggedProductsSectionProps) {
   if (products.length === 0) return null
 
   const title = getProductTagLabel(tag)
@@ -48,7 +55,12 @@ export function TaggedProductsSection({ tag, products }: TaggedProductsSectionPr
           </Link>
         </div>
         <div className="mt-4 sm:mt-6">
-          <ProductGrid products={products} columns={4} />
+          <ProductGrid
+            products={products}
+            columns={4}
+            initialVisible={initialVisible}
+            batchSize={batchSize}
+          />
         </div>
       </div>
     </section>

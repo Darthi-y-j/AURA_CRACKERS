@@ -226,7 +226,7 @@ export function Chatbot() {
       >
       {open && (
         <div
-          className="flex max-h-[min(calc(100dvh-5.5rem),32rem)] w-[min(calc(100vw-2rem),22rem)] flex-col overflow-hidden rounded-2xl border border-gold-500/25 bg-navy-950 shadow-[0_16px_48px_rgba(0,0,0,0.45)] animate-fade-up sm:max-h-[min(calc(100dvh-6rem),36rem)] sm:w-[22rem]"
+          className="flex max-h-[min(calc(100dvh-5.5rem),32rem)] w-[min(22rem,calc(100dvw-2rem))] flex-col overflow-hidden rounded-2xl border border-gold-500/25 bg-navy-950 shadow-[0_16px_48px_rgba(0,0,0,0.45)] animate-fade-up sm:max-h-[min(calc(100dvh-6rem),36rem)] sm:w-[22rem]"
           role="dialog"
           aria-label="Aura assistant chat"
         >

@@ -15,27 +15,33 @@ interface HeroProps {
 }
 
 const HERO_VIDEO = '/hero.mp4'
+const HERO_POSTER = '/hero-slide-2.png'
+
+function shouldPlayHeroVideo(): boolean {
+  if (typeof window === 'undefined') return false
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false
+  const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
+  if (connection?.saveData) return false
+  return true
+}
 
 export function Hero({ categories = [] }: HeroProps) {
   const { settings } = useSettings()
   const { setTheme } = useHeroSlideTheme()
   const videoRef = useRef<HTMLVideoElement>(null)
-  const [videoReady, setVideoReady] = useState(false)
+  const [videoEnabled] = useState(shouldPlayHeroVideo)
 
   useEffect(() => {
     setTheme('dark')
   }, [setTheme])
 
   useEffect(() => {
+    if (!videoEnabled) return
+
     const video = videoRef.current
     if (!video) return
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (prefersReducedMotion) {
-      video.pause()
-      video.removeAttribute('autoplay')
-      return
-    }
+    let loaded = false
 
     const playVideo = () => {
       if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
@@ -43,13 +49,19 @@ export function Hero({ categories = [] }: HeroProps) {
       }
     }
 
+    const loadVideo = () => {
+      if (loaded) return
+      loaded = true
+      video.preload = 'auto'
+      video.load()
+      playVideo()
+    }
+
     const onCanPlay = () => {
-      setVideoReady(true)
       playVideo()
     }
 
     video.addEventListener('canplay', onCanPlay)
-    video.load()
 
     const onVisibility = () => {
       if (document.hidden) video.pause()
@@ -58,38 +70,55 @@ export function Hero({ categories = [] }: HeroProps) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) playVideo()
-        else video.pause()
+        if (entry.isIntersecting) {
+          loadVideo()
+          playVideo()
+        } else {
+          video.pause()
+        }
       },
-      { threshold: 0.15 },
+      { threshold: 0.1 },
     )
 
     observer.observe(video)
     document.addEventListener('visibilitychange', onVisibility)
+    loadVideo()
 
     return () => {
       observer.disconnect()
       document.removeEventListener('visibilitychange', onVisibility)
       video.removeEventListener('canplay', onCanPlay)
     }
-  }, [])
+  }, [videoEnabled])
 
   return (
-    <section className="relative">
+    <section className="relative overflow-x-clip">
       <div className="relative max-sm:min-h-[92vh]">
         <div className="absolute inset-0 overflow-hidden bg-navy-950 max-sm:min-h-[92vh]">
-          <video
-            ref={videoRef}
-            className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-500 max-sm:object-[center_30%] ${videoReady ? 'opacity-100' : 'opacity-0'}`}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            aria-hidden="true"
-          >
-            <source src={HERO_VIDEO} type="video/mp4" />
-          </video>
+          {videoEnabled ? (
+            <video
+              ref={videoRef}
+              className="absolute inset-0 h-full w-full object-cover object-center max-sm:object-[center_30%]"
+              muted
+              loop
+              playsInline
+              autoPlay
+              preload="metadata"
+              poster={HERO_POSTER}
+              aria-hidden="true"
+            >
+              <source src={HERO_VIDEO} type="video/mp4" />
+            </video>
+          ) : (
+            <img
+              src={HERO_POSTER}
+              alt=""
+              fetchPriority="high"
+              decoding="async"
+              className="absolute inset-0 h-full w-full object-cover object-center max-sm:object-[center_30%]"
+              aria-hidden="true"
+            />
+          )}
 
           <div
             className="pointer-events-none absolute inset-0 bg-gradient-to-b from-navy-950/55 via-navy-950/20 to-navy-950/75 max-sm:from-navy-950/45 max-sm:via-navy-950/15 max-sm:to-navy-950/65"
@@ -101,26 +130,25 @@ export function Hero({ categories = [] }: HeroProps) {
           </div>
         </div>
 
-        {/* Content */}
-        <div className="relative z-10 mx-auto flex max-w-7xl flex-col px-3 pb-6 pt-[4.25rem] max-sm:min-h-[92vh] sm:px-6 sm:pb-10 sm:pt-24 lg:px-8 lg:pt-28">
-          <div className="max-w-2xl max-sm:space-y-6">
+        <div className="relative z-10 mx-auto flex w-full min-w-0 max-w-7xl flex-col px-4 pb-6 pt-[4.25rem] max-sm:min-h-[92vh] sm:px-6 sm:pb-10 sm:pt-24 lg:px-8 lg:pt-28">
+          <div className="w-full max-w-2xl max-sm:space-y-5">
             <AnimateIn animation="fade-down" delay={100}>
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-gold-400/50 bg-gold-500/15 px-3 py-1 backdrop-blur-md sm:mb-6 sm:gap-2 sm:px-4 sm:py-2">
-                <Sparkles className="h-3 w-3 text-gold-300 sm:h-4 sm:w-4" />
-                <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-gold-300 sm:text-[11px] sm:tracking-[0.2em]">
+              <div className="inline-flex items-center gap-2 rounded-full border border-gold-400/50 bg-gold-500/15 px-3.5 py-1.5 backdrop-blur-md sm:mb-6 sm:gap-2 sm:px-4 sm:py-2">
+                <Sparkles className="h-3.5 w-3.5 text-gold-300 sm:h-4 sm:w-4" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-gold-300 sm:text-[11px] sm:tracking-[0.2em]">
                   Premium Fireworks
                 </span>
               </div>
             </AnimateIn>
 
             <AnimateIn animation="fade-up" delay={250}>
-              <h1 className="font-display text-[2rem] font-bold leading-[1.15] text-white sm:text-[3.25rem] sm:leading-[1.12] lg:text-[3.75rem] lg:whitespace-nowrap">
+              <h1 className="font-display text-[2.35rem] font-bold leading-[1.12] text-white sm:text-[3.25rem] sm:leading-[1.12] lg:text-[3.75rem] lg:whitespace-nowrap">
                 Light Up Your <TitleHighlight variant="dark">Celebration</TitleHighlight>
               </h1>
             </AnimateIn>
 
             <AnimateIn animation="fade-up" delay={400}>
-              <p className="max-w-md text-[13px] leading-relaxed text-white/80 sm:mt-6 sm:text-base sm:leading-relaxed sm:text-lg">
+              <p className="max-w-md text-[15px] leading-relaxed text-white/85 sm:mt-6 sm:text-base sm:leading-relaxed sm:text-lg">
                 {settings.tagline ||
                   'Premium crackers and fireworks for Diwali, weddings, and every special moment. Browse, add to cart, and send your enquiry on WhatsApp.'}
               </p>
@@ -131,9 +159,9 @@ export function Hero({ categories = [] }: HeroProps) {
                 {['100% Quality Products', 'WhatsApp Enquiry'].map((text) => (
                   <span
                     key={text}
-                    className="inline-flex w-fit items-center gap-1.5 rounded-full border border-white/25 bg-black/20 px-3 py-1.5 text-[10px] font-medium text-white/90 backdrop-blur-sm sm:gap-2 sm:px-4 sm:py-2 sm:text-xs"
+                    className="inline-flex w-fit items-center gap-2 rounded-full border border-white/25 bg-black/20 px-3.5 py-2 text-xs font-medium text-white/90 backdrop-blur-sm sm:gap-2 sm:px-4 sm:py-2"
                   >
-                    <CheckCircle className="h-3 w-3 shrink-0 text-gold-400 sm:h-3.5 sm:w-3.5" />
+                    <CheckCircle className="h-3.5 w-3.5 shrink-0 text-gold-400 sm:h-3.5 sm:w-3.5" />
                     {text}
                   </span>
                 ))}
@@ -144,14 +172,14 @@ export function Hero({ categories = [] }: HeroProps) {
               <div className="flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap sm:gap-4">
                 <Link
                   to="/products"
-                  className="btn-hover-lift inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-festive-500 to-gold-500 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-festive-500/30 sm:w-auto sm:gap-2 sm:px-8 sm:py-3.5 sm:text-sm"
+                  className="btn-hover-lift inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-festive-500 to-gold-500 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-festive-500/30 sm:w-auto sm:gap-2 sm:px-8 sm:py-3.5"
                 >
                   Explore Products
-                  <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <ArrowRight className="h-4 w-4 sm:h-4 sm:w-4" />
                 </Link>
                 <Link
                   to="/cart"
-                  className="btn-hover-lift inline-flex w-full items-center justify-center gap-1.5 rounded-full border-2 border-white/35 bg-white/5 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-sm transition-colors hover:border-white/50 hover:bg-white/10 sm:w-auto sm:gap-2 sm:px-8 sm:py-3.5 sm:text-sm"
+                  className="btn-hover-lift inline-flex w-full items-center justify-center gap-2 rounded-full border-2 border-white/35 bg-white/5 px-5 py-3.5 text-sm font-bold text-white backdrop-blur-sm transition-colors hover:border-white/50 hover:bg-white/10 sm:w-auto sm:gap-2 sm:px-8 sm:py-3.5"
                 >
                   Get Quote
                 </Link>
@@ -159,7 +187,7 @@ export function Hero({ categories = [] }: HeroProps) {
             </AnimateIn>
           </div>
 
-          <AnimateIn animation="fade-up" delay={750} className="mt-5 max-sm:mt-auto max-sm:pt-10 sm:mt-14 lg:mt-16">
+          <AnimateIn animation="fade-up" delay={750} className="mt-6 w-full max-sm:mt-auto max-sm:pt-8 sm:mt-14 lg:mt-16">
             <HeroStats variant="dark" />
           </AnimateIn>
         </div>
@@ -167,7 +195,7 @@ export function Hero({ categories = [] }: HeroProps) {
         <WaveDivider />
       </div>
 
-      <div className="relative z-20 bg-cream-50 px-3 pb-3 pt-0 sm:px-6 sm:pb-5 lg:px-8">
+      <div className="relative z-20 w-full min-w-0 overflow-x-clip bg-cream-50 px-4 pb-3 pt-0 sm:px-6 sm:pb-5 lg:px-8">
         <HeroSearchBar categories={categories} />
       </div>
     </section>

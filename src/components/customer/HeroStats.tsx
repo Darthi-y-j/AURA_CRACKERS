@@ -19,10 +19,10 @@ export function HeroStats({ variant = 'dark' }: { variant?: 'dark' | 'light' }) 
   const isLight = variant === 'light'
 
   return (
-    <div className="relative">
+    <div className="relative overflow-hidden">
       <div
         className={cn(
-          'pointer-events-none absolute -inset-2 rounded-3xl blur-2xl transition-opacity duration-1000 sm:-inset-4',
+          'pointer-events-none absolute inset-0 rounded-3xl blur-2xl transition-opacity duration-1000 sm:-inset-4',
           isLight
             ? 'bg-gradient-to-r from-festive-500/10 via-gold-500/8 to-festive-500/10'
             : 'bg-gradient-to-r from-gold-500/12 via-festive-500/8 to-gold-500/12',
@@ -41,14 +41,14 @@ export function HeroStats({ variant = 'dark' }: { variant?: 'dark' | 'light' }) 
       >
         <div className={cn('grid grid-cols-4 divide-x', isLight ? 'divide-navy-900/10' : 'divide-gold-500/15')}>
           {stats.map((stat) => (
-            <div key={stat.label} className="flex flex-col items-center px-1 py-2.5 text-center">
-              <stat.icon className={cn('mb-1 h-3 w-3', isLight ? 'text-festive-500' : 'text-gold-300')} />
-              <p className={cn('font-display text-[11px] font-bold leading-none', isLight ? 'text-navy-900' : 'text-cream-50')}>
+            <div key={stat.label} className="flex flex-col items-center px-1.5 py-3 text-center">
+              <stat.icon className={cn('mb-1.5 h-4 w-4', isLight ? 'text-festive-500' : 'text-gold-300')} />
+              <p className={cn('font-display text-sm font-bold leading-none', isLight ? 'text-navy-900' : 'text-cream-50')}>
                 {stat.value}
               </p>
               <p
                 className={cn(
-                  'mt-0.5 text-[6px] font-medium uppercase leading-tight tracking-wide',
+                  'mt-1 text-[9px] font-medium uppercase leading-tight tracking-wide',
                   isLight ? 'text-navy-700/70' : 'text-gold-300/60',
                 )}
               >

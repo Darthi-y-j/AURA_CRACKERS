@@ -257,8 +257,8 @@ export function ProductsPage() {
               />
             </aside>
 
-            <div className="min-w-0">
-              <div className="sticky top-14 z-40 mb-4 flex items-center gap-2 rounded-2xl border border-navy-900/8 bg-gradient-to-r from-cream-50 via-white to-cream-50/80 p-2 shadow-[0_4px_24px_rgba(12,8,6,0.06)] sm:gap-3 sm:p-2.5 sm:top-[4.25rem]">
+            <div className="min-w-0 max-w-full">
+              <div className="sticky top-14 z-40 mb-4 flex w-full min-w-0 max-w-full items-center gap-1.5 overflow-hidden rounded-2xl border border-navy-900/8 bg-gradient-to-r from-cream-50 via-white to-cream-50/80 p-2 shadow-[0_4px_24px_rgba(12,8,6,0.06)] sm:gap-3 sm:p-2.5 sm:top-[4.25rem]">
                 <SearchBar
                   value={localSearch}
                   onChange={setLocalSearch}
@@ -271,13 +271,13 @@ export function ProductsPage() {
                     'relative z-0 min-w-0 transition-[flex-grow,max-width] duration-300',
                     searchExpanded
                       ? 'max-sm:flex-[1_1_100%] max-sm:max-w-full'
-                      : 'max-sm:max-w-[9.5rem] max-sm:flex-[0_1_9.5rem] sm:flex-1',
+                      : 'max-sm:max-w-[6.75rem] max-sm:flex-[0_1_6.75rem] sm:flex-1',
                   )}
                 />
 
                 <div
                   className={cn(
-                    'relative z-10 shrink-0 transition-opacity duration-200',
+                    'relative z-10 min-w-0 flex-1 overflow-hidden transition-opacity duration-200',
                     searchExpanded && 'max-sm:pointer-events-none max-sm:invisible max-sm:w-0 max-sm:overflow-hidden max-sm:opacity-0',
                   )}
                 >
@@ -287,6 +287,7 @@ export function ProductsPage() {
                     view={view}
                     onViewChange={setView}
                     inline
+                    className="w-full min-w-0"
                     filterSlot={
                       <MobileFilterDropdown
                         {...navProps}

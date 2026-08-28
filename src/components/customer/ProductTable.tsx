@@ -129,14 +129,14 @@ function MobileTablePrice({
     <div className="flex flex-col items-end gap-0.5">
       <span
         className={cn(
-          'text-xs font-bold tabular-nums leading-none',
+          'text-sm font-bold tabular-nums leading-none sm:text-xs',
           hasDiscount ? 'text-festive-400' : 'text-gold-300',
         )}
       >
         {price}
       </span>
       {originalPrice && (
-        <span className="text-[9px] tabular-nums leading-none text-white/35 line-through">{originalPrice}</span>
+        <span className="text-[10px] tabular-nums leading-none text-white/35 line-through sm:text-[9px]">{originalPrice}</span>
       )}
     </div>
   )
@@ -154,49 +154,49 @@ function MobileProductTableRow({ product }: { product: Product }) {
   return (
     <article
       className={cn(
-        'flex items-center gap-2 border-b border-white/[0.06] px-3 py-2.5 last:border-b-0 sm:gap-2.5 sm:px-3.5 sm:py-3',
+        'flex items-center gap-2.5 border-b border-white/[0.06] px-3.5 py-3 last:border-b-0 sm:gap-2.5 sm:px-3.5 sm:py-3',
         inCart && 'bg-gold-500/[0.06]',
       )}
     >
-      <ProductLink product={product} className="flex min-w-0 flex-1 items-center gap-2.5 active:opacity-80 sm:gap-3">
-        <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-[#1a120e] ring-1 ring-white/10">
+      <ProductLink product={product} className="flex min-w-0 flex-1 items-center gap-3 active:opacity-80 sm:gap-3">
+        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-[#1a120e] ring-1 ring-white/10 sm:h-11 sm:w-11">
           <img
             src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.thumb)}
             alt=""
             className="h-full w-full object-cover"
           />
           {hasDiscount && (
-            <span className="absolute inset-x-0 top-0 bg-gradient-to-r from-festive-500 to-gold-500 py-px text-center text-[7px] font-bold leading-none text-navy-950">
+            <span className="absolute inset-x-0 top-0 bg-gradient-to-r from-festive-500 to-gold-500 py-px text-center text-[8px] font-bold leading-none text-navy-950 sm:text-[7px]">
               {product.discount_percentage}%
             </span>
           )}
         </div>
 
         <div className="min-w-0 flex-1">
-          <h3 className="font-product-name truncate text-[13px] font-bold leading-tight text-cream-100">
+          <h3 className="font-product-name truncate text-sm font-bold leading-tight text-cream-100 sm:text-[13px]">
             {product.name}
           </h3>
-          <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
+          <div className="mt-1 flex min-w-0 items-center gap-1.5">
             {product.brand?.trim() ? (
               <ProductBrandBadge
                 brand={product.brand}
                 variant="overlay"
                 wrap={brandWrap}
                 className={cn(
-                  'min-w-0 shrink text-[8px] sm:text-[9px]',
-                  brandWrap ? 'max-w-full' : 'max-w-[calc(100%-3.25rem)]',
+                  'min-w-0 shrink text-[9px] sm:text-[9px]',
+                  brandWrap ? 'max-w-full' : 'max-w-[calc(100%-3.5rem)]',
                 )}
               />
             ) : null}
             {product.pieces != null && product.pieces >= 1 ? (
-              <span className="shrink-0 text-[10px] tabular-nums text-white/40">{product.pieces} pcs</span>
+              <span className="shrink-0 text-[11px] tabular-nums text-white/40 sm:text-[10px]">{product.pieces} pcs</span>
             ) : null}
           </div>
         </div>
 
       </ProductLink>
 
-      <div className="relative z-[1] flex shrink-0 items-center gap-1">
+      <div className="relative z-[1] flex shrink-0 items-center gap-1.5">
         <MobileTablePrice price={price} originalPrice={originalPrice} hasDiscount={hasDiscount} />
         <WishlistButton product={product} size="sm" className="rounded-full bg-white/[0.06] hover:bg-white/10" />
 
@@ -207,7 +207,7 @@ function MobileProductTableRow({ product }: { product: Product }) {
               onChange={handleQuantityChange}
               variant="table"
               min={0}
-              className="shrink-0 rounded-lg border border-gold-500/25 bg-white/[0.04] p-0 [&_button]:text-gold-400 [&_span]:text-cream-50"
+              className="shrink-0 rounded-lg border border-gold-500/25 bg-white/[0.04] p-0 [&_button]:h-8 [&_button]:w-8 [&_button]:text-gold-400 [&_span]:min-w-[1.25rem] [&_span]:text-sm [&_span]:text-cream-50"
             />
           ) : (
             <button
@@ -215,11 +215,11 @@ function MobileProductTableRow({ product }: { product: Product }) {
               onClick={handleAddToCart}
               aria-label={`Add ${product.name} to cart`}
               className={cn(
-                'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-navy-950 transition-all active:scale-95',
+                'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-navy-950 transition-all active:scale-95 sm:h-8 sm:w-8',
                 isElite ? SILVER_METALLIC_BG : 'bg-gradient-to-r from-festive-500 to-gold-500',
               )}
             >
-              <ShoppingCart className="h-3.5 w-3.5" />
+              <ShoppingCart className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
             </button>
           )
         ) : null}
@@ -443,16 +443,16 @@ export function ProductTable({
   return (
     <div className="space-y-3">
       {/* Mobile — compact table list */}
-      <div className="rounded-xl border border-navy-900/10 bg-navy-950 shadow-[0_4px_24px_rgba(0,0,0,0.28)] md:hidden">
+      <div className="border border-navy-900/10 border-x-0 bg-navy-950 shadow-[0_4px_24px_rgba(0,0,0,0.28)] max-md:-mx-4 max-md:rounded-none md:hidden">
         <div className="h-0.5 bg-gradient-to-r from-gold-400 via-festive-500 to-gold-400" aria-hidden="true" />
         <div
           className={cn(
-            'flex items-center justify-between gap-2 border-b border-white/[0.08] bg-navy-950/95 px-3 py-2 backdrop-blur-sm sm:px-3.5',
+            'flex items-center justify-between gap-2 border-b border-white/[0.08] bg-navy-950/95 px-3.5 py-2.5 backdrop-blur-sm sm:px-3.5',
             TABLE_HEADER_STICKY_CLASS,
           )}
         >
-          <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-gold-400/85">Product</span>
-          <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-white/45">Price · Add</span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-gold-400/85 sm:text-[9px]">Product</span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/45 sm:text-[9px]">Price · Add</span>
         </div>
         {products.map((product) => (
           <MobileProductTableRow key={product.id} product={product} />

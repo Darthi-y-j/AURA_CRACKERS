@@ -38,24 +38,24 @@ export function CatalogueToolbar({
   return (
     <div
       className={cn(
-        'relative flex items-center gap-2 overflow-visible sm:gap-3',
+        'relative flex min-w-0 items-center gap-1.5 overflow-hidden sm:gap-3',
         !inline &&
           'mb-4 rounded-2xl border border-navy-900/8 bg-gradient-to-r from-cream-50 via-white to-cream-50/80 p-2.5 shadow-[0_4px_24px_rgba(12,8,6,0.06)] sm:p-3',
-        inline && 'shrink-0',
+        inline && 'w-full min-w-0',
         className,
       )}
     >
       {filterSlot}
 
       <div
-        className="flex min-w-0 items-center justify-end gap-2"
+        className="flex min-w-0 flex-1 items-center justify-end gap-1.5 overflow-hidden max-sm:gap-1 sm:gap-2"
         role="toolbar"
         aria-label="Sort and view products"
       >
         <div
           className={cn(
-            'flex min-w-0 items-center gap-1 overflow-x-auto rounded-full border border-navy-900/8 bg-white/80 p-0.5 scrollbar-hide',
-            inline ? 'shrink-0' : 'flex-1 justify-start sm:justify-end',
+            'flex min-w-0 items-center gap-1 overflow-x-auto rounded-full border border-navy-900/8 bg-white/80 p-1 scrollbar-hide max-sm:max-w-[calc(100%-5.5rem)] sm:gap-1 sm:p-0.5',
+            inline ? 'shrink' : 'flex-1 justify-start sm:justify-end',
           )}
           role="group"
           aria-label="Sort products"
@@ -71,13 +71,15 @@ export function CatalogueToolbar({
                 aria-label={`Sort by ${label}`}
                 title={label}
                 className={cn(
-                  'inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold transition-all duration-300 sm:gap-1.5 sm:px-2.5 sm:py-1.5 sm:text-xs',
+                  'inline-flex shrink-0 items-center justify-center gap-1 rounded-full font-semibold transition-all duration-300',
+                  'max-sm:min-h-9 max-sm:min-w-9 max-sm:px-2.5 max-sm:py-2 max-sm:text-xs',
+                  'px-2 py-1 text-[11px] sm:gap-1.5 sm:px-2.5 sm:py-1.5 sm:text-xs',
                   active
                     ? 'bg-gradient-to-r from-festive-500 to-gold-500 text-navy-950 shadow-[0_2px_10px_rgba(234,88,12,0.25)]'
                     : 'text-navy-700/65 hover:bg-navy-900/[0.04] hover:text-navy-900',
                 )}
               >
-                <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <Icon className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                 <span className="hidden sm:inline">{label}</span>
               </button>
             )
@@ -85,14 +87,14 @@ export function CatalogueToolbar({
         </div>
 
         <div
-          className="relative inline-flex shrink-0 rounded-full border border-navy-900/10 bg-navy-950 p-0.5 sm:p-1"
+          className="relative inline-flex shrink-0 rounded-full border border-navy-900/10 bg-navy-950 p-1"
           role="group"
           aria-label="View mode"
         >
           <span
             className={cn(
-              'absolute top-0.5 bottom-0.5 w-[calc(50%-2px)] rounded-full bg-gradient-to-r from-gold-400 to-festive-500 shadow-[0_2px_8px_rgba(245,158,11,0.35)] transition-all duration-300 ease-out sm:top-1 sm:bottom-1 sm:w-[calc(50%-4px)]',
-              view === 'card' ? 'left-0.5 sm:left-1' : 'left-[calc(50%+1px)] sm:left-[calc(50%+2px)]',
+              'absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full bg-gradient-to-r from-gold-400 to-festive-500 shadow-[0_2px_8px_rgba(245,158,11,0.35)] transition-all duration-300 ease-out',
+              view === 'card' ? 'left-1' : 'left-[calc(50%+0px)]',
             )}
             aria-hidden="true"
           />
@@ -101,11 +103,13 @@ export function CatalogueToolbar({
             onClick={() => onViewChange('card')}
             aria-pressed={view === 'card'}
             className={cn(
-              'relative z-10 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-bold transition-colors sm:gap-1.5 sm:px-2.5 sm:py-1.5 sm:text-xs',
+              'relative z-10 inline-flex items-center justify-center gap-1 rounded-full font-bold transition-colors',
+              'max-sm:min-h-9 max-sm:min-w-9 max-sm:px-2.5 max-sm:py-2 max-sm:text-xs',
+              'px-2 py-1 text-[11px] sm:gap-1.5 sm:px-2.5 sm:py-1.5 sm:text-xs',
               view === 'card' ? 'text-navy-950' : 'text-white/55 hover:text-white/80',
             )}
           >
-            <LayoutGrid className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+            <LayoutGrid className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
             <span className="hidden sm:inline">Cards</span>
           </button>
           <button
@@ -113,11 +117,13 @@ export function CatalogueToolbar({
             onClick={() => onViewChange('table')}
             aria-pressed={view === 'table'}
             className={cn(
-              'relative z-10 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-bold transition-colors sm:gap-1.5 sm:px-2.5 sm:py-1.5 sm:text-xs',
+              'relative z-10 inline-flex items-center justify-center gap-1 rounded-full font-bold transition-colors',
+              'max-sm:min-h-9 max-sm:min-w-9 max-sm:px-2.5 max-sm:py-2 max-sm:text-xs',
+              'px-2 py-1 text-[11px] sm:gap-1.5 sm:px-2.5 sm:py-1.5 sm:text-xs',
               view === 'table' ? 'text-navy-950' : 'text-white/55 hover:text-white/80',
             )}
           >
-            <Table2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+            <Table2 className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
             <span className="hidden sm:inline">Table</span>
           </button>
         </div>
