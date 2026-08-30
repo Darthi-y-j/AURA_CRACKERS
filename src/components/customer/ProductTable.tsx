@@ -46,11 +46,13 @@ const TABLE_CELL = 'min-w-0 overflow-hidden'
 
 /** Below fixed navbar */
 const TABLE_STICKY_HEADER = 'sticky top-14 z-40 sm:top-[4.25rem]'
-/** Must match header row height (min-h-11) so no white gap when both stick */
+/** Mobile table header row height — keep in sync with #catalogue-table-header */
+const MOBILE_TABLE_HEADER_HEIGHT = '2.25rem'
+/** Must match header row height so sticky category sits flush under the table header */
 const TABLE_HEADER_ROW_CLASS = 'min-h-11 items-center'
-const TABLE_STICKY_CATEGORY =
+const TABLE_STICKY_CATEGORY_DESKTOP =
   'sticky top-[calc(3.5rem+2.75rem)] z-30 sm:top-[calc(4.25rem+2.75rem)]'
-const TABLE_STICKY_CATEGORY_MOBILE = TABLE_STICKY_CATEGORY
+const TABLE_STICKY_CATEGORY_MOBILE = `sticky top-[calc(3.5rem+${MOBILE_TABLE_HEADER_HEIGHT})] z-30 sm:top-[calc(4.25rem+${MOBILE_TABLE_HEADER_HEIGHT})]`
 
 const TABLE_VIEW_BUTTON_CLASS = 'border-stone-200 text-stone-700'
 
@@ -139,10 +141,11 @@ function ProductTableCategoryRow({
     <div
       id={`category-${id}`}
       className={cn(
-        'scroll-mt-20 flex min-h-11 items-center justify-center border-b border-l-4 border-l-orange-700 px-3 py-0 text-center sm:scroll-mt-[4.5rem] md:px-3 lg:px-4',
+        'scroll-mt-20 flex min-h-11 items-center justify-center border-b border-l-4 border-l-orange-700 px-3 py-0 text-center max-md:scroll-mt-[calc(3.5rem+2.25rem)] sm:scroll-mt-[4.5rem] md:px-3 lg:px-4',
         sticky && TABLE_CATEGORY_HIGHLIGHT,
         sticky && variant === 'mobile' && TABLE_STICKY_CATEGORY_MOBILE,
-        sticky && variant === 'desktop' && TABLE_STICKY_CATEGORY,
+        sticky && variant === 'mobile' && '-mt-px',
+        sticky && variant === 'desktop' && TABLE_STICKY_CATEGORY_DESKTOP,
         className,
       )}
     >
@@ -578,7 +581,7 @@ export function ProductTable({
           id="catalogue-table-header"
           className={cn(
             MOBILE_ROW_GRID,
-            'min-h-9 border-0 px-3 py-1.5',
+            'h-9 min-h-9 shrink-0 items-center border-0 px-3 py-0',
             TABLE_STICKY_HEADER,
             TABLE_HEADER_HIGHLIGHT,
           )}
