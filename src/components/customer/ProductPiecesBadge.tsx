@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 
 interface ProductPiecesBadgeProps {
   pieces: number | null | undefined
-  variant?: 'ember' | 'light' | 'silver' | 'elite'
+  variant?: 'ember' | 'light' | 'silver' | 'elite' | 'table'
   suffix?: string
   className?: string
 }
@@ -22,6 +22,8 @@ export function ProductPiecesBadge({
         'inline-flex items-center gap-1 rounded-md border font-bold uppercase tracking-[0.12em]',
         variant === 'ember'
           ? 'shrink-0 rounded-md bg-gold-500/10 px-1.5 py-0.5 text-[9px] tracking-wide text-gold-300 ring-1 ring-inset ring-gold-500/15'
+          : variant === 'table'
+            ? 'shrink-0 rounded-md border border-orange-300/60 bg-white/70 px-2 py-0.5 text-[10px] tracking-[0.12em] text-festive-700 shadow-sm'
           : variant === 'silver'
             ? 'shrink-0 rounded-md bg-slate-400/10 px-1.5 py-0.5 text-[9px] tracking-wide text-slate-200 ring-1 ring-inset ring-slate-400/25'
             : variant === 'elite'
@@ -30,12 +32,14 @@ export function ProductPiecesBadge({
         className,
       )}
     >
-      {variant === 'ember' || variant === 'silver' || variant === 'elite' ? (
+      {variant === 'ember' || variant === 'silver' || variant === 'elite' || variant === 'table' ? (
         <>
           <Package
             className={cn(
               'h-2.5 w-2.5',
-              variant === 'elite'
+              variant === 'table'
+                ? 'text-festive-500'
+                : variant === 'elite'
                 ? 'text-slate-300/85'
                 : variant === 'silver'
                   ? 'text-slate-300/80'

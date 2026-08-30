@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { BadgeCheck, Headphones, ShieldCheck, Truck } from 'lucide-react'
+import { BadgeCheck, Headphones, ShieldCheck } from 'lucide-react'
 import { useSettings } from '@/contexts/SettingsContext'
 import { getBusinessPolicies } from '@/lib/businessInfo'
 import { cn } from '@/lib/utils'
@@ -45,11 +45,6 @@ export function TrustHighlightsBar() {
       subtitle: '100% Satisfaction Guaranteed',
     },
     {
-      icon: Truck,
-      title: 'Free Delivery',
-      subtitle: policies.delivery_areas ?? 'All over India',
-    },
-    {
       icon: ShieldCheck,
       title: 'Secure Payment',
       subtitle: policies.payment_methods
@@ -68,7 +63,7 @@ export function TrustHighlightsBar() {
   return (
     <section className="bg-navy-950">
       <div className="mx-auto max-w-7xl">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {highlights.map((item, index) => (
             <TrustHighlightItem
               key={item.title}

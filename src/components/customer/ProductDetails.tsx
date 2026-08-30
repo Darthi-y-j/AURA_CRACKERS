@@ -196,7 +196,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         >
           {product.description}
         </p>
-      </div>
+              </div>
     ) : null
 
   const specsSection = (tone: 'light' | 'dark' = 'light') =>
@@ -295,7 +295,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           <MessageCircle className="mt-0.5 h-3 w-3 shrink-0 text-gold-400/80" />
           Build your cart, then send one WhatsApp enquiry with your full order list.
         </p>
-      </div>
+        </div>
     ) : (
       <div className={cn('rounded-lg border border-red-400/25 bg-red-500/10 px-3 py-2', className)}>
         <p className="text-xs font-semibold text-red-300">This product is currently out of stock.</p>
@@ -341,15 +341,15 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
             {/* Mobile: name → price → cart, then details */}
             <div className="space-y-2 bg-navy-950/60 px-3 pb-3 pt-2.5 backdrop-blur-sm lg:hidden">
-              {product.category && (
-                <Link
-                  to={`/products?category=${product.category.id}`}
+            {product.category && (
+              <Link
+                to={`/products?category=${product.category.id}`}
                   className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-gold-400/80 transition hover:text-gold-300"
-                >
-                  <Sparkles className="h-3 w-3" />
-                  {product.category.name}
-                </Link>
-              )}
+              >
+                <Sparkles className="h-3 w-3" />
+                {product.category.name}
+              </Link>
+            )}
 
               <h1 className={cn(CARD_TITLE_BASE_CLASS, 'text-lg sm:text-xl', getCardTitleClass(product.tag))}>
                 {product.name}
@@ -368,7 +368,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               {addToCartPanel()}
             </div>
           </div>
-        </div>
+                  </div>
 
         {/* Right column — desktop only */}
         <div className="hidden min-w-0 lg:flex lg:min-h-0 lg:flex-col">
@@ -394,10 +394,10 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             <div className="flex flex-1 flex-col gap-3 border-t border-white/10 px-4 pb-4 pt-3 sm:px-5 sm:pb-5 sm:pt-4">
               {aboutSection('dark')}
               <div className="flex-1">{specsSection('dark')}</div>
-            </div>
+              </div>
           </div>
-        </div>
-      </div>
+            </div>
+              </div>
 
       {/* Mobile: frozen add to cart bar */}
       {product.is_available && (
@@ -412,27 +412,27 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   <ShoppingCart className="h-4 w-4 text-amber-200" />
                   Go to cart
                 </Link>
-                <QuantitySelector
-                  value={quantity}
-                  onChange={handleQuantityChange}
-                  min={0}
+                  <QuantitySelector
+                    value={quantity}
+                    onChange={handleQuantityChange}
+                    min={0}
                   variant="ember"
-                  compact
+                    compact
                   className="w-[7.5rem] shrink-0"
-                />
-              </div>
+                  />
+                </div>
             ) : (
-              <button
-                type="button"
-                onClick={handleAddToCart}
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
                 className="btn-festive inline-flex min-h-[2.75rem] w-full items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-bold shadow-[0_4px_16px_rgba(234,88,12,0.3)]"
-              >
+                >
                 <ShoppingCart className="h-4 w-4" />
                 Add to Cart
-              </button>
-            )}
-          </div>
+                </button>
+          )}
         </div>
+      </div>
       )}
     </>
   )

@@ -9,6 +9,7 @@ import {
   LogOut,
   X,
   Sparkles,
+  ShoppingBag,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { cn } from '@/lib/utils'
@@ -18,6 +19,7 @@ const navItems = [
   { to: '/admin/products', label: 'Products', icon: Package },
   { to: '/admin/categories', label: 'Categories', icon: FolderOpen },
   { to: '/admin/enquiries', label: 'Enquiries', icon: MessageSquare },
+  { to: '/admin/orders', label: 'Order Enquiries', icon: ShoppingBag },
   { to: '/admin/customers', label: 'Customers', icon: Users },
   { to: '/admin/settings', label: 'Settings', icon: Settings },
 ]

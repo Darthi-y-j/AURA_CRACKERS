@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Flame,
   Sparkles,
@@ -35,6 +36,7 @@ function MobileSortDropdown({
   onSortChange: (sort: CatalogueSort) => void
 }) {
   const [open, setOpen] = useState(false)
+  const [panelTop, setPanelTop] = useState(0)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const activeOption = SORT_OPTIONS.find((option) => option.id === sort) ?? SORT_OPTIONS[0]
@@ -42,14 +44,34 @@ function MobileSortDropdown({
   useEffect(() => {
     if (!open) return
 
+    const updatePanelTop = () => {
+      const button = buttonRef.current
+      if (!button) return
+      setPanelTop(button.getBoundingClientRect().bottom + 8)
+    }
+
+    updatePanelTop()
+    window.addEventListener('resize', updatePanelTop)
+    window.addEventListener('scroll', updatePanelTop, true)
+
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node
       if (buttonRef.current?.contains(target) || panelRef.current?.contains(target)) return
       setOpen(false)
     }
 
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      window.removeEventListener('resize', updatePanelTop)
+      window.removeEventListener('scroll', updatePanelTop, true)
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
   }, [open])
 
   const handleSelect = (id: CatalogueSort) => {
@@ -79,49 +101,61 @@ function MobileSortDropdown({
         <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 transition-transform', open && 'rotate-180')} />
       </button>
 
-      {open ? (
-        <div
-          ref={panelRef}
-          role="listbox"
-          aria-label="Sort products"
-          className="absolute right-0 top-[calc(100%+0.5rem)] z-50 min-w-[12.5rem] overflow-hidden rounded-2xl border border-navy-900/10 bg-white shadow-[0_12px_40px_rgba(12,8,6,0.12)]"
-        >
-          <div className="flex items-center justify-between border-b border-cream-200 px-3 py-2.5">
-            <p className="text-sm font-bold text-navy-900">Sort by</p>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Close sort menu"
-              className="rounded-lg p-1 text-navy-700/50 transition-colors hover:bg-cream-100 hover:text-navy-900"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-          <div className="p-1.5">
-            {SORT_OPTIONS.map(({ id, menuLabel, icon: Icon }) => {
-              const active = sort === id
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  role="option"
-                  aria-selected={active}
-                  onClick={() => handleSelect(id)}
-                  className={cn(
-                    'flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors',
-                    active
-                      ? 'bg-festive-500/10 text-festive-600'
-                      : 'text-navy-800 hover:bg-cream-50',
-                  )}
-                >
-                  <Icon className={cn('h-4 w-4 shrink-0', active ? 'text-festive-500' : 'text-navy-700/55')} />
-                  {menuLabel}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      ) : null}
+      {open && typeof document !== 'undefined'
+        ? createPortal(
+            <>
+              <button
+                type="button"
+                aria-label="Close sort menu"
+                className="fixed inset-0 z-[70] bg-transparent"
+                onClick={() => setOpen(false)}
+              />
+              <div
+                ref={panelRef}
+                role="listbox"
+                aria-label="Sort products"
+                style={{ top: panelTop }}
+                className="fixed right-4 z-[71] min-w-[12.5rem] overflow-hidden rounded-2xl border border-navy-900/10 bg-white shadow-[0_12px_40px_rgba(12,8,6,0.12)]"
+              >
+                <div className="flex items-center justify-between border-b border-cream-200 px-3 py-2.5">
+                  <p className="text-sm font-bold text-navy-900">Sort by</p>
+                  <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    aria-label="Close sort menu"
+                    className="rounded-lg p-1 text-navy-700/50 transition-colors hover:bg-cream-100 hover:text-navy-900"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="p-1.5">
+                  {SORT_OPTIONS.map(({ id, menuLabel, icon: Icon }) => {
+                    const active = sort === id
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        role="option"
+                        aria-selected={active}
+                        onClick={() => handleSelect(id)}
+                        className={cn(
+                          'flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors',
+                          active
+                            ? 'bg-festive-500/10 text-festive-600'
+                            : 'text-navy-800 hover:bg-cream-50',
+                        )}
+                      >
+                        <Icon className={cn('h-4 w-4 shrink-0', active ? 'text-festive-500' : 'text-navy-700/55')} />
+                        {menuLabel}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </>,
+            document.body,
+          )
+        : null}
     </div>
   )
 }
@@ -224,7 +258,7 @@ export function CatalogueToolbar({
     return (
       <div
         className={cn(
-          'relative flex w-full min-w-0 items-center gap-1 overflow-y-visible max-sm:justify-center sm:justify-end sm:gap-2',
+          'relative flex shrink-0 items-center gap-1 overflow-y-visible sm:gap-2',
           className,
         )}
         role="toolbar"

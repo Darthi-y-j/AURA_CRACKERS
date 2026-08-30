@@ -158,13 +158,13 @@ export function WishlistPage() {
                     <Heart className="h-3.5 w-3.5 fill-rose-400 text-rose-400" />
                     <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-rose-100">
                       Your Favourites
-                    </span>
-                  </div>
+              </span>
+            </div>
 
                   <h1 className="mt-5 font-display text-[2rem] font-bold leading-[1.1] text-cream-50 sm:text-5xl">
                     Liked{' '}
                     <TitleHighlight variant="dark">Products</TitleHighlight>
-                  </h1>
+            </h1>
 
                   <p className="mt-4 max-w-lg text-sm leading-relaxed text-cream-50/90 sm:text-base">
                     Save crackers and fireworks you love — add them to cart anytime or keep browsing
@@ -182,7 +182,7 @@ export function WishlistPage() {
                       </span>
                     </div>
                   )}
-                </div>
+          </div>
 
                 {items.length > 0 && (
                   <div className="flex flex-wrap gap-2 sm:justify-end">
@@ -194,15 +194,15 @@ export function WishlistPage() {
                       <ShoppingCart className="h-4 w-4" />
                       Add all to cart
                     </button>
-                    <button
-                      type="button"
-                      onClick={clearWishlist}
+          <button
+            type="button"
+            onClick={clearWishlist}
                       className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-navy-950/80 px-4 py-2.5 text-sm font-semibold text-white shadow-sm backdrop-blur-md transition hover:border-red-400/50 hover:text-red-200"
-                    >
+          >
                       <Trash2 className="h-4 w-4" />
-                      Clear all
-                    </button>
-                  </div>
+            Clear all
+          </button>
+        </div>
                 )}
               </div>
             </AnimateIn>
@@ -287,7 +287,7 @@ export function WishlistPage() {
                 </div>
               </AnimateIn>
             )}
-          </div>
+        </div>
         </section>
       </div>
     </>

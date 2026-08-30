@@ -5,13 +5,12 @@ import { useSettings } from '@/contexts/SettingsContext'
 import { useHeroSlideTheme } from '@/contexts/HeroSlideContext'
 import { TitleHighlight } from './TitleHighlight'
 import { AnimateIn } from './AnimateIn'
-import { HeroSearchBar } from './HeroSearchBar'
-import { HeroStats } from './HeroStats'
+import { FeaturedProductsShowcase } from './FeaturedProductsShowcase'
 import { WaveDivider } from './WaveDivider'
-import type { Category } from '@/types/database'
+import type { Product } from '@/types/database'
 
 interface HeroProps {
-  categories?: Category[]
+  heroSelectionProducts?: Product[]
 }
 
 const HERO_VIDEO = '/hero.mp4'
@@ -25,7 +24,7 @@ function shouldPlayHeroVideo(): boolean {
   return true
 }
 
-export function Hero({ categories = [] }: HeroProps) {
+export function Hero({ heroSelectionProducts = [] }: HeroProps) {
   const { settings } = useSettings()
   const { setTheme } = useHeroSlideTheme()
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -92,7 +91,7 @@ export function Hero({ categories = [] }: HeroProps) {
   }, [videoEnabled])
 
   return (
-    <section className="relative overflow-x-clip">
+    <section className="relative overflow-x-clip max-sm:overflow-x-visible">
       <div className="relative max-sm:min-h-[92vh]">
         <div className="absolute inset-0 overflow-hidden bg-navy-950 max-sm:min-h-[92vh]">
           {videoEnabled ? (
@@ -130,7 +129,7 @@ export function Hero({ categories = [] }: HeroProps) {
           </div>
         </div>
 
-        <div className="relative z-10 mx-auto flex w-full min-w-0 max-w-7xl flex-col px-4 pb-6 pt-[4.25rem] max-sm:min-h-[92vh] sm:px-6 sm:pb-10 sm:pt-24 lg:px-8 lg:pt-28">
+        <div className="relative z-10 mx-auto flex w-full min-w-0 max-w-7xl flex-col px-4 pb-6 pt-[4.25rem] max-sm:min-h-0 sm:px-6 sm:pb-8 sm:pt-24 lg:px-8 lg:pt-28">
           <div className="w-full max-w-2xl max-sm:space-y-5">
             <AnimateIn animation="fade-down" delay={100}>
               <div className="inline-flex items-center gap-2 rounded-full border border-gold-400/50 bg-gold-500/15 px-3.5 py-1.5 backdrop-blur-md sm:mb-6 sm:gap-2 sm:px-4 sm:py-2">
@@ -187,16 +186,18 @@ export function Hero({ categories = [] }: HeroProps) {
             </AnimateIn>
           </div>
 
-          <AnimateIn animation="fade-up" delay={750} className="mt-6 w-full max-sm:mt-auto max-sm:pt-8 sm:mt-14 lg:mt-16">
-            <HeroStats variant="dark" />
-          </AnimateIn>
+          {heroSelectionProducts.length > 0 && (
+            <AnimateIn
+              animation="fade-up"
+              delay={720}
+              className="relative -mx-4 mt-6 w-[calc(100%+2rem)] sm:-mx-6 sm:mt-8 sm:w-[calc(100%+3rem)] lg:-mx-8 lg:mt-10 lg:w-[calc(100%+4rem)]"
+            >
+              <FeaturedProductsShowcase products={heroSelectionProducts} variant="hero" />
+            </AnimateIn>
+          )}
         </div>
 
         <WaveDivider />
-      </div>
-
-      <div className="relative z-20 w-full min-w-0 overflow-x-clip bg-cream-50 px-4 pb-3 pt-0 sm:px-6 sm:pb-5 lg:px-8">
-        <HeroSearchBar categories={categories} />
       </div>
     </section>
   )

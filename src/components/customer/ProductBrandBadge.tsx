@@ -1,11 +1,65 @@
-import { cn } from '@/lib/utils'
+import { cn, getImageUrl } from '@/lib/utils'
 
 interface ProductBrandBadgeProps {
   brand?: string | null
-  variant?: 'overlay' | 'dark' | 'light' | 'silver' | 'elite'
+  variant?: 'overlay' | 'dark' | 'light' | 'silver' | 'elite' | 'table'
   /** Allow long names to wrap up to 2 lines instead of truncating */
   wrap?: boolean
   className?: string
+}
+
+const TABLE_BRAND_THEMES = [
+  {
+    shell:
+      'border-orange-300/55 bg-white shadow-[0_2px_10px_rgba(234,88,12,0.14)]',
+    text: 'text-festive-700',
+  },
+  {
+    shell:
+      'border-gold-400/50 bg-gradient-to-br from-gold-50 via-white to-[#fff8ef] shadow-[0_2px_10px_rgba(245,158,11,0.16)]',
+    text: 'text-amber-900',
+  },
+  {
+    shell:
+      'border-festive-500/30 bg-gradient-to-r from-festive-500/10 via-white to-gold-500/12 shadow-sm',
+    text: 'text-festive-700',
+  },
+  {
+    shell: 'border-amber-200/90 bg-[#fff5e8] shadow-sm',
+    text: 'text-navy-900',
+  },
+  {
+    shell:
+      'border-orange-400/40 bg-gradient-to-r from-festive-500/12 to-gold-400/18 shadow-[0_2px_8px_rgba(234,88,12,0.1)]',
+    text: 'text-navy-950',
+  },
+  {
+    shell: 'border-stone-200/90 bg-cream-50 shadow-sm',
+    text: 'text-stone-700',
+  },
+] as const
+
+function getBrandThemeIndex(name: string): number {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) {
+    hash = (hash + name.charCodeAt(i) * (i + 1)) % TABLE_BRAND_THEMES.length
+  }
+  return hash
+}
+
+function isBrandLogoUrl(value: string): boolean {
+  if (
+    value.startsWith('http://') ||
+    value.startsWith('https://') ||
+    value.startsWith('/')
+  ) {
+    return (
+      /\.(png|jpe?g|webp|gif|svg)(\?|$)/i.test(value) ||
+      value.includes('/storage/') ||
+      value.includes('/object/')
+    )
+  }
+  return false
 }
 
 export function ProductBrandBadge({
@@ -17,6 +71,10 @@ export function ProductBrandBadge({
   const name = brand?.trim()
   if (!name) return null
 
+  const isLogo = variant === 'table' && isBrandLogoUrl(name)
+  const tableTheme =
+    variant === 'table' ? TABLE_BRAND_THEMES[getBrandThemeIndex(name)] : null
+
   return (
     <span
       className={cn(
@@ -24,6 +82,13 @@ export function ProductBrandBadge({
         wrap
           ? 'line-clamp-2 inline-block w-max max-w-full whitespace-normal rounded-lg border px-2 py-1 text-left text-[9px] leading-snug sm:text-[10px]'
           : 'inline-flex w-max max-w-full items-center justify-center truncate rounded-full border px-2 py-1 text-[9px] leading-none sm:px-2.5 sm:text-[10px]',
+        variant === 'table' &&
+          cn(
+            'rounded-2xl border px-2.5 py-1.5 normal-case tracking-normal shadow-sm',
+            isLogo ? 'max-w-[6.5rem]' : 'max-w-full',
+            tableTheme?.shell,
+            !isLogo && tableTheme?.text,
+          ),
         variant === 'overlay' &&
           'border-amber-200/80 bg-black/85 text-amber-50 shadow-[0_2px_12px_rgba(0,0,0,0.55)] backdrop-blur-md',
         variant === 'dark' &&
@@ -37,7 +102,17 @@ export function ProductBrandBadge({
         className,
       )}
     >
-      {name}
+      {isLogo ? (
+        <img
+          src={getImageUrl(name)}
+          alt=""
+          className="max-h-9 max-w-full object-contain sm:max-h-10"
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        name
+      )}
     </span>
   )
 }

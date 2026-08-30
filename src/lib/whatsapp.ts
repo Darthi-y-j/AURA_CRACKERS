@@ -45,15 +45,33 @@ export function buildCartWhatsAppMessage(data: CartEnquiryFormData): string {
     }
   })
 
+  lines.push('', '— Customer Details —')
+
+  if (data.authUserId) {
+    lines.push('✓ Logged-in registered customer')
+  }
+
   lines.push(
-    '',
-    `Customer Name: ${data.customerName}`,
+    `Name: ${data.customerName}`,
     `Phone: ${data.customerPhone}`,
     `Address: ${data.customerAddress}`,
   )
 
+  if (data.customerEmail?.trim()) {
+    lines.push(`Email: ${data.customerEmail.trim()}`)
+  }
+
   if (data.customerMessage?.trim()) {
     lines.push('', 'Message:', data.customerMessage.trim())
+  }
+
+  if (data.spinReward?.label) {
+    lines.push('', '— Spin to Win —', `Reward: ${data.spinReward.label}`)
+    if (data.spinReward.discountAmount && data.spinReward.discountAmount > 0) {
+      lines.push(`Discount applied: ${formatPrice(data.spinReward.discountAmount)}`)
+    } else {
+      lines.push('(Non-monetary reward — mention on WhatsApp to claim)')
+    }
   }
 
   lines.push('', 'Thank you.')

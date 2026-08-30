@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { SEO } from '@/components/shared/SEO'
+import { JsonLd } from '@/components/shared/JsonLd'
 import { CatalogueHero, CatalogueOverlap } from '@/components/customer/CatalogueHero'
 import { CategoryCard } from '@/components/customer/CategoryCard'
 import { LoadingState } from '@/components/customer/LoadingState'
 import { EmptyState } from '@/components/customer/EmptyState'
 import { getCategories } from '@/services/categories'
+import { buildBreadcrumbPageSchema } from '@/lib/structuredData'
 import type { Category } from '@/types/database'
 
 export function CategoriesPage() {
@@ -25,6 +27,12 @@ export function CategoriesPage() {
         title="Categories"
         description="Browse all fireworks and cracker categories at Aura Crackers — sparklers, rockets, aerial crackers, and more."
         url="/categories"
+      />
+      <JsonLd
+        data={buildBreadcrumbPageSchema([
+          { name: 'Home', path: '/' },
+          { name: 'Categories', path: '/categories' },
+        ])}
       />
 
       <CatalogueHero withWave>

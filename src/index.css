@@ -434,10 +434,30 @@
     animation: featured-marquee var(--marquee-duration, 45s) linear infinite;
     will-change: transform;
     backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
   }
 
-  .featured-marquee:hover .featured-marquee-track {
-    animation-play-state: paused;
+  /* Hero featured strip — mask + pause logic breaks auto-scroll on many mobile browsers */
+  @media (max-width: 639px) {
+    .hero-featured-marquee.featured-marquee {
+      -webkit-mask-image: none;
+      mask-image: none;
+      overflow: visible;
+    }
+
+    .hero-featured-marquee .featured-marquee-track {
+      animation-play-state: running;
+    }
+
+    .hero-featured-marquee .product-grid-item {
+      content-visibility: visible;
+    }
+  }
+
+  @media (hover: hover) {
+    .featured-marquee:hover .featured-marquee-track {
+      animation-play-state: paused;
+    }
   }
 
   .marquee-paused .featured-marquee-track {
@@ -472,6 +492,24 @@
       flex-wrap: wrap;
       width: 100%;
       justify-content: center;
+    }
+
+    .hero-featured-marquee .featured-marquee-track {
+      flex-wrap: nowrap;
+      width: max-content;
+      justify-content: flex-start;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .hero-featured-marquee .featured-marquee-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .hero-featured-marquee .featured-marquee-track > * {
+      scroll-snap-align: start;
     }
   }
 

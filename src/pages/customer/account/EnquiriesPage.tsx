@@ -73,11 +73,13 @@ export function EnquiriesPage() {
               const itemCount = getEnquiryItemCount(enquiry)
               const statusLabel = getEnquiryStatusLabel(enquiry.status)
               const sourceLabel =
-                enquiry.enquiry_type === 'cart'
-                  ? 'Cart · WhatsApp'
-                  : enquiry.enquiry_type === 'contact'
-                    ? 'Contact form'
-                    : 'Account'
+                enquiry.enquiry_type === 'order'
+                  ? 'Cart order · WhatsApp'
+                  : enquiry.enquiry_type === 'cart'
+                    ? 'Product · WhatsApp'
+                    : enquiry.enquiry_type === 'contact'
+                      ? 'Contact form'
+                      : 'Account'
 
               return (
                 <li

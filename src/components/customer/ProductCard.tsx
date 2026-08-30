@@ -22,6 +22,10 @@ interface ProductCardProps {
   variant?: 'default' | 'featured' | 'featured-hero' | 'catalogue'
   /** Stretch to fill grid cell height (featured showcase bento layout) */
   fillHeight?: boolean
+  /** Smaller featured card for hero marquee */
+  compact?: boolean
+  /** Show one-tap add-to-cart on compact featured cards */
+  showQuickAdd?: boolean
 }
 
 function ProductMetaBadges({
@@ -133,7 +137,14 @@ function PriceBlock({
   )
 }
 
-export const ProductCard = memo(function ProductCard({ product, index = 0, variant = 'default', fillHeight = false }: ProductCardProps) {
+export const ProductCard = memo(function ProductCard({
+  product,
+  index = 0,
+  variant = 'default',
+  fillHeight = false,
+  compact = false,
+  showQuickAdd = false,
+}: ProductCardProps) {
   const { inCart, quantity, price, originalPrice, handleQuantityChange, handleAddToCart } =
     useProductCartState(product)
   const isElite = isEliteProductTag(product.tag)
@@ -254,16 +265,20 @@ export const ProductCard = memo(function ProductCard({ product, index = 0, varia
     return (
       <article
         className={cn(
-          'product-grid-item group relative flex flex-col overflow-hidden rounded-xl border border-gold-500/15 shadow-[0_12px_40px_rgba(0,0,0,0.35)] transition-all duration-500 hover:border-gold-400/30 hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)] sm:rounded-2xl',
+          'product-grid-item group relative flex flex-col overflow-hidden rounded-lg border border-gold-500/15 shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-all duration-500 hover:border-gold-400/30 sm:rounded-xl',
           FEATURED_CARD_GRADIENT,
-          !fillHeight && 'hover:-translate-y-1',
+          !fillHeight && !compact && 'hover:-translate-y-1',
         )}
       >
         <ProductLink
           product={product}
           className={cn(
             'relative overflow-hidden bg-[#140f0d]',
-            fillHeight ? 'block min-h-[140px] flex-1' : 'block aspect-[4/3] sm:aspect-[5/4]',
+            fillHeight
+              ? 'block min-h-[140px] flex-1'
+              : compact
+                ? 'block aspect-[4/3]'
+                : 'block aspect-[4/3] sm:aspect-[5/4]',
           )}
         >
           <img
@@ -279,23 +294,35 @@ export const ProductCard = memo(function ProductCard({ product, index = 0, varia
           <div className="absolute inset-0 bg-gradient-to-t from-[#140f0d]/75 via-[#43302b]/15 to-transparent opacity-90 transition-opacity group-hover:opacity-95" />
 
           {product.discount_percentage != null && product.discount_percentage > 0 && (
-            <DiscountOfferTag percentage={product.discount_percentage} />
+            <DiscountOfferTag
+              percentage={product.discount_percentage}
+              className={compact ? 'scale-[0.78] origin-top-right' : undefined}
+            />
           )}
 
-          <div className="absolute left-2 top-2 z-20 flex flex-col items-start gap-1.5 sm:left-3 sm:top-3">
-            <ProductHighlightBadges product={product} />
-            {product.tag ? (
+          <div
+            className={cn(
+              'absolute left-2 top-2 z-20 flex flex-col items-start gap-1',
+              !compact && 'gap-1.5 sm:left-3 sm:top-3',
+            )}
+          >
+            {(compact && showQuickAdd) || !compact ? (
+              <ProductHighlightBadges product={product} compact={compact} />
+            ) : null}
+            {product.tag && !compact ? (
               <ProductTagBadge tag={product.tag} variant="overlay" compact />
             ) : null}
-            <WishlistButton
-              product={product}
-              className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/55"
-              size="sm"
-            />
+            {!compact && (
+              <WishlistButton
+                product={product}
+                className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/55"
+                size="sm"
+              />
+            )}
           </div>
 
-          <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
-            {(product.category || product.brand) && (
+          <div className={cn('absolute inset-x-0 bottom-0', compact ? 'p-2' : 'p-3 sm:p-4')}>
+            {(product.category || product.brand) && !compact && (
               <div className="flex min-w-0 items-center justify-between gap-2">
                 {product.category ? (
                   <span className="min-w-0 flex-1 truncate text-[9px] font-bold uppercase tracking-[0.1em] text-gold-300 sm:text-[10px] sm:tracking-[0.12em]">
@@ -315,19 +342,43 @@ export const ProductCard = memo(function ProductCard({ product, index = 0, varia
             )}
             <h3
               className={cn(
-                'font-product-name line-clamp-2 text-sm font-extrabold leading-tight tracking-wide text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] sm:text-base',
-                (product.category || product.brand) && 'mt-0.5 sm:mt-1',
+                'font-product-name line-clamp-2 font-extrabold leading-tight tracking-wide text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]',
+                compact ? 'text-[11px]' : 'text-sm sm:text-base',
+                (product.category || product.brand) && !compact && 'mt-0.5 sm:mt-1',
               )}
             >
               {product.name}
             </h3>
-            <div className="mt-2">
+            <div className={cn(compact ? 'mt-1' : 'mt-2')}>
               <PriceBlock price={price} originalPrice={originalPrice} inverted />
             </div>
           </div>
         </ProductLink>
 
-        {product.is_available && (
+        {compact && showQuickAdd && product.is_available && (
+          <div className="border-t border-gold-500/15 p-1.5">
+            {inCart ? (
+              <CartQuantityControl
+                value={quantity}
+                onChange={handleQuantityChange}
+                variant="ember"
+                min={0}
+                className="w-full"
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                className="inline-flex w-full items-center justify-center gap-1 rounded-lg bg-gradient-to-r from-festive-500 to-gold-500 py-1.5 text-[10px] font-bold text-white shadow-[0_2px_10px_rgba(234,88,12,0.35)] transition-transform active:scale-95"
+              >
+                <ShoppingCart className="h-3 w-3" />
+                Add to cart
+              </button>
+            )}
+          </div>
+        )}
+
+        {product.is_available && !compact && (
           <div className="flex shrink-0 gap-2 border-t border-gold-500/15 p-3">
             <ProductLink
               product={product}

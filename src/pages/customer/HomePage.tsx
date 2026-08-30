@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { SEO } from '@/components/shared/SEO'
+import { JsonLd } from '@/components/shared/JsonLd'
 import { Hero } from '@/components/customer/Hero'
 import { ShopByCategorySection } from '@/components/customer/ShopByCategorySection'
-import { FeaturedProductsShowcase } from '@/components/customer/FeaturedProductsShowcase'
 import { TaggedProductsSection } from '@/components/customer/TaggedProductsSection'
 import { ContactSection } from '@/components/customer/ContactSection'
 import { DosAndDontsSection } from '@/components/customer/DosAndDontsSection'
@@ -17,7 +17,10 @@ import { LazySection } from '@/components/customer/LazySection'
 import { getCategories, getCachedCatalogueCategories } from '@/services/categories'
 import { getProducts, getCachedCatalogueProducts } from '@/services/products'
 import { PRODUCT_TAGS } from '@/lib/productTags'
+import { pickHeroSelectionProducts } from '@/lib/heroSelection'
 import { useSettings } from '@/contexts/SettingsContext'
+import { HOME_PAGE_DESCRIPTION, HOME_PAGE_TITLE } from '@/lib/siteConfig'
+import { buildHomePageSchema } from '@/lib/structuredData'
 import type { Category, Product } from '@/types/database'
 
 const TAGGED_SECTION_LIMIT = 6
@@ -35,8 +38,8 @@ export function HomePage() {
   const { settings } = useSettings()
   const cachedProducts = getCachedCatalogueProducts()
   const [categories, setCategories] = useState<Category[]>(() => getCachedCatalogueCategories()?.slice(0, 6) ?? [])
-  const [featured, setFeatured] = useState<Product[]>(
-    () => cachedProducts?.filter((product) => product.is_featured).slice(0, 8) ?? [],
+  const [heroSelection, setHeroSelection] = useState<Product[]>(() =>
+    cachedProducts ? pickHeroSelectionProducts(cachedProducts, 8) : [],
   )
   const [taggedSections, setTaggedSections] = useState<{ tag: string; products: Product[] }[]>(
     () => (cachedProducts?.length ? buildTaggedSections(cachedProducts) : []),
@@ -57,12 +60,12 @@ export function HomePage() {
     void getProducts({ sortBy: 'sort_order', lite: true })
       .then((products) => {
         if (cancelled) return
-        setFeatured(products.filter((product) => product.is_featured).slice(0, 8))
+        setHeroSelection(pickHeroSelectionProducts(products, 8))
         setTaggedSections(buildTaggedSections(products))
       })
       .catch(() => {
         if (!cancelled && !getCachedCatalogueProducts()?.length) {
-          setFeatured([])
+          setHeroSelection([])
           setTaggedSections([])
         }
       })
@@ -75,20 +78,19 @@ export function HomePage() {
     }
   }, [])
 
-  const hasProductContent = featured.length > 0 || taggedSections.length > 0
+  const hasProductContent = heroSelection.length > 0 || taggedSections.length > 0
 
   return (
     <div className="min-w-0 overflow-x-clip">
       <SEO
-        title={settings.business_name}
-        description={
-          settings.tagline ||
-          'Premium fireworks and crackers catalogue from Sivakasi. Browse products by category and send enquiries on WhatsApp — delivery across India.'
-        }
+        title={HOME_PAGE_TITLE}
+        description={HOME_PAGE_DESCRIPTION}
         url="/"
+        titleIsFull
       />
+      <JsonLd data={buildHomePageSchema(settings)} />
 
-      <Hero categories={categories} />
+      <Hero heroSelectionProducts={heroSelection} />
 
       <LazySection minHeight="120px">
         <BrandMarquee />
@@ -102,12 +104,6 @@ export function HomePage() {
         </div>
       ) : (
         <>
-          {featured.length > 0 && (
-            <LazySection minHeight="320px">
-              <FeaturedProductsShowcase products={featured} />
-            </LazySection>
-          )}
-
           {taggedSections.map((section) => (
             <LazySection key={section.tag} minHeight="280px">
               <TaggedProductsSection

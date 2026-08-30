@@ -20,6 +20,7 @@ import {
   isEnquiryReplied,
   getEnquiryTypeLabel,
   resolveEnquiryType,
+  isOrderEnquiry,
   parseEnquiryMessage,
 } from '@/services/enquiries'
 import { formatDateShort, cn } from '@/lib/utils'
@@ -28,9 +29,14 @@ import type { DashboardStats, Enquiry } from '@/types/database'
 
 const typeStyles = {
   cart: 'bg-blue-50 text-blue-700 ring-blue-200',
+  order: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
   contact: 'bg-amber-50 text-amber-800 ring-amber-200',
   account: 'bg-violet-50 text-violet-700 ring-violet-200',
 } as const
+
+function getEnquiryAdminPath(enquiry: Enquiry): string {
+  return isOrderEnquiry(enquiry) ? '/admin/orders' : '/admin/enquiries'
+}
 
 function getInitials(name: string): string {
   return name
@@ -42,7 +48,7 @@ function getInitials(name: string): string {
 
 function getSubjectLine(enquiry: Enquiry): string {
   const type = resolveEnquiryType(enquiry)
-  if (type !== 'cart') {
+  if (type === 'contact' || type === 'account') {
     return enquiry.product_name.replace(/^\[(Contact|Account)\]\s*/, '')
   }
   return enquiry.product_name
@@ -98,7 +104,7 @@ export function AdminDashboardPage() {
               <Link to="/admin/enquiries" className="block transition hover:scale-[1.01]">
                 <DashboardCard title="New Enquiries" value={stats?.newEnquiries ?? 0} icon={MessageSquare} accent="festive" className="h-full" />
               </Link>
-              <Link to="/admin/enquiries" className="block transition hover:scale-[1.01]">
+              <Link to="/admin/orders" className="block transition hover:scale-[1.01]">
                 <DashboardCard title="Today's Enquiries" value={stats?.todayEnquiries ?? 0} icon={Clock} accent="gold" className="h-full" />
               </Link>
               <Link to="/admin/enquiries" className="block transition hover:scale-[1.01]">
@@ -122,10 +128,15 @@ export function AdminDashboardPage() {
                     )}
                   </div>
                 </div>
-                <Link to="/admin/enquiries" className="admin-btn-primary px-3 py-2 text-xs sm:text-sm">
-                  Open inbox
-                  <ChevronRight className="h-4 w-4" />
-                </Link>
+                <div className="flex flex-wrap gap-2">
+                  <Link to="/admin/enquiries" className="admin-btn-primary px-3 py-2 text-xs sm:text-sm">
+                    General enquiries
+                  </Link>
+                  <Link to="/admin/orders" className="admin-btn-secondary px-3 py-2 text-xs sm:text-sm">
+                    Order enquiries
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </div>
               </div>
 
               {recentEnquiries.length === 0 ? (
@@ -143,7 +154,7 @@ export function AdminDashboardPage() {
                     return (
                       <li key={enquiry.id}>
                         <Link
-                          to="/admin/enquiries"
+                          to={getEnquiryAdminPath(enquiry)}
                           state={{ enquiryId: enquiry.id }}
                           className="flex items-center gap-4 px-5 py-3.5 transition hover:bg-cream-50/80"
                         >

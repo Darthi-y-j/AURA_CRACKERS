@@ -1,7 +1,7 @@
 import type { Category, Product } from '@/types/database'
 import type { CatalogueView } from './CatalogueToolbar'
 import { ProductGrid } from './ProductGrid'
-import { ProductTable, ProductTableHeader } from './ProductTable'
+import { ProductTable } from './ProductTable'
 
 export interface CategoryProductGroup {
   id: string
@@ -65,13 +65,7 @@ interface CategoryGroupedProductsProps {
   view: CatalogueView
 }
 
-function CategoryProductSection({
-  group,
-  view,
-}: {
-  group: CategoryProductGroup
-  view: CatalogueView
-}) {
+function CategoryProductSection({ group }: { group: CategoryProductGroup }) {
   return (
     <section id={`category-${group.id}`} className="scroll-mt-32">
       <div className="mb-4 flex items-center gap-2.5 border-b border-navy-900/8 pb-3 sm:mb-5">
@@ -87,27 +81,26 @@ function CategoryProductSection({
         </span>
       </div>
 
-      {view === 'table' ? (
-        <ProductTable products={group.products} showHeader={false} />
-      ) : (
-        <ProductGrid
-          products={group.products}
-          columns={3}
-          variant="catalogue"
-          initialVisible={group.products.length}
-          batchSize={group.products.length}
-        />
-      )}
+      <ProductGrid
+        products={group.products}
+        columns={3}
+        variant="catalogue"
+        initialVisible={group.products.length}
+        batchSize={group.products.length}
+      />
     </section>
   )
 }
 
 export function CategoryGroupedProducts({ groups, view }: CategoryGroupedProductsProps) {
+  if (view === 'table') {
+    return <ProductTable groups={groups} />
+  }
+
   return (
     <div className="space-y-10 sm:space-y-14">
-      {view === 'table' ? <ProductTableHeader className="mb-3" /> : null}
       {groups.map((group) => (
-        <CategoryProductSection key={group.id} group={group} view={view} />
+        <CategoryProductSection key={group.id} group={group} />
       ))}
     </div>
   )

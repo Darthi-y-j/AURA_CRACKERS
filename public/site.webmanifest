@@ -1,0 +1,25 @@
+{
+  "name": "Aura Crackers",
+  "short_name": "Aura Crackers",
+  "description": "Official Aura Crackers website — premium fireworks and crackers from Sivakasi.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0c0806",
+  "theme_color": "#0c0806",
+  "lang": "en-IN",
+  "icons": [
+    {
+      "src": "/favicon-192x192.png?v=4",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png?v=4",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

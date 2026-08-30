@@ -1,5 +1,5 @@
-/** Offset for fixed navbar + sticky catalogue search/toolbar row */
-export const SCROLL_OFFSET = 120
+/** Offset for fixed navbar when scrolling to category sections */
+export const SCROLL_OFFSET = 80
 
 export function scrollToElement(element: HTMLElement, behavior: ScrollBehavior = 'auto') {
   const top = element.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET

@@ -1,10 +1,10 @@
 import { supabase, getSupabaseErrorMessage, isSupabaseConfigured } from '@/lib/supabase'
-import {
-  BUSINESS_ADDRESS,
+import { BUSINESS_ADDRESS,
   BUSINESS_HOURS_24_7,
   BUSINESS_POLICIES,
   WHATSAPP_NUMBERS,
 } from '@/lib/businessInfo'
+import { SITE_LOGO_PATH } from '@/lib/siteConfig'
 import type { WebsiteSettings } from '@/types/database'
 
 export const SOCIAL_LINKS = {
@@ -18,7 +18,7 @@ export const DEFAULT_SETTINGS: WebsiteSettings = {
   id: 'default',
   business_name: 'Aura Crackers',
   tagline: 'Premium Fireworks & Crackers for Every Celebration',
-  logo_url: null,
+  logo_url: SITE_LOGO_PATH,
   phone: '+91 88254 11254',
   whatsapp_number: WHATSAPP_NUMBERS[0],
   email: 'auracrackers@gmail.com',
@@ -73,6 +73,7 @@ function mergeSettings(data: Record<string, unknown> | null): WebsiteSettings {
   return {
     ...DEFAULT_SETTINGS,
     ...(data as unknown as WebsiteSettings),
+    logo_url: SITE_LOGO_PATH,
     phone,
     whatsapp_number,
     address,

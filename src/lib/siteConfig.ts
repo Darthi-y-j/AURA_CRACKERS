@@ -14,8 +14,36 @@ export const DEVELOPER_CREDIT = {
 export const DEFAULT_DESCRIPTION =
   'Premium fireworks and crackers catalogue from Sivakasi. Browse products by category and send enquiries on WhatsApp — delivery across India.'
 
-/** Default Open Graph / social share image (served from /public). */
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/hero-slide-2.png`
+/** Homepage document title — includes official brand positioning for search. */
+export const HOME_PAGE_TITLE =
+  'Aura Crackers — Official Website | Premium Fireworks & Crackers'
+
+/** Homepage meta description — natural brand + product intent without keyword stuffing. */
+export const HOME_PAGE_DESCRIPTION =
+  'Official Aura Crackers website. Browse fireworks and crackers products with prices from Sivakasi. Send enquiries on WhatsApp — delivery across India.'
+
+/** Bump when favicon assets change — busts aggressive browser favicon cache. */
+export const FAVICON_VERSION = '4'
+
+/** Brand logo for navbar (full PNG in /public). */
+export const SITE_LOGO_FILE = '/IMG_6850.PNG'
+export const SITE_LOGO_PATH = `${SITE_LOGO_FILE}?v=${FAVICON_VERSION}`
+
+/** Trimmed favicons generated from SITE_LOGO_FILE — use for browser tab / PWA. */
+export const FAVICON_PATH = `/favicon.png?v=${FAVICON_VERSION}`
+export const FAVICON_32_PATH = `/favicon-32x32.png?v=${FAVICON_VERSION}`
+export const FAVICON_192_PATH = `/favicon-192x192.png?v=${FAVICON_VERSION}`
+export const APPLE_TOUCH_ICON_PATH = `/apple-touch-icon.png?v=${FAVICON_VERSION}`
+export const OG_IMAGE_PATH = '/og-image.png'
+export const FAVICON_URL = `${SITE_URL}${FAVICON_PATH.split('?')[0]}`
+export const DEFAULT_OG_IMAGE = `${SITE_URL}${OG_IMAGE_PATH}`
+
+/** Public social profiles for Organization schema (sameAs). */
+export const BRAND_SOCIAL_PROFILES = [
+  'https://www.youtube.com/@AuraCrackers',
+  'https://www.facebook.com/share/192L4T2prh/?mibextid=wwXIfr',
+  'https://www.instagram.com/aura_crackers?igsi=MTA0aHFzM3VwOHRpOA%3D%3D&utm_source=qr',
+] as const
 
 /** Static public routes included in the sitemap (no auth/admin/user-only pages). */
 export const SITEMAP_STATIC_ROUTES = [

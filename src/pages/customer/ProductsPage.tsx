@@ -1,9 +1,11 @@
 import { useEffect, useState, useMemo, useCallback, useLayoutEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { SEO } from '@/components/shared/SEO'
+import { JsonLd } from '@/components/shared/JsonLd'
 import { CatalogueHero, CatalogueOverlap } from '@/components/customer/CatalogueHero'
 import { ShopByCategoryNav, FilterByPanel, MobileFilterDropdown } from '@/components/customer/ShopBySidebar'
 import { CategoryIconStrip } from '@/components/customer/CategoryIconStrip'
+import { MobileCategorySideDrawer } from '@/components/customer/MobileCategorySideDrawer'
 import { ProductGrid } from '@/components/customer/ProductGrid'
 import { ProductTable } from '@/components/customer/ProductTable'
 import { CategoryGroupedProducts, groupProductsByCategory } from '@/components/customer/CategoryGroupedProducts'
@@ -22,9 +24,11 @@ import { filterProductsByQuery } from '@/lib/productSearch'
 import { useRestoreScrollAfterLoad } from '@/hooks/useRestoreScrollAfterLoad'
 import { useProductViewMode } from '@/hooks/useProductViewMode'
 import { cn } from '@/lib/utils'
+import { buildBreadcrumbPageSchema } from '@/lib/structuredData'
 import type { Product, Category } from '@/types/database'
 
 const MAX_PRICE = 5000
+const MOBILE_NAV_OFFSET = 56
 
 export function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -40,6 +44,8 @@ export function ProductsPage() {
   )
   const [localSearch, setLocalSearch] = useState('')
   const [searchExpanded, setSearchExpanded] = useState(false)
+  const [catalogueSectionEl, setCatalogueSectionEl] = useState<HTMLDivElement | null>(null)
+  const [showCategoryArrow, setShowCategoryArrow] = useState(false)
 
   const categoryId = searchParams.get('category') || ''
   const brand = searchParams.get('brand') || ''
@@ -201,6 +207,48 @@ export function ProductsPage() {
   const showGrouped = !categoryId
   const navSelectedCategoryId = categoryId || scrollCategoryId
 
+  useLayoutEffect(() => {
+    if (loading || filteredProducts.length === 0 || !catalogueSectionEl) {
+      setShowCategoryArrow(false)
+      return
+    }
+
+    const section = catalogueSectionEl
+
+    const updateArrowVisibility = () => {
+      const sectionRect = section.getBoundingClientRect()
+      const stillInCatalogue = sectionRect.bottom > MOBILE_NAV_OFFSET + 24
+      const tableHeader = document.getElementById('catalogue-table-header')
+
+      if (view === 'table' && tableHeader) {
+        const headerRect = tableHeader.getBoundingClientRect()
+        const headerInTableZone =
+          headerRect.bottom > MOBILE_NAV_OFFSET + 8 &&
+          headerRect.top <= MOBILE_NAV_OFFSET + 120
+        setShowCategoryArrow(headerInTableZone && stillInCatalogue)
+        return
+      }
+
+      const tableReached = sectionRect.top <= MOBILE_NAV_OFFSET + 72
+      setShowCategoryArrow(tableReached && stillInCatalogue)
+    }
+
+    updateArrowVisibility()
+
+    const observer = new IntersectionObserver(updateArrowVisibility, {
+      threshold: [0, 0.05, 0.1, 0.25, 0.5, 0.75, 1],
+    })
+    observer.observe(section)
+
+    window.addEventListener('scroll', updateArrowVisibility, { passive: true })
+    window.addEventListener('resize', updateArrowVisibility)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('scroll', updateArrowVisibility)
+      window.removeEventListener('resize', updateArrowVisibility)
+    }
+  }, [catalogueSectionEl, loading, filteredProducts.length, showGrouped, view])
+
   const navProps = {
     categories,
     categoryCounts,
@@ -209,12 +257,63 @@ export function ProductsPage() {
     onCategoryChange: handleCategoryNav,
   }
 
+  const productsToolbar = (
+    <div className="relative z-50 flex w-full min-w-0 max-w-full flex-row items-center gap-1.5 overflow-visible rounded-2xl border border-navy-900/8 bg-gradient-to-r from-cream-50 via-white to-cream-50/80 p-2 shadow-[0_4px_24px_rgba(12,8,6,0.06)] sm:gap-3 sm:p-2.5">
+      <SearchBar
+        value={localSearch}
+        onChange={setLocalSearch}
+        onSubmit={() => applySearch(localSearch)}
+        onFocus={() => setSearchExpanded(true)}
+        onBlur={() => setSearchExpanded(false)}
+        placeholder="Search crackers, sparklers..."
+        compact
+        className={cn(
+          'relative z-0 min-w-0 flex-1 transition-[flex-grow,max-width] duration-300',
+          searchExpanded && 'max-sm:flex-[1_1_100%] max-sm:max-w-full',
+        )}
+      />
+
+      <div
+        className={cn(
+          'relative flex shrink-0 items-center transition-opacity duration-200',
+          searchExpanded && 'max-sm:pointer-events-none max-sm:hidden max-sm:overflow-hidden max-sm:opacity-0',
+        )}
+      >
+        <CatalogueToolbar
+          sort={sort}
+          onSortChange={setSort}
+          view={view}
+          onViewChange={setView}
+          inline
+          filterSlot={
+            <MobileFilterDropdown
+              {...navProps}
+              priceRange={priceRange}
+              onPriceRangeChange={setPriceRange}
+              brands={brands}
+              selectedBrand={brand}
+              onBrandChange={updateBrand}
+              maxPrice={MAX_PRICE}
+              inline
+            />
+          }
+        />
+      </div>
+    </div>
+  )
+
   return (
     <>
       <SEO
         title="Products"
-        description="Browse our complete catalogue of premium fireworks and crackers. Filter by category and send enquiries on WhatsApp."
+        description="Browse Aura Crackers products — fireworks and crackers with prices. Filter by category and send enquiries on WhatsApp."
         url="/products"
+      />
+      <JsonLd
+        data={buildBreadcrumbPageSchema([
+          { name: 'Home', path: '/' },
+          { name: 'Products', path: '/products' },
+        ])}
       />
 
       <CatalogueHero withWave>
@@ -258,60 +357,18 @@ export function ProductsPage() {
             </aside>
 
             <div className="min-w-0 max-w-full">
-              <div className="sticky top-14 z-40 mb-4 flex w-full min-w-0 max-w-full flex-col gap-2 overflow-visible rounded-2xl border border-navy-900/8 bg-gradient-to-r from-cream-50 via-white to-cream-50/80 p-2 shadow-[0_4px_24px_rgba(12,8,6,0.06)] sm:flex-row sm:items-center sm:gap-3 sm:p-2.5 sm:top-[4.25rem]">
-                <SearchBar
-                  value={localSearch}
-                  onChange={setLocalSearch}
-                  onSubmit={() => applySearch(localSearch)}
-                  onFocus={() => setSearchExpanded(true)}
-                  onBlur={() => setSearchExpanded(false)}
-                  placeholder="Search crackers, sparklers..."
-                  compact
-                  className={cn(
-                    'relative z-0 w-full min-w-0 transition-[flex-grow,max-width] duration-300',
-                    searchExpanded
-                      ? 'max-sm:flex-[1_1_100%] max-sm:max-w-full'
-                      : 'sm:flex-1',
-                  )}
-                />
-
-                <div
-                  className={cn(
-                    'relative z-10 flex w-full min-w-0 items-center sm:w-auto sm:shrink-0 transition-opacity duration-200',
-                    searchExpanded && 'max-sm:pointer-events-none max-sm:hidden max-sm:overflow-hidden max-sm:opacity-0',
-                  )}
-                >
-                  <CatalogueToolbar
-                    sort={sort}
-                    onSortChange={setSort}
-                    view={view}
-                    onViewChange={setView}
-                    inline
-                    className="w-full min-w-0"
-                    filterSlot={
-                      <MobileFilterDropdown
-                        {...navProps}
-                        priceRange={priceRange}
-                        onPriceRangeChange={setPriceRange}
-                        brands={brands}
-                        selectedBrand={brand}
-                        onBrandChange={updateBrand}
-                        maxPrice={MAX_PRICE}
-                        inline
-                      />
-                    }
-                  />
-                </div>
-              </div>
+              <div className="mb-4 hidden sm:block">{productsToolbar}</div>
 
               {!loading && categories.length > 0 && (
-                <div className="mb-5 min-w-0 overflow-hidden">
-                  <CategoryIconStrip
-                    categories={categories}
-                    selectedCategoryId={navSelectedCategoryId}
-                    onCategoryChange={handleCategoryNav}
-                  />
-                </div>
+                <>
+                  <div className="mb-5 hidden min-w-0 overflow-hidden sm:block">
+                    <CategoryIconStrip
+                      categories={categories}
+                      selectedCategoryId={navSelectedCategoryId}
+                      onCategoryChange={handleCategoryNav}
+                    />
+                  </div>
+                </>
               )}
 
               {loading ? (
@@ -346,24 +403,41 @@ export function ProductsPage() {
                     ) : undefined
                   }
                 />
-              ) : showGrouped ? (
-                <div id="catalogue-products" className="scroll-mt-32">
-                  <CategoryGroupedProducts groups={groupedProducts} view={view} />
-                </div>
-              ) : view === 'table' ? (
-                <ProductTable
-                  products={filteredProducts}
-                  emptyTitle="No products found"
-                  emptyDescription="Try selecting a different category or adjusting your filters."
-                />
               ) : (
-                <ProductGrid
-                  products={filteredProducts}
-                  columns={3}
-                  variant="catalogue"
-                  emptyTitle="No products found"
-                  emptyDescription="Try selecting a different category or adjusting your filters."
-                />
+                <>
+                  <div className="mb-4 sm:hidden">{productsToolbar}</div>
+                  <div ref={setCatalogueSectionEl}>
+                    {showGrouped ? (
+                      <div id="catalogue-products" className="scroll-mt-32">
+                        <CategoryGroupedProducts groups={groupedProducts} view={view} />
+                      </div>
+                    ) : view === 'table' ? (
+                      <ProductTable
+                        products={filteredProducts}
+                        emptyTitle="No products found"
+                        emptyDescription="Try selecting a different category or adjusting your filters."
+                      />
+                    ) : (
+                      <ProductGrid
+                        products={filteredProducts}
+                        columns={3}
+                        variant="catalogue"
+                        emptyTitle="No products found"
+                        emptyDescription="Try selecting a different category or adjusting your filters."
+                      />
+                    )}
+                  </div>
+                  {!loading && categories.length > 0 && (
+                    <MobileCategorySideDrawer
+                      categories={categories}
+                      selectedCategoryId={navSelectedCategoryId}
+                      onCategoryChange={handleCategoryNav}
+                      categoryCounts={categoryCounts}
+                      totalCount={products.length}
+                      visible={showCategoryArrow}
+                    />
+                  )}
+                </>
               )}
             </div>
           </div>

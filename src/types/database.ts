@@ -1,5 +1,5 @@
 export type EnquiryStatus = 'new' | 'contacted' | 'completed' | 'cancelled'
-export type EnquiryType = 'cart' | 'contact' | 'account'
+export type EnquiryType = 'cart' | 'contact' | 'account' | 'order'
 
 export interface Category {
   id: string
@@ -108,6 +108,12 @@ export interface CartEnquiryFormData {
   customerPhone: string
   customerAddress: string
   customerMessage?: string
+  customerEmail?: string
+  authUserId?: string
+  spinReward?: {
+    label: string
+    discountAmount?: number
+  }
 }
 
 export interface Customer {

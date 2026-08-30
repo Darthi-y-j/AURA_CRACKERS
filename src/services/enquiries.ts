@@ -157,8 +157,33 @@ async function upsertCustomer(name: string, phone: string, email?: string | null
   }
 }
 
-function formatCustomerNotes(address: string, message?: string): string | null {
-  const parts: string[] = [`Delivery Address:\n${address.trim()}`]
+function formatCustomerNotes(
+  address: string,
+  message?: string,
+  extras?: {
+    email?: string
+    spinReward?: { label: string; discountAmount?: number }
+    isRegistered?: boolean
+  },
+): string | null {
+  const parts: string[] = []
+
+  if (extras?.isRegistered) {
+    parts.push('Registered customer (logged in)')
+  }
+  if (extras?.email?.trim()) {
+    parts.push(`Email: ${extras.email.trim()}`)
+  }
+
+  parts.push(`Delivery Address:\n${address.trim()}`)
+
+  if (extras?.spinReward?.label) {
+    parts.push(`Spin to Win: ${extras.spinReward.label}`)
+    if (extras.spinReward.discountAmount && extras.spinReward.discountAmount > 0) {
+      parts.push(`Spin discount: Rs. ${extras.spinReward.discountAmount}`)
+    }
+  }
+
   if (message?.trim()) parts.push(`Message:\n${message.trim()}`)
   return parts.join('\n\n')
 }
@@ -214,17 +239,23 @@ export async function createCartEnquiry(
       ? formData.items[0].productName
       : `${formData.items.length} products (${formData.items.map((i) => i.productName).join(', ')})`
 
-  await upsertCustomer(formData.customerName, phone)
+  await upsertCustomer(formData.customerName, phone, formData.customerEmail)
 
   const { data, error } = await insertEnquiry({
     enquiry_number: enquiryNumber,
-    enquiry_type: 'cart',
+    enquiry_type: 'order',
     product_id: enquiryHeaderProductId(formData.items),
     product_name: productName,
     quantity: totalQuantity,
     customer_name: formData.customerName,
     customer_phone: phone,
-    customer_message: formatCustomerNotes(formData.customerAddress, formData.customerMessage),
+    customer_email: formData.customerEmail ?? null,
+    auth_user_id: formData.authUserId ?? null,
+    customer_message: formatCustomerNotes(formData.customerAddress, formData.customerMessage, {
+      email: formData.customerEmail,
+      spinReward: formData.spinReward,
+      isRegistered: Boolean(formData.authUserId),
+    }),
     items: enquiryItems,
     status: 'new',
   })
@@ -464,14 +495,16 @@ export function getEnquiryTypeLabel(type: EnquiryType | null, productName?: stri
         return 'Contact'
       case 'account':
         return 'Account'
+      case 'order':
+        return 'Order'
       default:
-        return 'Cart'
+        return 'Product'
     }
   }
 
   if (productName?.startsWith('[Contact]')) return 'Contact'
   if (productName?.startsWith('[Account]')) return 'Account'
-  return 'Cart'
+  return 'Product'
 }
 
 export function resolveEnquiryType(enquiry: Pick<Enquiry, 'enquiry_type' | 'product_name'>): EnquiryType {
@@ -479,6 +512,19 @@ export function resolveEnquiryType(enquiry: Pick<Enquiry, 'enquiry_type' | 'prod
   if (enquiry.product_name?.startsWith('[Account]')) return 'account'
   if (enquiry.product_name?.startsWith('[Contact]')) return 'contact'
   return 'cart'
+}
+
+/** Cart-page multi-item orders (new `order` type + legacy cart records). */
+export function isOrderEnquiry(enquiry: Pick<Enquiry, 'enquiry_type' | 'product_name' | 'items'>): boolean {
+  const type = resolveEnquiryType(enquiry)
+  if (type === 'order') return true
+  if (type !== 'cart') return false
+  if (Array.isArray(enquiry.items) && enquiry.items.length > 1) return true
+  return Boolean(enquiry.product_name?.includes(' products ('))
+}
+
+export function isGeneralEnquiry(enquiry: Pick<Enquiry, 'enquiry_type' | 'product_name' | 'items'>): boolean {
+  return !isOrderEnquiry(enquiry)
 }
 
 export function getEnquiryCategoryLabel(category: string | null): string {

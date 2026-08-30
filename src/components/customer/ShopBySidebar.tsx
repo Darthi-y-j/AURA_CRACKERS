@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { ChevronDown, LayoutGrid, SlidersHorizontal, X } from 'lucide-react'
 import type { Category } from '@/types/database'
 import { getCategoryIcon } from '@/lib/categoryIcons'
@@ -226,17 +227,31 @@ export function MobileFilterDropdown({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [open, inline])
 
+  useEffect(() => {
+    if (!open || !inline) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [open, inline])
+
   const clearFilters = () => {
     onCategoryChange('')
     onBrandChange?.('')
     onPriceRangeChange([0, maxPrice])
   }
 
-  const panel = open ? (
-    <div
-      ref={panelRef}
-      className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 overflow-hidden rounded-2xl border border-navy-900/10 bg-white shadow-[0_12px_40px_rgba(12,8,6,0.12)]"
-    >
+  const panelBody = (
+    <>
       <div className="flex items-center justify-between border-b border-cream-200 px-4 py-3">
         <p className="font-display text-base font-bold text-navy-900">Filters</p>
         <button
@@ -249,7 +264,7 @@ export function MobileFilterDropdown({
         </button>
       </div>
 
-      <div className="max-h-[min(70vh,28rem)] overflow-y-auto scrollbar-hide p-4">
+      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide p-4">
         <ShopByCategoryNav
           categories={categories}
           categoryCounts={categoryCounts}
@@ -289,20 +304,54 @@ export function MobileFilterDropdown({
           Apply
         </button>
       </div>
-    </div>
-  ) : null
+    </>
+  )
+
+  const inlineMobilePanel =
+    open && inline && typeof document !== 'undefined'
+      ? createPortal(
+          <>
+            <button
+              type="button"
+              aria-label="Close filters"
+              className="fixed inset-0 z-[70] bg-navy-950/45"
+              onClick={() => setOpen(false)}
+            />
+            <div
+              ref={panelRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Filters"
+              className="fixed inset-x-4 top-[max(5.5rem,10dvh)] z-[71] flex max-h-[min(78dvh,34rem)] flex-col overflow-hidden rounded-2xl border border-navy-900/10 bg-white shadow-[0_12px_40px_rgba(12,8,6,0.12)]"
+            >
+              {panelBody}
+            </div>
+          </>,
+          document.body,
+        )
+      : null
+
+  const anchoredPanel =
+    open && !inline ? (
+      <div
+        ref={panelRef}
+        className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-[60] overflow-hidden rounded-2xl border border-navy-900/10 bg-white shadow-[0_12px_40px_rgba(12,8,6,0.12)]"
+      >
+        {panelBody}
+      </div>
+    ) : null
 
   if (inline) {
     return (
-      <>
+      <div className="relative shrink-0 lg:hidden">
         <button
           ref={buttonRef}
           type="button"
           onClick={() => setOpen((prev) => !prev)}
           aria-expanded={open}
-          aria-haspopup="true"
+          aria-haspopup="dialog"
           className={cn(
-            'relative inline-flex shrink-0 items-center justify-center gap-1 rounded-full border font-semibold transition-colors lg:hidden',
+            'relative inline-flex shrink-0 items-center justify-center gap-1 rounded-full border font-semibold transition-colors',
             'h-9 px-2.5 text-[11px]',
             open || hasActiveFilters
               ? 'border-festive-500/30 bg-festive-500/10 text-festive-600'
@@ -315,8 +364,8 @@ export function MobileFilterDropdown({
           {hasActiveFilters && <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-festive-500" />}
           <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 transition-transform', open && 'rotate-180')} />
         </button>
-        {panel}
-      </>
+        {inlineMobilePanel}
+      </div>
     )
   }
 
@@ -326,7 +375,7 @@ export function MobileFilterDropdown({
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
-        aria-haspopup="true"
+        aria-haspopup="dialog"
         className={cn(
           'flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors',
           open || hasActiveFilters
@@ -344,7 +393,7 @@ export function MobileFilterDropdown({
         <ChevronDown className={cn('h-4 w-4 transition-transform', open && 'rotate-180')} />
       </button>
 
-      {panel}
+      {anchoredPanel}
     </div>
   )
 }

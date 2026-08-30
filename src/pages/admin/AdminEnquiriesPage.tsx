@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useOutletContext, useLocation } from 'react-router-dom'
 import {
   MessageCircle,
@@ -9,6 +9,7 @@ import {
   Clock,
   Inbox,
   Package,
+  FileDown,
 } from 'lucide-react'
 import { AdminHeader } from '@/components/admin/AdminHeader'
 import { StatusBadge } from '@/components/admin/StatusBadge'
@@ -24,6 +25,8 @@ import {
   getEnquiryCategoryLabel,
   resolveEnquiryType,
   isEnquiryReplied,
+  isOrderEnquiry,
+  isGeneralEnquiry,
   parseEnquiryMessage,
 } from '@/services/enquiries'
 import { useSettings } from '@/contexts/SettingsContext'
@@ -32,11 +35,14 @@ import { useStockAlerts } from '@/contexts/StockAlertContext'
 import { applyEnquiryStockChange } from '@/services/products'
 import { getEnquiryStockItems } from '@/lib/stock'
 import { buildWhatsAppContactUrl } from '@/lib/whatsapp'
+import { downloadEnquiryPdf } from '@/lib/cartEnquiryPdf'
+import { formatDisplayPhone } from '@/lib/businessInfo'
 import { formatDate, formatDateShort, cn } from '@/lib/utils'
 import type { Enquiry, EnquiryStatus } from '@/types/database'
 
 const typeStyles = {
   cart: 'bg-blue-50 text-blue-700 ring-blue-200',
+  order: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
   contact: 'bg-amber-50 text-amber-800 ring-amber-200',
   account: 'bg-violet-50 text-violet-700 ring-violet-200',
 } as const
@@ -49,7 +55,25 @@ function getInitials(name: string): string {
     .join('')
 }
 
-export function AdminEnquiriesPage() {
+type EnquiryInboxMode = 'general' | 'order'
+
+const inboxConfig = {
+  general: {
+    title: 'Enquiries',
+    emptyMessage: 'No general enquiries found',
+    emptyHint: 'Contact form and single-product enquiries appear here',
+    matches: isGeneralEnquiry,
+  },
+  order: {
+    title: 'Order Enquiries',
+    emptyMessage: 'No order enquiries found',
+    emptyHint: 'Cart orders with multiple items appear here',
+    matches: isOrderEnquiry,
+  },
+} as const
+
+function AdminEnquiryInbox({ mode }: { mode: EnquiryInboxMode }) {
+  const config = inboxConfig[mode]
   const { onMenuClick } = useOutletContext<{ onMenuClick: () => void }>()
   const location = useLocation()
   const enquiryIdFromNav = (location.state as { enquiryId?: string } | null)?.enquiryId
@@ -64,6 +88,7 @@ export function AdminEnquiriesPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [togglingReplyId, setTogglingReplyId] = useState<string | null>(null)
+  const [pdfDownloading, setPdfDownloading] = useState(false)
 
   const loadEnquiries = async () => {
     setLoading(true)
@@ -138,10 +163,28 @@ export function AdminEnquiriesPage() {
     setDeleteId(null)
   }
 
+  const handleDownloadPdf = (enquiry: Enquiry) => {
+    setPdfDownloading(true)
+    try {
+      downloadEnquiryPdf(enquiry, {
+        businessName: settings.business_name,
+        businessPhone: settings.whatsapp_number
+          ? formatDisplayPhone(settings.whatsapp_number)
+          : undefined,
+      })
+      showToast('Order PDF downloaded', 'success')
+    } catch {
+      showToast('Could not generate PDF. Please try again.', 'error')
+    } finally {
+      setPdfDownloading(false)
+    }
+  }
+
   const contactWhatsApp = (enquiry: Enquiry) => {
     if (!settings.whatsapp_number) return
+    const type = resolveEnquiryType(enquiry)
     const subject =
-      resolveEnquiryType(enquiry) === 'cart'
+      type === 'cart' || type === 'order'
         ? `your enquiry ${enquiry.enquiry_number} for ${enquiry.product_name}`
         : `your enquiry ${enquiry.enquiry_number}`
     const message = `Hi ${enquiry.customer_name}, regarding ${subject}.`
@@ -174,7 +217,12 @@ export function AdminEnquiriesPage() {
     showToast(replied ? 'Marked as replied' : 'Marked as pending', 'success')
   }
 
-  const filteredEnquiries = enquiries.filter((enquiry) => {
+  const modeEnquiries = useMemo(
+    () => enquiries.filter(config.matches),
+    [enquiries, config],
+  )
+
+  const filteredEnquiries = modeEnquiries.filter((enquiry) => {
     if (repliedFilter === 'pending') return !isEnquiryReplied(enquiry)
     if (repliedFilter === 'replied') return isEnquiryReplied(enquiry)
     return true
@@ -198,13 +246,13 @@ export function AdminEnquiriesPage() {
 
       return filteredEnquiries[0]
     })
-  }, [loading, enquiries, repliedFilter, enquiryIdFromNav])
+  }, [loading, filteredEnquiries, repliedFilter, enquiryIdFromNav])
 
-  const pendingCount = enquiries.filter((e) => !isEnquiryReplied(e)).length
+  const pendingCount = modeEnquiries.filter((e) => !isEnquiryReplied(e)).length
 
   const getEnquirySummary = (enquiry: Enquiry) => {
     const type = resolveEnquiryType(enquiry)
-    if (type === 'cart') {
+    if (type === 'cart' || type === 'order') {
       if (enquiry.items && enquiry.items.length > 0) {
         return enquiry.items.map((item) => item.product_name).join(', ')
       }
@@ -221,9 +269,9 @@ export function AdminEnquiriesPage() {
   }
 
   const filterTabs: { id: typeof repliedFilter; label: string; count?: number }[] = [
-    { id: 'all', label: 'All', count: enquiries.length },
+    { id: 'all', label: 'All', count: modeEnquiries.length },
     { id: 'pending', label: 'Pending', count: pendingCount },
-    { id: 'replied', label: 'Replied', count: enquiries.length - pendingCount },
+    { id: 'replied', label: 'Replied', count: modeEnquiries.length - pendingCount },
   ]
 
   const selectedType = selectedEnquiry ? resolveEnquiryType(selectedEnquiry) : null
@@ -233,7 +281,7 @@ export function AdminEnquiriesPage() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <AdminHeader title="Enquiries" onMenuClick={onMenuClick} />
+      <AdminHeader title={config.title} onMenuClick={onMenuClick} />
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-4 sm:p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -292,8 +340,8 @@ export function AdminEnquiriesPage() {
               ) : filteredEnquiries.length === 0 ? (
                 <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
                   <Inbox className="mb-3 h-10 w-10 text-slate-300" />
-                  <p className="text-sm font-medium text-slate-700">No enquiries found</p>
-                  <p className="mt-1 text-xs text-slate-500">Try changing your filters</p>
+                  <p className="text-sm font-medium text-slate-700">{config.emptyMessage}</p>
+                  <p className="mt-1 text-xs text-slate-500">{config.emptyHint}</p>
                 </div>
               ) : (
                 <ul className="divide-y divide-slate-100">
@@ -441,10 +489,10 @@ export function AdminEnquiriesPage() {
                           <dd className="font-medium text-slate-900">{formatDate(selectedEnquiry.created_at)}</dd>
                         </div>
                         <div>
-                          <dt className="text-slate-500">{selectedType === 'cart' ? 'Products' : 'Subject'}</dt>
+                          <dt className="text-slate-500">{selectedType === 'cart' || selectedType === 'order' ? 'Products' : 'Subject'}</dt>
                           <dd className="font-medium text-slate-900">{getEnquirySummary(selectedEnquiry)}</dd>
                         </div>
-                        {selectedType === 'cart' && (
+                        {(selectedType === 'cart' || selectedType === 'order') && (
                           <div>
                             <dt className="text-slate-500">Quantity</dt>
                             <dd className="font-medium text-slate-900">{selectedEnquiry.quantity}</dd>
@@ -454,7 +502,7 @@ export function AdminEnquiriesPage() {
                     </div>
                   </div>
 
-                  {selectedType === 'cart' && selectedEnquiry.items && selectedEnquiry.items.length > 0 && (
+                  {(selectedType === 'cart' || selectedType === 'order') && selectedEnquiry.items && selectedEnquiry.items.length > 0 && (
                     <div className="mt-4 rounded-xl border border-slate-100 bg-white p-4">
                       <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                         <Package className="h-3.5 w-3.5" />
@@ -507,6 +555,22 @@ export function AdminEnquiriesPage() {
                     />
                   </div>
 
+                  {(selectedType === 'cart' || selectedType === 'order') && (
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadPdf(selectedEnquiry)}
+                      disabled={pdfDownloading}
+                      className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-navy-900/12 bg-white px-4 py-3 text-sm font-semibold text-navy-900 transition hover:border-gold-400 hover:bg-gold-50/50 disabled:opacity-60"
+                    >
+                      {pdfDownloading ? (
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-gold-500 border-t-transparent" />
+                      ) : (
+                        <FileDown className="h-4 w-4 text-gold-600" />
+                      )}
+                      Download Order PDF
+                    </button>
+                  )}
+
                   <div className="mt-3 flex items-center justify-between">
                     {isEnquiryReplied(selectedEnquiry) ? (
                       <EnquiryUndoReplyButton
@@ -542,4 +606,12 @@ export function AdminEnquiriesPage() {
       />
     </div>
   )
+}
+
+export function AdminEnquiriesPage() {
+  return <AdminEnquiryInbox mode="general" />
+}
+
+export function AdminOrderEnquiriesPage() {
+  return <AdminEnquiryInbox mode="order" />
 }

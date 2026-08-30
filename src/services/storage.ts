@@ -1,7 +1,7 @@
 import { supabase, getSupabaseErrorMessage } from '@/lib/supabase'
 import { compressImageFile } from '@/lib/compressImage'
 
-export type StorageBucket = 'product-images' | 'product-videos' | 'category-images' | 'logos'
+export type StorageBucket = 'product-images' | 'product-videos' | 'category-images'
 export type ImageStorageBucket = Exclude<StorageBucket, 'product-videos'>
 
 const VIDEO_MIME_TYPES = new Set(['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'])
@@ -12,7 +12,6 @@ const IMAGE_COMPRESS_OPTIONS: Record<
 > = {
   'product-images': { maxWidth: 1600, maxHeight: 1600, quality: 0.82, format: 'image/webp' },
   'category-images': { maxWidth: 1200, maxHeight: 1200, quality: 0.82, format: 'image/webp' },
-  logos: { maxWidth: 512, maxHeight: 512, quality: 0.88, format: 'image/webp' },
 }
 
 export async function uploadImage(

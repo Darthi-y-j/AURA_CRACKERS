@@ -2,12 +2,17 @@ import { useEffect, useState } from 'react'
 import { useParams, useLocation, Link } from 'react-router-dom'
 import { ChevronRight, Sparkles } from 'lucide-react'
 import { SEO } from '@/components/shared/SEO'
+import { JsonLd } from '@/components/shared/JsonLd'
 import { ProductDetails } from '@/components/customer/ProductDetails'
 import { ProductGrid } from '@/components/customer/ProductGrid'
 import { LoadingState } from '@/components/customer/LoadingState'
 import { EmptyState } from '@/components/customer/EmptyState'
 import { getProductBySlug, getProductsByCategory } from '@/services/products'
 import { readProductLinkState, preloadProductImage } from '@/lib/productLink'
+import { formatPrice } from '@/lib/utils'
+import { resolveProductPrice } from '@/lib/pricing'
+import { SITE_NAME } from '@/lib/siteConfig'
+import { buildProductPageSchema } from '@/lib/structuredData'
 import type { Product } from '@/types/database'
 
 const PRODUCT_DETAIL_BG = '/contact-section-bg.webp'
@@ -85,11 +90,21 @@ export function ProductDetailPage() {
     <>
       <SEO
         title={product.name}
-        description={product.description || `${product.name} - Premium fireworks from Aura Crackers`}
+        description={
+          product.description?.trim() ||
+          (() => {
+            const price = resolveProductPrice(product)
+            const priceText = price != null ? formatPrice(price) : null
+            return priceText
+              ? `${product.name} — ${priceText} at ${SITE_NAME}. Premium fireworks from Sivakasi.`
+              : `${product.name} — premium fireworks from ${SITE_NAME}. Enquire on WhatsApp.`
+          })()
+        }
         image={product.image_url || undefined}
         url={`/products/${slug}`}
-        type="product"
+        type="website"
       />
+      <JsonLd data={buildProductPageSchema(product, slug ?? product.slug)} />
 
       <div className="relative overflow-hidden pb-24 pt-14 sm:pt-[4.25rem] lg:pb-0">
         <picture className="pointer-events-none absolute inset-0">

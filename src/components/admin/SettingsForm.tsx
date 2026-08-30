@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { updateWebsiteSettings } from '@/services/settings'
-import { ImageUploader } from './ImageUploader'
 import { useToast } from '@/contexts/ToastContext'
 import { useSettings } from '@/contexts/SettingsContext'
 
@@ -12,7 +11,6 @@ export function SettingsForm() {
   const [form, setForm] = useState({
     business_name: settings.business_name,
     tagline: settings.tagline || '',
-    logo_url: settings.logo_url || '',
     phone: settings.phone || '',
     whatsapp_number: settings.whatsapp_number || '',
     email: settings.email || '',
@@ -34,7 +32,6 @@ export function SettingsForm() {
     const { error } = await updateWebsiteSettings({
       business_name: form.business_name,
       tagline: form.tagline || null,
-      logo_url: form.logo_url || null,
       phone: form.phone || null,
       whatsapp_number: form.whatsapp_number || null,
       email: form.email || null,
@@ -89,14 +86,6 @@ export function SettingsForm() {
             className={inputClass}
           />
         </div>
-
-        <ImageUploader
-          bucket="logos"
-          currentUrl={form.logo_url}
-          onUpload={(url) => setForm({ ...form, logo_url: url })}
-          onRemove={() => setForm({ ...form, logo_url: '' })}
-          label="Logo"
-        />
 
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-700">About Text</label>

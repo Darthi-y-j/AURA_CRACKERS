@@ -8,6 +8,7 @@ import { useHeroSlideTheme } from '@/contexts/HeroSlideContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { BackButton } from '@/components/customer/BackButton'
 import { UserProfileMenu } from '@/components/customer/UserProfileMenu'
+import { SITE_LOGO_PATH } from '@/lib/siteConfig'
 import { cn } from '@/lib/utils'
 
 const navLinks = [
@@ -74,7 +75,7 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 h-14 transition-all duration-500 sm:h-[4.25rem]',
+        'fixed top-0 left-0 right-0 z-50 h-14 overflow-visible transition-all duration-500 sm:h-[4.25rem]',
         isDarkNav
           ? 'border-transparent bg-gradient-to-b from-navy-950/90 via-navy-950/70 to-transparent'
           : isLightHomeHero
@@ -85,43 +86,21 @@ export function Navbar() {
       <nav className="mx-auto grid h-full max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 px-3 sm:gap-2 sm:px-6 lg:px-8">
         <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2">
           {showBack && <BackButton variant={isDarkNav ? 'dark' : 'light'} />}
-          <Link to="/" className="flex items-center gap-2.5">
-          {settings.logo_url ? (
+          <Link to="/" className="flex min-w-0 items-center gap-2 sm:gap-2.5">
             <img
-              src={settings.logo_url}
+              src={SITE_LOGO_PATH}
               alt={settings.business_name}
-              className="h-8 w-8 rounded-lg object-cover ring-2 ring-white/25 sm:h-10 sm:w-10 sm:rounded-xl"
+              className="h-14 w-14 shrink-0 scale-[1.3] object-contain sm:h-16 sm:w-16 sm:scale-[1.4]"
             />
-          ) : (
-            <div
-              className={cn(
-                'flex h-8 w-8 items-center justify-center rounded-lg shadow-lg sm:h-10 sm:w-10 sm:rounded-xl',
-                isDarkNav
-                  ? 'bg-gradient-to-br from-gold-400 to-gold-500 shadow-gold-500/30'
-                  : 'bg-navy-900',
-              )}
-            >
-              <span
-                className={cn(
-                  'font-display text-base font-bold sm:text-lg',
-                  isDarkNav ? 'text-navy-950' : 'text-gold-500',
-                )}
-              >
-                A
-              </span>
-            </div>
-          )}
-          <div className="hidden min-w-0 sm:block lg:hidden 2xl:block">
             <span
               className={cn(
-                'font-display text-sm font-bold leading-tight transition-colors xl:text-base 2xl:text-lg',
+                'min-w-0 truncate font-display text-sm font-bold uppercase tracking-[0.06em] leading-tight sm:text-base lg:text-lg',
                 isDarkNav ? 'text-white' : 'text-navy-900',
               )}
             >
               {settings.business_name}
             </span>
-          </div>
-        </Link>
+          </Link>
         </div>
 
         <div className="hidden min-w-0 justify-center px-1 lg:flex">

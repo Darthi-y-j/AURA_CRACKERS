@@ -61,6 +61,9 @@ const AdminCategoriesPage = lazy(() =>
 const AdminEnquiriesPage = lazy(() =>
   import('@/pages/admin/AdminEnquiriesPage').then((m) => ({ default: m.AdminEnquiriesPage })),
 )
+const AdminOrderEnquiriesPage = lazy(() =>
+  import('@/pages/admin/AdminEnquiriesPage').then((m) => ({ default: m.AdminOrderEnquiriesPage })),
+)
 const AdminCustomersPage = lazy(() =>
   import('@/pages/admin/AdminCustomersPage').then((m) => ({ default: m.AdminCustomersPage })),
 )
@@ -119,6 +122,7 @@ function App() {
                         <Route path="products/:id/edit" element={<AdminProductFormPage />} />
                         <Route path="categories" element={<AdminCategoriesPage />} />
                         <Route path="enquiries" element={<AdminEnquiriesPage />} />
+                        <Route path="orders" element={<AdminOrderEnquiriesPage />} />
                         <Route path="customers" element={<AdminCustomersPage />} />
                         <Route path="settings" element={<AdminSettingsPage />} />
                       </Route>

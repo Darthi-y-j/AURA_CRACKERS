@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Trash2,
@@ -14,6 +14,7 @@ import {
   Gift,
   ShieldCheck,
   Truck,
+  BadgeCheck,
 } from 'lucide-react'
 import { SEO } from '@/components/shared/SEO'
 import { AnimateIn } from '@/components/customer/AnimateIn'
@@ -24,8 +25,12 @@ import { QuantitySelector } from '@/components/customer/QuantitySelector'
 import { useCart } from '@/contexts/CartContext'
 import { useSettings } from '@/contexts/SettingsContext'
 import { useToast } from '@/contexts/ToastContext'
+import { useAuth } from '@/contexts/AuthContext'
+import { SpinToWinWheel } from '@/components/customer/SpinToWinWheel'
 import { createCartEnquiry } from '@/services/enquiries'
 import { buildCartWhatsAppMessage, buildWhatsAppUrl } from '@/lib/whatsapp'
+import type { SpinReward } from '@/lib/spinToWin'
+import type { CartEnquiryFormData } from '@/types/database'
 import { getCurrentDeliveryAddress, geolocationErrorMessage } from '@/lib/geolocation'
 import {
   buildFullDeliveryAddress,
@@ -164,6 +169,8 @@ function EnquiryForm({
   setCustomerMessage,
   locating,
   loading,
+  isLoggedIn,
+  customerEmail,
   settings,
   onUseLocation,
   onSendEnquiry,
@@ -179,6 +186,8 @@ function EnquiryForm({
   setCustomerMessage: (v: string) => void
   locating: boolean
   loading: boolean
+  isLoggedIn: boolean
+  customerEmail?: string
   settings: ReturnType<typeof useSettings>['settings']
   onUseLocation: () => void
   onSendEnquiry: () => void
@@ -212,6 +221,14 @@ function EnquiryForm({
           <p className="inline-flex items-center gap-1.5 rounded-full border border-[#25D366]/25 bg-[#25D366]/10 px-3 py-1 text-xs font-semibold text-[#128C7E]">
             <MessageCircle className="h-3.5 w-3.5" />
             {formatDisplayPhone(settings.whatsapp_number)}
+          </p>
+        )}
+
+        {isLoggedIn && (
+          <p className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-gold-400/30 bg-gold-500/10 px-3 py-1 text-xs font-semibold text-gold-800">
+            <BadgeCheck className="h-3.5 w-3.5 text-gold-600" />
+            Logged in — your details will be included in the enquiry
+            {customerEmail ? ` (${customerEmail})` : ''}
           </p>
         )}
 
@@ -356,12 +373,34 @@ export function CartPage() {
   const { items, updateQuantity, removeItem, clearCart } = useCart()
   const { settings } = useSettings()
   const { showToast } = useToast()
+  const { user, isCustomer } = useAuth()
   const [customerName, setCustomerName] = useState('')
   const [customerPhone, setCustomerPhone] = useState('')
   const [addressFields, setAddressFields] = useState<DeliveryAddressFields>(emptyAddressFields)
   const [customerMessage, setCustomerMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [locating, setLocating] = useState(false)
+  const [spinReward, setSpinReward] = useState<SpinReward | null>(null)
+  const [spinDiscount, setSpinDiscount] = useState(0)
+  const [prefilledFromAccount, setPrefilledFromAccount] = useState(false)
+
+  const customerEmail = isCustomer && user?.email ? user.email : undefined
+
+  useEffect(() => {
+    if (!isCustomer || !user || prefilledFromAccount) return
+
+    const fullName = (user.user_metadata?.full_name as string | undefined)?.trim()
+    const phone = (user.user_metadata?.phone as string | undefined)?.trim()
+
+    if (fullName && !customerName) setCustomerName(fullName)
+    if (phone && !customerPhone) setCustomerPhone(phone)
+    setPrefilledFromAccount(true)
+  }, [isCustomer, user, prefilledFromAccount, customerName, customerPhone])
+
+  const handleSpinRewardChange = useCallback((reward: SpinReward | null, discount: number) => {
+    setSpinReward(reward)
+    setSpinDiscount(discount)
+  }, [])
 
   const estimatedTotal = useMemo(
     () =>
@@ -373,9 +412,49 @@ export function CartPage() {
   )
 
   const hasPricedItems = items.some((item) => item.price != null)
+  const estimatedAfterSpin = Math.max(0, estimatedTotal - spinDiscount)
 
   const updateAddress = (patch: Partial<DeliveryAddressFields>) => {
     setAddressFields((prev) => ({ ...prev, ...patch }))
+  }
+
+  const buildEnquiryFormData = (): CartEnquiryFormData | null => {
+    if (items.length === 0) {
+      showToast('Your cart is empty', 'error')
+      return null
+    }
+
+    if (!customerName.trim()) {
+      showToast('Please enter your name', 'error')
+      return null
+    }
+
+    if (!validatePhone(customerPhone)) {
+      showToast('Please enter a valid phone number', 'error')
+      return null
+    }
+
+    const addressError = validateDeliveryAddress(addressFields)
+    if (addressError) {
+      showToast(addressError, 'error')
+      return null
+    }
+
+    return {
+      items,
+      customerName: customerName.trim(),
+      customerPhone,
+      customerAddress: buildFullDeliveryAddress(addressFields),
+      customerMessage,
+      customerEmail,
+      authUserId: isCustomer && user?.id ? user.id : undefined,
+      spinReward: spinReward
+        ? {
+            label: spinReward.label,
+            discountAmount: spinDiscount > 0 ? spinDiscount : undefined,
+          }
+        : undefined,
+    }
   }
 
   const handleUseCurrentLocation = async () => {
@@ -392,28 +471,8 @@ export function CartPage() {
   }
 
   const handleSendEnquiry = async () => {
-    if (items.length === 0) {
-      showToast('Your cart is empty', 'error')
-      return
-    }
-
-    if (!customerName.trim()) {
-      showToast('Please enter your name', 'error')
-      return
-    }
-
-    if (!validatePhone(customerPhone)) {
-      showToast('Please enter a valid phone number', 'error')
-      return
-    }
-
-    const addressError = validateDeliveryAddress(addressFields)
-    if (addressError) {
-      showToast(addressError, 'error')
-      return
-    }
-
-    const customerAddress = buildFullDeliveryAddress(addressFields)
+    const formData = buildEnquiryFormData()
+    if (!formData) return
 
     if (!settings.whatsapp_number) {
       showToast('WhatsApp contact is not configured. Please call us instead.', 'error')
@@ -421,14 +480,6 @@ export function CartPage() {
     }
 
     setLoading(true)
-
-    const formData = {
-      items,
-      customerName: customerName.trim(),
-      customerPhone,
-      customerAddress,
-      customerMessage,
-    }
 
     try {
       const { error } = await createCartEnquiry(formData)
@@ -445,6 +496,7 @@ export function CartPage() {
       setCustomerPhone('')
       setAddressFields(emptyAddressFields())
       setCustomerMessage('')
+      setPrefilledFromAccount(false)
     } catch {
       showToast('Something went wrong. Please try again.', 'error')
     } finally {
@@ -463,6 +515,8 @@ export function CartPage() {
     setCustomerMessage,
     locating,
     loading,
+    isLoggedIn: Boolean(isCustomer && user),
+    customerEmail,
     settings,
     onUseLocation: handleUseCurrentLocation,
     onSendEnquiry: handleSendEnquiry,
@@ -665,16 +719,35 @@ export function CartPage() {
                   ))}
                 </div>
 
+                <AnimateIn animation="fade-up" delay={120}>
+                  <SpinToWinWheel
+                    estimatedTotal={estimatedTotal}
+                    onRewardChange={handleSpinRewardChange}
+                  />
+                </AnimateIn>
+
                 {hasPricedItems && (
                   <AnimateIn animation="fade-up" delay={150}>
                     <div className="flex items-center justify-between rounded-2xl border border-gold-400/30 bg-gradient-to-r from-gold-50 to-white px-4 py-3.5 sm:px-5 sm:py-4">
                       <div>
                         <span className="text-sm font-semibold text-navy-800">Estimated total</span>
                         <p className="text-[11px] text-navy-700/55">Confirmed on WhatsApp</p>
+                        {spinReward && spinDiscount > 0 && (
+                          <p className="mt-1 text-[11px] font-semibold text-festive-600">
+                            Spin reward: {spinReward.label} (−{formatPrice(spinDiscount)})
+                          </p>
+                        )}
                       </div>
-                      <span className="font-display text-xl font-bold tabular-nums text-navy-900 sm:text-2xl">
-                        {formatPrice(estimatedTotal)}
-                      </span>
+                      <div className="text-right">
+                        {spinDiscount > 0 && (
+                          <p className="text-xs tabular-nums text-navy-700/45 line-through">
+                            {formatPrice(estimatedTotal)}
+                          </p>
+                        )}
+                        <span className="font-display text-xl font-bold tabular-nums text-navy-900 sm:text-2xl">
+                          {formatPrice(estimatedAfterSpin)}
+                        </span>
+                      </div>
                     </div>
                   </AnimateIn>
                 )}
@@ -698,7 +771,7 @@ export function CartPage() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-navy-700/50">Estimated</p>
-                <p className="font-display text-lg font-bold text-navy-900">{formatPrice(estimatedTotal)}</p>
+                <p className="font-display text-lg font-bold text-navy-900">{formatPrice(estimatedAfterSpin)}</p>
               </div>
               <button
                 type="button"

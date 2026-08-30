@@ -1,7 +1,16 @@
 import { Helmet } from 'react-helmet-async'
 import { useLocation } from 'react-router-dom'
 import { buildCanonicalUrl } from '@/lib/seo'
-import { DEFAULT_DESCRIPTION, DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from '@/lib/siteConfig'
+import {
+  APPLE_TOUCH_ICON_PATH,
+  DEFAULT_DESCRIPTION,
+  DEFAULT_OG_IMAGE,
+  FAVICON_192_PATH,
+  FAVICON_32_PATH,
+  FAVICON_PATH,
+  SITE_NAME,
+  SITE_URL,
+} from '@/lib/siteConfig'
 
 interface SEOProps {
   title: string
@@ -12,6 +21,8 @@ interface SEOProps {
   type?: string
   /** When true, adds noindex/nofollow — use for login, account, cart, etc. */
   noIndex?: boolean
+  /** Use title exactly as provided (for homepage brand title). */
+  titleIsFull?: boolean
 }
 
 function resolveCanonical(url: string | undefined, pathname: string): string {
@@ -31,9 +42,10 @@ export function SEO({
   url,
   type = 'website',
   noIndex = false,
+  titleIsFull = false,
 }: SEOProps) {
   const { pathname } = useLocation()
-  const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`
+  const fullTitle = titleIsFull || title === SITE_NAME ? title : `${title} | ${SITE_NAME}`
   const canonical = resolveCanonical(url, pathname)
   const ogImage = resolveOgImage(image)
   const robots = noIndex ? 'noindex, nofollow' : 'index, follow'
@@ -43,7 +55,14 @@ export function SEO({
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <meta name="robots" content={robots} />
+      <meta name="application-name" content={SITE_NAME} />
+      <meta name="theme-color" content="#0c0806" />
       <link rel="canonical" href={canonical} />
+      <link rel="icon" href={FAVICON_32_PATH} type="image/png" sizes="32x32" />
+      <link rel="icon" href={FAVICON_192_PATH} type="image/png" sizes="192x192" />
+      <link rel="shortcut icon" href={FAVICON_PATH} type="image/png" />
+      <link rel="apple-touch-icon" href={APPLE_TOUCH_ICON_PATH} />
+      <link rel="manifest" href="/site.webmanifest" />
 
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:title" content={fullTitle} />
@@ -51,12 +70,14 @@ export function SEO({
       <meta property="og:type" content={type} />
       <meta property="og:url" content={canonical} />
       <meta property="og:image" content={ogImage} />
+      <meta property="og:image:alt" content={`${SITE_NAME} — premium fireworks and crackers`} />
       <meta property="og:locale" content="en_IN" />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
+      <meta name="twitter:image:alt" content={`${SITE_NAME} — premium fireworks and crackers`} />
     </Helmet>
   )
 }

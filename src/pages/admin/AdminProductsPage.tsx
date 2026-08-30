@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useOutletContext } from 'react-router-dom'
-import { Plus, Pencil, Trash2, Search, GripVertical, Archive, ArchiveRestore, ShoppingBag, Upload } from 'lucide-react'
+import { Plus, Pencil, Trash2, Search, GripVertical, Archive, ArchiveRestore, ShoppingBag, Download } from 'lucide-react'
 import { AdminHeader } from '@/components/admin/AdminHeader'
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog'
 import { RecordSaleDialog } from '@/components/admin/RecordSaleDialog'
@@ -23,7 +23,8 @@ import { useStockAlerts } from '@/contexts/StockAlertContext'
 import { isLowStock } from '@/lib/stock'
 import { groupProductsByCategory } from '@/components/customer/CategoryGroupedProducts'
 import { getSupabaseErrorMessage } from '@/lib/supabase'
-import { importAuraCatalog } from '@/services/catalogImport'
+import { downloadProductsExcel } from '@/lib/exportProductsExcel'
+import { clearCatalogOnly } from '@/services/catalogCleanup'
 import type { Product, Category } from '@/types/database'
 
 export function AdminProductsPage() {
@@ -47,7 +48,9 @@ export function AdminProductsPage() {
   const [savingOrder, setSavingOrder] = useState(false)
   const [saleProduct, setSaleProduct] = useState<Product | null>(null)
   const [recordingSale, setRecordingSale] = useState(false)
-  const [importingCatalog, setImportingCatalog] = useState(false)
+  const [downloading, setDownloading] = useState(false)
+  const [clearAllOpen, setClearAllOpen] = useState(false)
+  const [clearingAll, setClearingAll] = useState(false)
 
   const canReorder = archiveFilter === 'active' && !search && !categoryFilter && !tagFilter && availabilityFilter === 'all'
 
@@ -123,16 +126,39 @@ export function AdminProductsPage() {
     setDeleteId(null)
   }
 
-  const handleImportCatalog = async () => {
-    setImportingCatalog(true)
-    const result = await importAuraCatalog({ force: true })
-    if (result.error) {
-      showToast(result.error, 'error')
-    } else {
-      showToast(`Loaded ${result.productCount} catalogue products.`, 'success')
-      await loadProducts()
+  const handleDownloadProducts = () => {
+    if (products.length === 0) {
+      showToast('No products to download', 'error')
+      return
     }
-    setImportingCatalog(false)
+
+    setDownloading(true)
+    try {
+      downloadProductsExcel(products, categories)
+      showToast(`Downloaded ${products.length} products`, 'success')
+    } catch {
+      showToast('Could not export products. Please try again.', 'error')
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  const handleClearAll = async () => {
+    setClearingAll(true)
+    const result = await clearCatalogOnly()
+    setClearingAll(false)
+    setClearAllOpen(false)
+
+    if (result.errors.length > 0) {
+      showToast(result.errors[0], 'error')
+      return
+    }
+
+    showToast(
+      `Deleted ${result.removedProducts} products and ${result.removedCategories} categories`,
+      'success',
+    )
+    await loadProducts()
   }
 
   const toggleAvailability = async (product: Product) => {
@@ -277,23 +303,32 @@ export function AdminProductsPage() {
               <option value="unavailable">Unavailable</option>
             </select>
           </div>
-          {archiveFilter === 'active' && (
-            <div className="flex shrink-0 items-center gap-2">
-              <button
-                type="button"
-                onClick={() => void handleImportCatalog()}
-                disabled={importingCatalog}
-                className="admin-btn-secondary"
-              >
-                <Upload className="h-4 w-4" />
-                {importingCatalog ? 'Loading catalogue…' : 'Load catalogue'}
-              </button>
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setClearAllOpen(true)}
+              disabled={clearingAll || loading}
+              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+            >
+              <Trash2 className="h-4 w-4" />
+              {clearingAll ? 'Deleting…' : 'Clear all'}
+            </button>
+            <button
+              type="button"
+              onClick={handleDownloadProducts}
+              disabled={downloading || loading || products.length === 0}
+              className="admin-btn-secondary"
+            >
+              <Download className="h-4 w-4" />
+              {downloading ? 'Downloading…' : 'Download Products'}
+            </button>
+            {archiveFilter === 'active' && (
               <Link to="/admin/products/new" className="admin-btn-primary">
                 <Plus className="h-4 w-4" />
                 Add Product
               </Link>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {canReorder && products.length > 1 && (
@@ -526,6 +561,16 @@ export function AdminProductsPage() {
         onConfirm={handleRecordSale}
         onCancel={() => setSaleProduct(null)}
         loading={recordingSale}
+      />
+
+      <ConfirmDialog
+        open={clearAllOpen}
+        title="Delete all products & categories"
+        message="This will permanently delete EVERY product and EVERY category from your store. The catalogue will be empty until you import again. This cannot be undone. Continue?"
+        confirmLabel="Delete everything"
+        onConfirm={handleClearAll}
+        onCancel={() => setClearAllOpen(false)}
+        loading={clearingAll}
       />
 
       <ConfirmDialog
