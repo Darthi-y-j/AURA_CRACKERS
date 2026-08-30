@@ -19,6 +19,7 @@ import {
   isPremiumPlusProductTag,
 } from '@/lib/productCardThemes'
 import { isCardVisibleProductTag } from '@/lib/productTags'
+import { getDisplayBrand } from '@/lib/brand'
 import { Link } from 'react-router-dom'
 
 interface ProductTableGroup {
@@ -36,7 +37,12 @@ interface ProductTableProps {
 }
 
 const DESKTOP_ROW_GRID =
-  'grid grid-cols-[minmax(0,1.5fr)_4.75rem_8.5rem_4.75rem_4rem_5.25rem_minmax(15rem,1.25fr)] items-center gap-x-2'
+  'grid grid-cols-[minmax(0,1.35fr)_3.5rem_minmax(6.5rem,7.25rem)_4.25rem_3.25rem_5rem_minmax(10.75rem,11.5rem)] items-center gap-x-2.5 lg:gap-x-3'
+
+const MOBILE_ROW_GRID =
+  'grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2'
+
+const TABLE_CELL = 'min-w-0 overflow-hidden'
 
 /** Below fixed navbar */
 const TABLE_STICKY_HEADER = 'sticky top-14 z-40 sm:top-[4.25rem]'
@@ -104,12 +110,12 @@ function ProductTableHeader({ className, sticky = true }: { className?: string; 
       )}
     >
       <span className={TABLE_HEADER_LABEL}>Product</span>
-      <span className={cn('text-center', TABLE_HEADER_LABEL_MUTED)}>Pcs</span>
-      <span className={TABLE_HEADER_LABEL}>Brand</span>
-      <span className={TABLE_HEADER_LABEL_ACCENT}>Price</span>
-      <span className={cn('text-center', TABLE_HEADER_LABEL_ACCENT)}>Off</span>
-      <span className={cn('text-center', TABLE_HEADER_LABEL_STATUS)}>Status</span>
-      <span className={cn('text-right', TABLE_HEADER_LABEL_MUTED)}>Action</span>
+      <span className={cn(TABLE_CELL, 'text-center', TABLE_HEADER_LABEL_MUTED)}>Pcs</span>
+      <span className={cn(TABLE_CELL, TABLE_HEADER_LABEL)}>Brand</span>
+      <span className={cn(TABLE_CELL, TABLE_HEADER_LABEL_ACCENT)}>Price</span>
+      <span className={cn(TABLE_CELL, 'text-center', TABLE_HEADER_LABEL_ACCENT)}>Off</span>
+      <span className={cn(TABLE_CELL, 'text-center', TABLE_HEADER_LABEL_STATUS)}>Status</span>
+      <span className={cn(TABLE_CELL, 'text-right', TABLE_HEADER_LABEL_MUTED)}>Action</span>
     </div>
   )
 }
@@ -133,7 +139,7 @@ function ProductTableCategoryRow({
     <div
       id={`category-${id}`}
       className={cn(
-        'scroll-mt-20 flex min-h-11 items-center justify-center border-b border-l-4 border-l-orange-700 px-4 py-0 text-center sm:scroll-mt-[4.5rem] lg:px-5',
+        'scroll-mt-20 flex min-h-11 items-center justify-center border-b border-l-4 border-l-orange-700 px-3 py-0 text-center sm:scroll-mt-[4.5rem] md:px-3 lg:px-4',
         sticky && TABLE_CATEGORY_HIGHLIGHT,
         sticky && variant === 'mobile' && TABLE_STICKY_CATEGORY_MOBILE,
         sticky && variant === 'desktop' && TABLE_STICKY_CATEGORY,
@@ -192,27 +198,49 @@ function MobileTablePrice({
   price,
   originalPrice,
   hasDiscount,
+  inline = false,
 }: {
   price: string | null
   originalPrice: string | null
   hasDiscount: boolean
+  inline?: boolean
 }) {
   if (!price) {
-    return <span className="text-xs font-semibold text-festive-600">Enquire</span>
+    return <span className="text-[11px] font-semibold text-festive-600">Enquire</span>
+  }
+
+  if (inline) {
+    return (
+      <div className="flex items-baseline gap-1 whitespace-nowrap text-right">
+        <span
+          className={cn(
+            'text-sm font-bold tabular-nums leading-none',
+            hasDiscount ? 'text-festive-600' : 'text-navy-950',
+          )}
+        >
+          {price}
+        </span>
+        {originalPrice && (
+          <span className={cn('text-[9px] tabular-nums leading-none line-through', TABLE_META_CLASS)}>
+            {originalPrice}
+          </span>
+        )}
+      </div>
+    )
   }
 
   return (
-    <div className="flex min-w-[3.25rem] flex-col items-end gap-0.5">
+    <div className="flex flex-col items-end gap-0.5 text-right">
       <span
         className={cn(
-          'text-base font-bold tabular-nums leading-none',
+          'text-sm font-bold tabular-nums leading-none',
           hasDiscount ? 'text-festive-600' : 'text-navy-950',
         )}
       >
         {price}
       </span>
       {originalPrice && (
-        <span className={cn('text-[11px] tabular-nums leading-none line-through', TABLE_META_CLASS)}>
+        <span className={cn('text-[10px] tabular-nums leading-none line-through', TABLE_META_CLASS)}>
           {originalPrice}
         </span>
       )}
@@ -226,58 +254,66 @@ function MobileProductTableRow({ product, index }: { product: Product; index: nu
 
   const hasDiscount = product.discount_percentage != null && product.discount_percentage > 0
   const isElite = isEliteProductTag(product.tag)
+  const displayBrand = getDisplayBrand(product.brand)
+  const metaParts = [
+    displayBrand,
+    product.pieces != null && product.pieces >= 1 ? `${product.pieces} pcs` : null,
+  ].filter(Boolean)
 
   return (
     <article
       className={cn(
-        'flex items-center gap-3 border-b px-4 py-3.5 last:border-b-0',
+        MOBILE_ROW_GRID,
+        'min-h-[3.25rem] border-b px-3 py-2 last:border-b-0',
         TABLE_BORDER,
         inCart ? TABLE_IN_CART_BG : getTableStripeClass(index),
       )}
     >
-      <ProductLink product={product} className="flex min-w-0 flex-1 items-center gap-3.5">
-        <div className={cn('relative h-16 w-16 shrink-0 overflow-hidden rounded-xl', TABLE_THUMB_CLASS)}>
-          <img
-            src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.thumb)}
-            alt=""
-            className="h-full w-full object-cover"
-          />
+      <div className="flex min-w-0 items-center gap-2 overflow-hidden">
+        <ProductLink product={product} className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
+          <div className={cn('h-full w-full', TABLE_THUMB_CLASS)}>
+            <img
+              src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.thumb)}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          </div>
           {hasDiscount && (
-            <span className="absolute inset-x-0 top-0 bg-gradient-to-r from-festive-500 to-gold-500 py-0.5 text-center text-[9px] font-bold leading-none text-navy-950">
+            <span className="absolute left-0 top-0 rounded-br bg-gradient-to-r from-festive-500 to-gold-500 px-1 py-px text-[7px] font-bold leading-none text-navy-950">
               {product.discount_percentage}%
             </span>
           )}
-        </div>
+        </ProductLink>
 
-        <div className="min-w-0 flex-1">
-          <h3 className={cn('line-clamp-2 text-base font-bold leading-snug', TABLE_TITLE_CLASS)}>
-            {product.name}
-          </h3>
-          <ProductHighlightBadges product={product} className="mt-1.5" />
-          <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-2">
-            {product.brand?.trim() ? (
-              <ProductBrandBadge
-                brand={product.brand}
-                variant="table"
-                className="px-2.5 py-1 text-[11px]"
-              />
-            ) : null}
-            {product.pieces != null && product.pieces >= 1 ? (
-              <span className="shrink-0 text-xs font-semibold text-stone-600">{product.pieces} pcs</span>
+        <div className="min-w-0 flex-1 overflow-hidden">
+          <ProductLink product={product} className="block min-w-0">
+            <h3 className={cn('truncate text-[13px] font-bold leading-tight', TABLE_TITLE_CLASS)}>
+              {product.name}
+            </h3>
+          </ProductLink>
+          <div className="mt-0.5 flex min-w-0 flex-nowrap items-center gap-1 overflow-hidden">
+            <ProductHighlightBadges product={product} compact className="shrink-0 flex-nowrap gap-0.5" />
+            {metaParts.length > 0 ? (
+              <span className="truncate text-[9px] leading-none text-stone-500">
+                {metaParts.join(' · ')}
+              </span>
             ) : null}
           </div>
         </div>
+      </div>
 
-      </ProductLink>
-
-      <div className="relative z-[1] flex shrink-0 items-center gap-2">
-        <MobileTablePrice price={price} originalPrice={originalPrice} hasDiscount={hasDiscount} />
+      <div className="flex shrink-0 items-center gap-1">
+        <MobileTablePrice
+          price={price}
+          originalPrice={originalPrice}
+          hasDiscount={hasDiscount}
+          inline
+        />
         <WishlistButton
           product={product}
-          size="md"
-          className="h-10 w-10 rounded-full bg-stone-100"
+          size="sm"
+          className="h-7 w-7 shrink-0 rounded-full bg-stone-100"
         />
-
         {product.is_available ? (
           inCart ? (
             <QuantitySelector
@@ -285,7 +321,7 @@ function MobileProductTableRow({ product, index }: { product: Product; index: nu
               onChange={handleQuantityChange}
               variant="table"
               min={0}
-              className="shrink-0 rounded-lg border border-stone-200 bg-white p-0 [&_button]:h-10 [&_button]:w-10 [&_button]:text-stone-600 [&_span]:min-w-[1.5rem] [&_span]:text-base [&_span]:text-navy-950"
+              className="shrink-0 rounded-lg border border-stone-200 bg-white p-0 [&_button]:h-7 [&_button]:w-7 [&_button]:text-stone-600 [&_span]:min-w-5 [&_span]:text-xs [&_span]:font-semibold [&_span]:text-navy-950"
             />
           ) : (
             <button
@@ -293,14 +329,16 @@ function MobileProductTableRow({ product, index }: { product: Product; index: nu
               onClick={handleAddToCart}
               aria-label={`Add ${product.name} to cart`}
               className={cn(
-                'inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-navy-950 shadow-[0_2px_10px_rgba(234,88,12,0.25)]',
+                'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-navy-950 shadow-[0_2px_8px_rgba(234,88,12,0.22)]',
                 isElite ? SILVER_METALLIC_BG : 'bg-gradient-to-r from-festive-500 to-gold-500',
               )}
             >
-              <ShoppingCart className="h-5 w-5" />
+              <ShoppingCart className="h-3.5 w-3.5" />
             </button>
           )
-        ) : null}
+        ) : (
+          <span className="px-1 text-[9px] font-semibold text-stone-500">N/A</span>
+        )}
       </div>
     </article>
   )
@@ -309,15 +347,15 @@ function MobileProductTableRow({ product, index }: { product: Product; index: nu
 function TableStatus({ available }: { available: boolean }) {
   if (available) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700 sm:text-[11px]">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.35)]" aria-hidden="true" />
-        In stock
+      <span className="inline-flex max-w-full items-center gap-1 rounded-full border border-emerald-500/25 bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-700 sm:text-[11px]">
+        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.35)]" aria-hidden="true" />
+        <span className="truncate">In stock</span>
       </span>
     )
   }
 
   return (
-    <span className="inline-flex rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1 text-[10px] font-semibold text-stone-500 sm:text-[11px]">
+    <span className="inline-flex max-w-full rounded-full border border-stone-200 bg-stone-50 px-2 py-1 text-[10px] font-semibold text-stone-500 sm:text-[11px]">
       Sold out
     </span>
   )
@@ -339,8 +377,7 @@ function ProductTableRowCard({
   const isElite = isEliteProductTag(product.tag)
   const showCategory =
     showCategoryLabel && product.category && !isCardVisibleProductTag(product.tag)
-  const brandName = product.brand?.trim() ?? ''
-  const brandWrap = brandName.length > 18
+  const brandName = getDisplayBrand(product.brand) ?? ''
 
   return (
     <article
@@ -348,13 +385,13 @@ function ProductTableRowCard({
         'product-grid-item group relative hidden border-b md:grid md:items-center',
         TABLE_BORDER,
         DESKTOP_ROW_GRID,
-        'px-4 py-3.5 lg:px-5 lg:py-4',
+        'px-3 py-3 lg:px-4 lg:py-3.5',
         inCart ? TABLE_IN_CART_BG : getTableStripeClass(index),
       )}
     >
-          <div className="flex min-w-0 items-center gap-3 lg:gap-4">
+          <div className={cn(TABLE_CELL, 'flex min-w-0 items-center gap-2.5 lg:gap-3')}>
             <ProductLink product={product} className="relative shrink-0">
-              <div className={cn('relative h-[4.5rem] w-[4.5rem] overflow-hidden rounded-xl lg:h-20 lg:w-20', TABLE_THUMB_CLASS)}>
+              <div className={cn('relative h-16 w-16 overflow-hidden rounded-xl lg:h-[4.25rem] lg:w-[4.25rem]', TABLE_THUMB_CLASS)}>
                 <img
                   src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.thumb)}
                   alt={product.name}
@@ -371,12 +408,12 @@ function ProductTableRowCard({
               </div>
             </ProductLink>
 
-            <div className="min-w-0 flex-1">
-              <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+            <div className="min-w-0 flex-1 overflow-hidden">
+              <div className="mb-1 flex flex-wrap items-center gap-1.5">
                 <ProductHighlightBadges product={product} compact />
               </div>
               <ProductLink product={product} className="block min-w-0">
-                <h3 className={cn(CARD_TITLE_BASE_CLASS, TABLE_TITLE_CLASS, 'text-sm lg:text-[15px]')}>
+                <h3 className={cn(CARD_TITLE_BASE_CLASS, TABLE_TITLE_CLASS, 'truncate text-sm lg:text-[15px]')}>
                   {product.name}
                 </h3>
               </ProductLink>
@@ -384,36 +421,35 @@ function ProductTableRowCard({
                 <ProductTagBadge tag={product.tag} variant="light" compact />
               </div>
               {showCategory && (
-                <span className={cn('mt-1', TABLE_PRODUCT_CATEGORY_CLASS)}>
+                <span className={cn('mt-1 inline-block max-w-full truncate', TABLE_PRODUCT_CATEGORY_CLASS)}>
                   {product.category!.name}
                 </span>
               )}
               {product.description && (
-                <p className={cn('mt-1.5 hidden line-clamp-1 lg:block', TABLE_DESC_CLASS)}>
+                <p className={cn('mt-1 hidden truncate text-[11px] leading-snug xl:block', TABLE_DESC_CLASS)}>
                   {truncate(product.description, 72)}
                 </p>
               )}
             </div>
           </div>
 
-          <div className="flex justify-center">
+          <div className={cn(TABLE_CELL, 'flex justify-center')}>
             <ProductPiecesBadge pieces={product.pieces} variant="table" />
           </div>
 
-          <div className="min-w-0 justify-self-start">
-            {product.brand?.trim() ? (
+          <div className={cn(TABLE_CELL, 'flex items-center')}>
+            {brandName ? (
               <ProductBrandBadge
-                brand={product.brand}
+                brand={brandName}
                 variant="table"
-                wrap={brandWrap}
-                className="text-[9px] sm:text-[10px]"
+                className="w-full max-w-full min-w-0 truncate px-2 py-1 text-[9px] lg:text-[10px]"
               />
             ) : (
               <span className={cn('text-[11px]', TABLE_META_CLASS)}>—</span>
             )}
           </div>
 
-          <div className="min-w-0">
+          <div className={cn(TABLE_CELL, 'flex items-center')}>
             <TablePrice
               price={price}
               originalPrice={originalPrice}
@@ -421,7 +457,7 @@ function ProductTableRowCard({
             />
           </div>
 
-          <div className="flex justify-center">
+          <div className={cn(TABLE_CELL, 'flex justify-center')}>
             {hasDiscount ? (
               <span className="inline-flex items-center rounded-lg bg-gradient-to-r from-festive-500 to-gold-500 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-navy-950 shadow-[0_2px_10px_rgba(234,88,12,0.25)]">
                 {product.discount_percentage}%
@@ -431,11 +467,11 @@ function ProductTableRowCard({
             )}
           </div>
 
-          <div className="flex min-w-0 justify-center overflow-hidden">
+          <div className={cn(TABLE_CELL, 'flex justify-center')}>
             <TableStatus available={product.is_available} />
           </div>
 
-          <div className="flex min-w-0 items-center justify-end gap-1">
+          <div className={cn(TABLE_CELL, 'flex min-w-0 items-center justify-end gap-1')}>
             {product.is_available ? (
               <>
                 <ProductLink
@@ -561,25 +597,26 @@ export function ProductTable({
   return (
     <div className="space-y-3">
       {/* Mobile — compact table list */}
-      <div className={cn('flex flex-col gap-0 border border-x-0 max-md:-mx-4 max-md:rounded-none md:hidden', TABLE_SHELL_CLASS)}>
+      <div className={cn('flex flex-col gap-0 border border-x-0 pb-28 max-md:-mx-4 max-md:rounded-none md:hidden', TABLE_SHELL_CLASS)}>
         <div className={TABLE_TOP_BAR_CLASS} aria-hidden="true" />
         <div
           id="catalogue-table-header"
           className={cn(
-            'flex min-h-12 items-center justify-between gap-2 px-4 py-0',
+            MOBILE_ROW_GRID,
+            'min-h-9 border-0 px-3 py-1.5',
             TABLE_STICKY_HEADER,
             TABLE_HEADER_HIGHLIGHT,
           )}
         >
-          <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-navy-950">Product</span>
-          <span className="text-right text-[11px] font-bold uppercase tracking-[0.14em] text-navy-950">
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-navy-950">Product</span>
+          <span className="text-right text-[10px] font-bold uppercase tracking-[0.14em] text-navy-950">
             Price · Add
           </span>
         </div>
         {mobileRows}
       </div>
 
-      <div className={cn('hidden flex-col gap-0 rounded-xl md:flex', TABLE_SHELL_CLASS)}>
+      <div className={cn('mx-auto hidden w-full max-w-6xl flex-col gap-0 rounded-xl md:flex', TABLE_SHELL_CLASS)}>
         <div className={TABLE_TOP_BAR_CLASS} aria-hidden="true" />
         {showHeader ? <ProductTableHeader /> : null}
         {desktopRows}

@@ -83,18 +83,38 @@ export function Navbar() {
             : 'border-b border-navy-800/10 bg-white/95 shadow-sm backdrop-blur-md',
       )}
     >
-      <nav className="mx-auto grid h-full max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 px-3 sm:gap-2 sm:px-6 lg:px-8">
-        <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2">
-          {showBack && <BackButton variant={isDarkNav ? 'dark' : 'light'} />}
-          <Link to="/" className="flex min-w-0 items-center gap-2 sm:gap-2.5">
+      <nav className="mx-auto grid h-full max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 px-2 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:gap-2 sm:px-6 lg:px-8">
+        <div
+          className={cn(
+            'col-start-1 flex min-w-0 items-center gap-0.5 overflow-hidden sm:gap-2',
+            showBack && 'pr-1',
+          )}
+        >
+          {showBack && <BackButton variant={isDarkNav ? 'dark' : 'light'} className="-ml-1 shrink-0 p-2 sm:ml-0 sm:p-2.5" />}
+          <Link
+            to="/"
+            className={cn(
+              'flex min-w-0 items-center gap-1.5 sm:gap-2.5',
+              showBack && '-ml-0.5 sm:ml-0',
+            )}
+          >
             <img
               src={SITE_LOGO_PATH}
               alt={settings.business_name}
-              className="h-14 w-14 shrink-0 scale-[1.3] object-contain sm:h-16 sm:w-16 sm:scale-[1.4]"
+              className={cn(
+                'shrink-0 object-contain',
+                showBack
+                  ? 'h-10 w-10 sm:h-16 sm:w-16 sm:scale-[1.4]'
+                  : 'h-14 w-14 scale-[1.3] sm:h-16 sm:w-16 sm:scale-[1.4]',
+              )}
             />
             <span
               className={cn(
-                'min-w-0 truncate font-display text-sm font-bold uppercase tracking-[0.06em] leading-tight sm:text-base lg:text-lg',
+                'min-w-0 font-display font-bold uppercase leading-tight',
+                showBack
+                  ? 'max-w-[6.5rem] truncate text-[9px] tracking-[0.03em] min-[380px]:max-w-[7.25rem] min-[380px]:text-[10px]'
+                  : 'max-w-[8.5rem] truncate text-[10px] tracking-[0.04em]',
+                'sm:max-w-none sm:truncate sm:text-sm sm:tracking-[0.06em] lg:text-lg',
                 isDarkNav ? 'text-white' : 'text-navy-900',
               )}
             >
@@ -140,7 +160,7 @@ export function Navbar() {
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center justify-end gap-0.5 sm:gap-1">
+        <div className="col-start-2 row-start-1 flex shrink-0 items-center justify-end gap-0.5 sm:col-start-3 sm:gap-1">
           <Link
             to="/wishlist"
             className={cn(

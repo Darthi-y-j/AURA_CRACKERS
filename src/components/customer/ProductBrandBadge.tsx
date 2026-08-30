@@ -77,15 +77,24 @@ export function ProductBrandBadge({
 
   return (
     <span
+      title={name}
       className={cn(
-        'max-w-full font-bold uppercase tracking-wide',
+        'max-w-full font-bold',
+        variant === 'table' || variant === 'overlay' || variant === 'dark'
+          ? 'normal-case tracking-normal'
+          : 'uppercase tracking-wide',
         wrap
           ? 'line-clamp-2 inline-block w-max max-w-full whitespace-normal rounded-lg border px-2 py-1 text-left text-[9px] leading-snug sm:text-[10px]'
-          : 'inline-flex w-max max-w-full items-center justify-center truncate rounded-full border px-2 py-1 text-[9px] leading-none sm:px-2.5 sm:text-[10px]',
+          : variant === 'table'
+            ? 'inline-flex w-full min-w-0 max-w-full items-center truncate rounded-2xl border px-2 py-1 text-[9px] leading-snug sm:px-2.5 sm:text-[10px]'
+            : variant === 'overlay' || variant === 'dark'
+              ? 'inline-flex w-max max-w-full items-center justify-center whitespace-nowrap rounded-full border px-2 py-1 text-[8px] normal-case leading-none tracking-normal sm:px-2.5 sm:text-[10px]'
+              : 'inline-flex w-max max-w-full items-center justify-center truncate rounded-full border px-2 py-1 text-[9px] leading-none sm:px-2.5 sm:text-[10px]',
         variant === 'table' &&
           cn(
             'rounded-2xl border px-2.5 py-1.5 normal-case tracking-normal shadow-sm',
-            isLogo ? 'max-w-[6.5rem]' : 'max-w-full',
+            isLogo ? 'max-w-[6.5rem]' : '',
+            wrap && 'line-clamp-2 whitespace-normal',
             tableTheme?.shell,
             !isLogo && tableTheme?.text,
           ),
@@ -111,7 +120,7 @@ export function ProductBrandBadge({
           decoding="async"
         />
       ) : (
-        name
+        <span className="truncate">{name}</span>
       )}
     </span>
   )
