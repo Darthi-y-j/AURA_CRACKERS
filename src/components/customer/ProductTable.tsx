@@ -198,35 +198,13 @@ function MobileTablePrice({
   price,
   originalPrice,
   hasDiscount,
-  inline = false,
 }: {
   price: string | null
   originalPrice: string | null
   hasDiscount: boolean
-  inline?: boolean
 }) {
   if (!price) {
     return <span className="text-[11px] font-semibold text-festive-600">Enquire</span>
-  }
-
-  if (inline) {
-    return (
-      <div className="flex items-baseline gap-1 whitespace-nowrap text-right">
-        <span
-          className={cn(
-            'text-sm font-bold tabular-nums leading-none',
-            hasDiscount ? 'text-festive-600' : 'text-navy-950',
-          )}
-        >
-          {price}
-        </span>
-        {originalPrice && (
-          <span className={cn('text-[9px] tabular-nums leading-none line-through', TABLE_META_CLASS)}>
-            {originalPrice}
-          </span>
-        )}
-      </div>
-    )
   }
 
   return (
@@ -240,7 +218,7 @@ function MobileTablePrice({
         {price}
       </span>
       {originalPrice && (
-        <span className={cn('text-[10px] tabular-nums leading-none line-through', TABLE_META_CLASS)}>
+        <span className={cn('text-[9px] tabular-nums leading-none line-through', TABLE_META_CLASS)}>
           {originalPrice}
         </span>
       )}
@@ -286,19 +264,17 @@ function MobileProductTableRow({ product, index }: { product: Product; index: nu
         </ProductLink>
 
         <div className="min-w-0 flex-1 overflow-hidden">
+          <ProductHighlightBadges product={product} compact className="mb-0.5 shrink-0 flex-nowrap gap-0.5" />
           <ProductLink product={product} className="block min-w-0">
             <h3 className={cn('truncate text-[13px] font-bold leading-tight', TABLE_TITLE_CLASS)}>
               {product.name}
             </h3>
           </ProductLink>
-          <div className="mt-0.5 flex min-w-0 flex-nowrap items-center gap-1 overflow-hidden">
-            <ProductHighlightBadges product={product} compact className="shrink-0 flex-nowrap gap-0.5" />
-            {metaParts.length > 0 ? (
-              <span className="truncate text-[9px] leading-none text-stone-500">
-                {metaParts.join(' · ')}
-              </span>
-            ) : null}
-          </div>
+          {metaParts.length > 0 ? (
+            <p className="mt-0.5 truncate text-[9px] leading-none text-stone-500">
+              {metaParts.join(' · ')}
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -307,7 +283,6 @@ function MobileProductTableRow({ product, index }: { product: Product; index: nu
           price={price}
           originalPrice={originalPrice}
           hasDiscount={hasDiscount}
-          inline
         />
         <WishlistButton
           product={product}
