@@ -86,7 +86,7 @@ export function Navbar() {
       <nav className="mx-auto grid h-full max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 px-2 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:gap-2 sm:px-6 lg:px-8">
         <div
           className={cn(
-            'col-start-1 flex min-w-0 items-center gap-0.5 overflow-hidden sm:gap-2',
+            'col-start-1 flex min-w-0 items-center gap-0.5 overflow-visible sm:-ml-2 sm:gap-2 lg:-ml-3',
             showBack && 'pr-1',
           )}
         >
@@ -94,7 +94,8 @@ export function Navbar() {
           <Link
             to="/"
             className={cn(
-              'flex min-w-0 items-center gap-1.5 sm:gap-2.5',
+              'flex min-w-0 items-center',
+              showBack ? 'gap-0 sm:gap-2' : 'gap-1 sm:gap-2',
               showBack && '-ml-0.5 sm:ml-0',
             )}
           >
@@ -108,18 +109,23 @@ export function Navbar() {
                   : 'h-14 w-14 scale-[1.3] sm:h-16 sm:w-16 sm:scale-[1.4]',
               )}
             />
-            <span
+            <div
               className={cn(
-                'min-w-0 font-display font-bold uppercase leading-tight',
+                'relative shrink-0 sm:-ml-1.5 lg:-ml-2',
+                showBack ? '-ml-2 sm:-ml-1.5' : '-ml-0.5',
                 showBack
-                  ? 'max-w-[6.5rem] truncate text-[9px] tracking-[0.03em] min-[380px]:max-w-[7.25rem] min-[380px]:text-[10px]'
-                  : 'max-w-[8.5rem] truncate text-[10px] tracking-[0.04em]',
-                'sm:max-w-none sm:truncate sm:text-sm sm:tracking-[0.06em] lg:text-lg',
-                isDarkNav ? 'text-white' : 'text-festive-500',
+                  ? 'h-9 w-[8.25rem] min-[380px]:w-[8.75rem]'
+                  : 'h-9 w-[8.75rem]',
+                'sm:h-[3.25rem] sm:w-[13rem] lg:h-14 lg:w-[16rem]',
               )}
             >
-              {settings.business_name}
-            </span>
+              <img
+                src="/Wordmark - Transparent-03.png"
+                alt={settings.business_name}
+                className="pointer-events-none absolute left-0 top-1/2 h-[430%] w-auto max-w-none -translate-y-1/2 select-none sm:h-[480%]"
+                draggable={false}
+              />
+            </div>
           </Link>
         </div>
 

@@ -124,7 +124,7 @@ function ProductTableHeader({ className, sticky = true }: { className?: string; 
 
 export { ProductTableHeader }
 
-function ProductTableCategoryRow({
+export function ProductTableCategoryRow({
   id,
   name,
   className,
@@ -142,7 +142,7 @@ function ProductTableCategoryRow({
       id={`category-${id}`}
       className={cn(
         'scroll-mt-20 flex min-h-11 items-center justify-center border-b border-l-4 border-l-orange-700 px-3 py-0 text-center max-md:scroll-mt-[calc(3.5rem+2.25rem)] sm:scroll-mt-[4.5rem] md:px-3 lg:px-4',
-        sticky && TABLE_CATEGORY_HIGHLIGHT,
+        TABLE_CATEGORY_HIGHLIGHT,
         sticky && variant === 'mobile' && TABLE_STICKY_CATEGORY_MOBILE,
         sticky && variant === 'mobile' && '-mt-px',
         sticky && variant === 'desktop' && TABLE_STICKY_CATEGORY_DESKTOP,

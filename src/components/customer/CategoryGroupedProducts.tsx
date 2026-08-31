@@ -1,7 +1,7 @@
 import type { Category, Product } from '@/types/database'
 import type { CatalogueView } from './CatalogueToolbar'
 import { ProductGrid } from './ProductGrid'
-import { ProductTable } from './ProductTable'
+import { ProductTable, ProductTableCategoryRow } from './ProductTable'
 
 export interface CategoryProductGroup {
   id: string
@@ -67,18 +67,9 @@ interface CategoryGroupedProductsProps {
 
 function CategoryProductSection({ group }: { group: CategoryProductGroup }) {
   return (
-    <section id={`category-${group.id}`} className="scroll-mt-32">
-      <div className="mb-4 flex items-center gap-2.5 border-b border-navy-900/8 pb-3 sm:mb-5">
-        <span
-          className="h-0.5 w-8 shrink-0 rounded-full bg-gradient-to-r from-festive-500 to-gold-400 sm:w-10"
-          aria-hidden="true"
-        />
-        <h2 className="min-w-0 font-display text-lg font-bold text-navy-900 sm:text-2xl">
-          {group.name}
-        </h2>
-        <span className="ml-auto shrink-0 rounded-full border border-gold-500/25 bg-gold-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold-600">
-          {group.products.length} {group.products.length === 1 ? 'item' : 'items'}
-        </span>
+    <section className="scroll-mt-32">
+      <div className="mb-4 overflow-hidden rounded-xl border border-stone-200/90 sm:mb-5">
+        <ProductTableCategoryRow id={group.id} name={group.name} sticky={false} />
       </div>
 
       <ProductGrid

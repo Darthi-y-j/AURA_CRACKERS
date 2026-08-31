@@ -6,7 +6,7 @@ Keelathiruthangal Village,
 Taluk: Sivakasi, District: Virudhunagar,
 Tamil Nadu, India`
 
-export const WHATSAPP_NUMBERS = ['919344335242', '918825988269', '919789514191'] as const
+export const WHATSAPP_NUMBERS = ['918825411254', '918825988269', '919789514191'] as const
 
 export const BUSINESS_POLICIES: BusinessPolicies = {
   delivery_areas: 'All over India',

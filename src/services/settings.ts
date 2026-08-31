@@ -39,7 +39,7 @@ function mergeSettings(data: Record<string, unknown> | null): WebsiteSettings {
 
   const socialLinks = (data.social_links as WebsiteSettings['social_links']) || {}
   const legacyPhones = ['+91 9876543210', '919876543210']
-  const legacyWhatsapp = ['919876543210', '9876543210', '918825411254']
+  const legacyWhatsapp = ['919876543210', '9876543210', '919344335242', '9344335242']
   const legacyAddress = 'Sivakasi, Tamil Nadu, India'
 
   const legacyEmails = ['info@auracrackers.com']

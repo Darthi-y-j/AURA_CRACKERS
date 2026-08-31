@@ -15,7 +15,14 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           <div>
-            <h3 className="font-display text-xl font-bold uppercase tracking-wide text-festive-500">{settings.business_name}</h3>
+            <div className="relative h-10 w-44 max-w-full sm:h-11 sm:w-52">
+              <img
+                src="/Wordmark - Transparent-03.png"
+                alt={settings.business_name}
+                className="pointer-events-none absolute left-0 top-1/2 h-[430%] w-auto max-w-none -translate-y-1/2 select-none sm:h-[480%]"
+                draggable={false}
+              />
+            </div>
             {settings.tagline && (
               <p className="mt-2 text-sm text-white/60">{settings.tagline}</p>
             )}
