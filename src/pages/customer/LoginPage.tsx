@@ -1,24 +1,37 @@
-import { useState } from 'react'
-import { Link, Navigate, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, Navigate, useLocation, useSearchParams } from 'react-router-dom'
 import { LogIn, Mail } from 'lucide-react'
 import { SEO } from '@/components/shared/SEO'
 import { useAuth } from '@/contexts/AuthContext'
 
 function isEmailNotConfirmedError(message: string): boolean {
-  return message.toLowerCase().includes('email not confirmed')
+  const lower = message.toLowerCase()
+  return lower.includes('email not confirmed') || lower.includes('confirm your email')
 }
 
 export function LoginPage() {
   const { signInCustomer, resendConfirmationEmail, user, isAdmin, isCustomer, loading } = useAuth()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const from = (location.state as { from?: string } | null)?.from || '/account'
+  const emailVerified = searchParams.get('verified') === '1'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [info, setInfo] = useState('')
+  const [info, setInfo] = useState(
+    emailVerified
+      ? 'Your email is confirmed. Sign in with the same email and password you used to register.'
+      : '',
+  )
   const [submitting, setSubmitting] = useState(false)
   const [resending, setResending] = useState(false)
+
+  useEffect(() => {
+    if (emailVerified) {
+      setInfo('Your email is confirmed. Sign in with the same email and password you used to register.')
+    }
+  }, [emailVerified])
 
   const emailNotConfirmed = isEmailNotConfirmedError(error)
 

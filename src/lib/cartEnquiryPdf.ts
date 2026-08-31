@@ -133,10 +133,9 @@ function drawSpinRewardCallout(
   pageWidth: number,
   y: number,
   label: string,
-  spinDiscount: number,
 ): number {
   const boxWidth = pageWidth - margin * 2
-  const boxHeight = spinDiscount > 0 ? 20 : 16
+  const boxHeight = 16
   const boxY = y
 
   doc.setFillColor(255, 247, 237)
@@ -147,22 +146,15 @@ function drawSpinRewardCallout(
   doc.setFont('Orbitron', 'bold')
   doc.setFontSize(9)
   doc.setTextColor(...BRAND_ORANGE)
-  doc.text('Spin to Win Reward', margin + 4, boxY + 6)
+  doc.text('Spin to Win Gift', margin + 4, boxY + 6)
 
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(9)
   doc.text(label, margin + 4, boxY + 12)
 
-  if (spinDiscount > 0) {
-    doc.setFont('helvetica', 'normal')
-    doc.text(`Discount: - ${formatPdfAmount(spinDiscount)}`, pageWidth - margin - 4, boxY + 12, {
-      align: 'right',
-    })
-  } else {
-    doc.setFont('helvetica', 'italic')
-    doc.setFontSize(8)
-    doc.text('Applied', pageWidth - margin - 4, boxY + 12, { align: 'right' })
-  }
+  doc.setFont('helvetica', 'italic')
+  doc.setFontSize(8)
+  doc.text('Free gift with order', pageWidth - margin - 4, boxY + 12, { align: 'right' })
 
   return boxY + boxHeight + 6
 }
@@ -339,7 +331,7 @@ export async function downloadCartEnquiryPdf(
   const hasPricing = data.items.some((item) => item.price != null)
 
   if (data.spinReward) {
-    y = drawSpinRewardCallout(doc, margin, pageWidth, y, data.spinReward.label, spinDiscount)
+    y = drawSpinRewardCallout(doc, margin, pageWidth, y, data.spinReward.label)
   }
 
   if (hasPricing && subtotal > 0) {

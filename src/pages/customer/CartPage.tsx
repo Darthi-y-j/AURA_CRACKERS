@@ -402,6 +402,17 @@ export function CartPage() {
     setSpinDiscount(discount)
   }, [])
 
+  const resetSpinForNewEnquiry = useCallback(() => {
+    setSpinReward(null)
+    setSpinDiscount(0)
+  }, [])
+
+  useEffect(() => {
+    if (items.length === 0) {
+      resetSpinForNewEnquiry()
+    }
+  }, [items.length, resetSpinForNewEnquiry])
+
   const estimatedTotal = useMemo(
     () =>
       items.reduce((sum, item) => {
@@ -492,6 +503,7 @@ export function CartPage() {
       const url = buildWhatsAppUrl(settings.whatsapp_number, message)
       window.open(url, '_blank', 'noopener,noreferrer')
       clearCart()
+      resetSpinForNewEnquiry()
       setCustomerName('')
       setCustomerPhone('')
       setAddressFields(emptyAddressFields())
@@ -722,6 +734,7 @@ export function CartPage() {
                 <AnimateIn animation="fade-up" delay={120}>
                   <SpinToWinWheel
                     estimatedTotal={estimatedTotal}
+                    reward={spinReward}
                     onRewardChange={handleSpinRewardChange}
                   />
                 </AnimateIn>
@@ -732,20 +745,15 @@ export function CartPage() {
                       <div>
                         <span className="text-sm font-semibold text-navy-800">Estimated total</span>
                         <p className="text-[11px] text-navy-700/55">Confirmed on WhatsApp</p>
-                        {spinReward && spinDiscount > 0 && (
+                        {spinReward && (
                           <p className="mt-1 text-[11px] font-semibold text-festive-600">
-                            Spin reward: {spinReward.label} (−{formatPrice(spinDiscount)})
+                            Spin gift: {spinReward.label}
                           </p>
                         )}
                       </div>
                       <div className="text-right">
-                        {spinDiscount > 0 && (
-                          <p className="text-xs tabular-nums text-navy-700/45 line-through">
-                            {formatPrice(estimatedTotal)}
-                          </p>
-                        )}
                         <span className="font-display text-xl font-bold tabular-nums text-navy-900 sm:text-2xl">
-                          {formatPrice(estimatedAfterSpin)}
+                          {formatPrice(estimatedTotal)}
                         </span>
                       </div>
                     </div>

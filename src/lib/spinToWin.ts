@@ -1,11 +1,10 @@
 export type SpinRewardType =
-  | 'percent_5'
-  | 'percent_10'
-  | 'flat_100'
-  | 'flat_200'
-  | 'free_gift'
-  | 'extra_reward'
-  | 'no_luck'
+  | 'tin_fountain'
+  | 'helicopter'
+  | 'one_k_wala'
+  | 'single_pipe'
+  | 'thirty_shot'
+  | 'thirty_shot_plus_one_k'
 
 export interface SpinReward {
   id: string
@@ -16,129 +15,106 @@ export interface SpinReward {
   textColor: string
 }
 
-export interface StoredSpinResult {
-  reward: SpinReward
-  spunAt: string
-  userId: string
+export const SPIN_SEGMENT_COUNT = 6
+export const SPIN_SEGMENT_DEGREES = 360 / SPIN_SEGMENT_COUNT
+export const SPIN_ANIMATION_MS = 5000
+
+/** Clockwise degrees from 12 o'clock to the centre of a wheel segment. */
+export function getSegmentCenterAngle(segmentIndex: number): number {
+  return segmentIndex * SPIN_SEGMENT_DEGREES + SPIN_SEGMENT_DEGREES / 2
 }
 
-export const SPIN_SEGMENT_COUNT = 8
-export const SPIN_SEGMENT_DEGREES = 360 / SPIN_SEGMENT_COUNT
+export function normalizeWheelDegrees(degrees: number): number {
+  return ((degrees % 360) + 360) % 360
+}
 
 export const SPIN_REWARDS: SpinReward[] = [
   {
-    id: 'percent_5_a',
-    label: '5% OFF',
-    type: 'percent_5',
+    id: 'tin_fountain',
+    label: '4" TIN FOUNTAIN',
+    type: 'tin_fountain',
     segmentIndex: 0,
     color: '#1e1b4b',
     textColor: '#fde68a',
   },
   {
-    id: 'percent_10',
-    label: '10% OFF',
-    type: 'percent_10',
+    id: 'helicopter',
+    label: 'HELICOPTER',
+    type: 'helicopter',
     segmentIndex: 1,
     color: '#ea580c',
     textColor: '#fff7ed',
   },
   {
-    id: 'flat_100',
-    label: '₹100 OFF',
-    type: 'flat_100',
+    id: 'one_k_wala',
+    label: '1K WALA',
+    type: 'one_k_wala',
     segmentIndex: 2,
     color: '#f59e0b',
     textColor: '#1c1917',
   },
   {
-    id: 'flat_200',
-    label: '₹200 OFF',
-    type: 'flat_200',
+    id: 'single_pipe',
+    label: '2" SINGLE PIPE',
+    type: 'single_pipe',
     segmentIndex: 3,
     color: '#0f172a',
     textColor: '#fbbf24',
   },
   {
-    id: 'free_gift',
-    label: 'FREE GIFT',
-    type: 'free_gift',
+    id: 'thirty_shot',
+    label: '30 SHOT',
+    type: 'thirty_shot',
     segmentIndex: 4,
     color: '#c2410c',
     textColor: '#fffbeb',
   },
   {
-    id: 'extra_reward',
-    label: 'EXTRA REWARD',
-    type: 'extra_reward',
+    id: 'thirty_shot_plus_one_k',
+    label: '30 SHOT + 1K',
+    type: 'thirty_shot_plus_one_k',
     segmentIndex: 5,
-    color: '#292524',
-    textColor: '#fcd34d',
-  },
-  {
-    id: 'no_luck',
-    label: 'BETTER LUCK NEXT TIME',
-    type: 'no_luck',
-    segmentIndex: 6,
-    color: '#44403c',
-    textColor: '#e7e5e4',
-  },
-  {
-    id: 'percent_5_b',
-    label: '5% OFF',
-    type: 'percent_5',
-    segmentIndex: 7,
     color: '#7c2d12',
     textColor: '#fef3c7',
   },
 ]
 
-function spinStorageKey(userId: string): string {
-  return `aura-spin-to-win-${userId}`
-}
+const SPIN_REWARD_BY_TYPE = Object.fromEntries(
+  SPIN_REWARDS.map((reward) => [reward.type, reward]),
+) as Record<SpinRewardType, SpinReward>
 
-function isSameCalendarDay(a: Date, b: Date): boolean {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  )
-}
-
-export function getStoredSpinResult(userId: string): StoredSpinResult | null {
-  try {
-    const raw = localStorage.getItem(spinStorageKey(userId))
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as StoredSpinResult
-    if (!parsed?.reward || parsed.userId !== userId) return null
-    if (!isSameCalendarDay(new Date(parsed.spunAt), new Date())) return null
-    return parsed
-  } catch {
-    return null
+/** Picks the wheel outcome from cart value — random only within the eligible tier. */
+export function pickSpinRewardForCartTotal(cartTotal: number): SpinReward {
+  if (cartTotal >= 20_000) {
+    return SPIN_REWARD_BY_TYPE.thirty_shot_plus_one_k
   }
-}
-
-export function saveSpinResult(userId: string, reward: SpinReward): StoredSpinResult {
-  const result: StoredSpinResult = {
-    reward,
-    spunAt: new Date().toISOString(),
-    userId,
+  if (cartTotal >= 10_000) {
+    return SPIN_REWARD_BY_TYPE.thirty_shot
   }
-  try {
-    localStorage.setItem(spinStorageKey(userId), JSON.stringify(result))
-  } catch {
-    // localStorage may be unavailable
+  if (cartTotal >= 5_000) {
+    const pool = [SPIN_REWARD_BY_TYPE.one_k_wala, SPIN_REWARD_BY_TYPE.single_pipe]
+    return pool[Math.floor(Math.random() * pool.length)]!
   }
-  return result
-}
-
-export function pickRandomSpinReward(): SpinReward {
-  const index = Math.floor(Math.random() * SPIN_REWARDS.length)
-  return SPIN_REWARDS[index]!
+  const pool = [SPIN_REWARD_BY_TYPE.tin_fountain, SPIN_REWARD_BY_TYPE.helicopter]
+  return pool[Math.floor(Math.random() * pool.length)]!
 }
 
 export function getSpinLandingRotation(segmentIndex: number, extraSpins = 6): number {
-  const segmentCenter = segmentIndex * SPIN_SEGMENT_DEGREES + SPIN_SEGMENT_DEGREES / 2
+  const segmentCenter = getSegmentCenterAngle(segmentIndex)
   return extraSpins * 360 + (360 - segmentCenter)
+}
+
+/** Clockwise rotation from current position to land segment under the top pointer. */
+export function getNextSpinRotation(
+  currentRotation: number,
+  segmentIndex: number,
+  extraSpins: number,
+): number {
+  const targetMod = normalizeWheelDegrees(getSpinLandingRotation(segmentIndex, 0))
+  const currentMod = normalizeWheelDegrees(currentRotation)
+  let delta = targetMod - currentMod
+  if (delta <= 0) delta += 360
+  return currentRotation + delta + extraSpins * 360
 }
 
 export function buildWheelGradient(): string {
@@ -147,39 +123,19 @@ export function buildWheelGradient(): string {
     const end = start + SPIN_SEGMENT_DEGREES
     return `${segment.color} ${start}deg ${end}deg`
   })
-  return `conic-gradient(from -90deg, ${stops.join(', ')})`
+  // 0deg = 12 o'clock in modern browsers — matches pointer and label layout.
+  return `conic-gradient(${stops.join(', ')})`
 }
 
-export function calculateSpinDiscount(subtotal: number, reward: SpinReward | null): number {
-  if (!reward || subtotal <= 0) return 0
-
-  switch (reward.type) {
-    case 'percent_5':
-      return Math.round(subtotal * 0.05)
-    case 'percent_10':
-      return Math.round(subtotal * 0.1)
-    case 'flat_100':
-      return Math.min(100, subtotal)
-    case 'flat_200':
-      return Math.min(200, subtotal)
-    default:
-      return 0
-  }
+/** Spin rewards are free gifts — no monetary discount on the cart. */
+export function calculateSpinDiscount(_subtotal: number, _reward: SpinReward | null): number {
+  return 0
 }
 
-export function rewardHasMonetaryDiscount(type: SpinRewardType): boolean {
-  return type === 'percent_5' || type === 'percent_10' || type === 'flat_100' || type === 'flat_200'
+export function rewardHasMonetaryDiscount(_type: SpinRewardType): boolean {
+  return false
 }
 
 export function getSpinRewardMessage(reward: SpinReward): string {
-  switch (reward.type) {
-    case 'free_gift':
-      return 'You won a FREE GIFT — mention this on WhatsApp to claim it!'
-    case 'extra_reward':
-      return 'You unlocked an EXTRA REWARD — our team will surprise you on WhatsApp!'
-    case 'no_luck':
-      return 'Better luck next time! You can spin again tomorrow.'
-    default:
-      return `You won ${reward.label}! Discount applied to your estimated total.`
-  }
+  return `You won ${reward.label}! Mention this free gift when you send your WhatsApp enquiry.`
 }

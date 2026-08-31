@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { UserPlus } from 'lucide-react'
+import { Mail, UserPlus } from 'lucide-react'
 import { SEO } from '@/components/shared/SEO'
 import { useAuth } from '@/contexts/AuthContext'
 import { validatePhone } from '@/lib/utils'
 
 export function RegisterPage() {
-  const { signUpCustomer, user, isAdmin, isCustomer, loading } = useAuth()
+  const { signUpCustomer, resendConfirmationEmail, user, isAdmin, isCustomer, loading } = useAuth()
   const navigate = useNavigate()
 
   const [fullName, setFullName] = useState('')
@@ -16,7 +16,10 @@ export function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [registeredEmail, setRegisteredEmail] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [resending, setResending] = useState(false)
+  const [resendInfo, setResendInfo] = useState('')
 
   if (loading) {
     return (
@@ -37,6 +40,7 @@ export function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setResendInfo('')
 
     if (!fullName.trim()) {
       setError('Please enter your full name')
@@ -61,7 +65,7 @@ export function RegisterPage() {
     setSubmitting(true)
 
     const { error: signUpError, needsEmailConfirmation } = await signUpCustomer(
-      email,
+      email.trim(),
       password,
       fullName.trim(),
       phone,
@@ -79,7 +83,21 @@ export function RegisterPage() {
       return
     }
 
+    setRegisteredEmail(email.trim())
     setSuccess(true)
+  }
+
+  const handleResend = async () => {
+    if (!registeredEmail) return
+    setResending(true)
+    setResendInfo('')
+    const { error: resendError } = await resendConfirmationEmail(registeredEmail)
+    setResending(false)
+    if (resendError) {
+      setResendInfo(resendError)
+      return
+    }
+    setResendInfo(`Confirmation email sent again to ${registeredEmail}. Check your inbox and spam folder.`)
   }
 
   if (success) {
@@ -88,14 +106,30 @@ export function RegisterPage() {
         <SEO title="Register" description="Create your Aura Crackers account." noIndex />
         <div className="mx-auto max-w-md px-4 py-12 text-center sm:py-16">
           <div className="rounded-2xl border border-navy-900/10 bg-white p-8 shadow-sm">
-            <h1 className="font-display text-2xl font-bold text-navy-900">Account Created</h1>
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50">
+              <Mail className="h-7 w-7 text-emerald-600" />
+            </div>
+            <h1 className="mt-5 font-display text-2xl font-bold text-navy-900">Check your email</h1>
             <p className="mt-3 text-sm leading-relaxed text-navy-700/70">
-              Your account has been created. If email confirmation is enabled, please check your inbox
-              before signing in.
+              We sent a confirmation link to{' '}
+              <span className="font-semibold text-navy-900">{registeredEmail}</span>. Open that email
+              and click <strong>Confirm</strong> to activate your account. You can sign in only after
+              confirming.
             </p>
+            {resendInfo && (
+              <p className="mt-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{resendInfo}</p>
+            )}
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resending}
+              className="mt-5 inline-flex items-center gap-2 rounded-lg border border-navy-900/10 px-4 py-2.5 text-sm font-semibold text-navy-800 transition hover:bg-navy-900/[0.03] disabled:opacity-60"
+            >
+              {resending ? 'Sending…' : 'Resend confirmation email'}
+            </button>
             <Link
               to="/login"
-              className="mt-6 inline-flex rounded-lg bg-gold-500 px-6 py-3 text-sm font-bold text-navy-950 hover:bg-gold-400"
+              className="mt-4 inline-flex w-full justify-center rounded-lg bg-gold-500 px-6 py-3 text-sm font-bold text-navy-950 hover:bg-gold-400"
             >
               Go to Login
             </Link>
@@ -115,7 +149,9 @@ export function RegisterPage() {
             <UserPlus className="h-7 w-7 text-gold-400" />
           </div>
           <h1 className="mt-5 font-display text-3xl font-bold text-navy-900">Create Account</h1>
-          <p className="mt-2 text-sm text-navy-700/70">Register to send enquiries from your account</p>
+          <p className="mt-2 text-sm text-navy-700/70">
+            Register with your email — we&apos;ll send a confirmation link before you can sign in
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 rounded-2xl border border-navy-900/10 bg-white p-6 shadow-sm sm:p-8">

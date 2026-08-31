@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
 import { supabase, getSupabaseErrorMessage } from '@/lib/supabase'
+import { getAuthConfirmRedirectUrl } from '@/lib/authRedirects'
 import { cleanPhone } from '@/lib/utils'
 import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js'
 
@@ -245,6 +246,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: 'Login succeeded but no session was returned. Please try again.' }
     }
 
+    if (!data.user.email_confirmed_at) {
+      await supabase.auth.signOut()
+      setSession(null)
+      setUser(null)
+      return {
+        error:
+          'Email not confirmed. Please open the confirmation link we sent to your inbox, then sign in again.',
+      }
+    }
+
     setSession(activeSession)
     setUser(data.user)
 
@@ -264,15 +275,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       options: {
         data: { full_name: fullName, phone: normalizedPhone },
+        emailRedirectTo: getAuthConfirmRedirectUrl(),
       },
     })
 
     if (error) return { error: error.message }
 
-    if (data.session && data.user) {
-      setSession(data.session)
-      setUser(data.user)
+    if (data.user && data.user.identities?.length === 0) {
+      return {
+        error:
+          'An account with this email already exists. Sign in, or use “Resend confirmation email” on the login page if you have not verified yet.',
+      }
+    }
 
+    if (data.session) {
+      await supabase.auth.signOut()
+      setSession(null)
+      setUser(null)
+    }
+
+    const needsEmailConfirmation = !data.user?.email_confirmed_at
+
+    if (!needsEmailConfirmation && data.user) {
       const profileError = await upsertCustomerProfile(
         data.user.id,
         fullName,
@@ -280,7 +304,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email,
       )
       if (profileError.error) return profileError
-
       return { error: null, needsEmailConfirmation: false }
     }
 
@@ -291,6 +314,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.resend({
       type: 'signup',
       email,
+      options: {
+        emailRedirectTo: getAuthConfirmRedirectUrl(),
+      },
     })
 
     if (error) return { error: error.message }

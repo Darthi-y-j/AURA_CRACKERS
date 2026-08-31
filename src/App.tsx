@@ -29,6 +29,9 @@ const AboutPage = lazy(() => import('@/pages/customer/AboutPage').then((m) => ({
 const ContactPage = lazy(() => import('@/pages/customer/ContactPage').then((m) => ({ default: m.ContactPage })))
 const LoginPage = lazy(() => import('@/pages/customer/LoginPage').then((m) => ({ default: m.LoginPage })))
 const RegisterPage = lazy(() => import('@/pages/customer/RegisterPage').then((m) => ({ default: m.RegisterPage })))
+const AuthConfirmPage = lazy(() =>
+  import('@/pages/customer/AuthConfirmPage').then((m) => ({ default: m.AuthConfirmPage })),
+)
 const AccountPage = lazy(() => import('@/pages/customer/AccountPage').then((m) => ({ default: m.AccountPage })))
 const FAQPage = lazy(() => import('@/pages/customer/FAQPage').then((m) => ({ default: m.FAQPage })))
 const SafetyPage = lazy(() => import('@/pages/customer/SafetyPage').then((m) => ({ default: m.SafetyPage })))
@@ -103,6 +106,7 @@ function App() {
                         <Route path="/contact" element={<ContactPage />} />
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />
+                        <Route path="/auth/confirm" element={<AuthConfirmPage />} />
                         <Route path="/account/*" element={<AccountPage />} />
                         <Route path="/faq" element={<FAQPage />} />
                         <Route path="/safety" element={<SafetyPage />} />

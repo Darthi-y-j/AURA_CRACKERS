@@ -1,81 +1,130 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Gift, LogIn, Sparkles, Trophy } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/contexts/ToastContext'
 import { SITE_LOGO_PATH } from '@/lib/siteConfig'
-import { formatPrice, cn } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import {
   SPIN_REWARDS,
-  SPIN_SEGMENT_DEGREES,
+  SPIN_ANIMATION_MS,
   buildWheelGradient,
-  calculateSpinDiscount,
-  getSpinLandingRotation,
+  getNextSpinRotation,
+  getSegmentCenterAngle,
   getSpinRewardMessage,
-  getStoredSpinResult,
-  pickRandomSpinReward,
-  rewardHasMonetaryDiscount,
-  saveSpinResult,
+  pickSpinRewardForCartTotal,
   type SpinReward,
-  type StoredSpinResult,
 } from '@/lib/spinToWin'
 
 interface SpinToWinWheelProps {
   estimatedTotal: number
+  reward: SpinReward | null
   onRewardChange?: (reward: SpinReward | null, discount: number) => void
   className?: string
 }
 
-export function SpinToWinWheel({ estimatedTotal, onRewardChange, className }: SpinToWinWheelProps) {
+const SPIN_EASING = 'cubic-bezier(0.2, 0.9, 0.2, 1)'
+
+export function SpinToWinWheel({
+  estimatedTotal,
+  reward,
+  onRewardChange,
+  className,
+}: SpinToWinWheelProps) {
   const { user, isCustomer, loading } = useAuth()
   const { showToast } = useToast()
-  const [rotation, setRotation] = useState(0)
   const [spinning, setSpinning] = useState(false)
-  const [storedResult, setStoredResult] = useState<StoredSpinResult | null>(null)
+  const rotationRef = useRef(0)
+  const wheelRef = useRef<HTMLDivElement>(null)
+  const pendingRewardRef = useRef<SpinReward | null>(null)
+  const spinFinishTimerRef = useRef<number | null>(null)
 
   const wheelGradient = useMemo(() => buildWheelGradient(), [])
-  const onRewardChangeRef = useRef(onRewardChange)
-  onRewardChangeRef.current = onRewardChange
+
+  const applyWheelRotation = (degrees: number, animate: boolean) => {
+    const wheel = wheelRef.current
+    if (!wheel) return
+
+    wheel.style.transition = animate
+      ? `transform ${SPIN_ANIMATION_MS}ms ${SPIN_EASING}`
+      : 'none'
+    wheel.style.transform = `rotate(${degrees}deg)`
+    rotationRef.current = degrees
+  }
+
+  useLayoutEffect(() => {
+    applyWheelRotation(rotationRef.current, false)
+  }, [])
 
   useEffect(() => {
-    if (!user?.id) {
-      setStoredResult(null)
-      onRewardChangeRef.current?.(null, 0)
-      return
+    return () => {
+      if (spinFinishTimerRef.current != null) {
+        window.clearTimeout(spinFinishTimerRef.current)
+      }
     }
-    const saved = getStoredSpinResult(user.id)
-    setStoredResult(saved)
-    if (saved) {
-      const discount = calculateSpinDiscount(estimatedTotal, saved.reward)
-      onRewardChangeRef.current?.(saved.reward, discount)
-      setRotation(getSpinLandingRotation(saved.reward.segmentIndex, 0))
-    } else {
-      onRewardChangeRef.current?.(null, 0)
-    }
-  }, [user?.id, estimatedTotal])
+  }, [])
 
-  const activeReward = storedResult?.reward ?? null
-  const discount = activeReward ? calculateSpinDiscount(estimatedTotal, activeReward) : 0
-  const finalTotal = Math.max(0, estimatedTotal - discount)
+  useEffect(() => {
+    if (reward) return
+
+    pendingRewardRef.current = null
+    rotationRef.current = 0
+    applyWheelRotation(0, false)
+  }, [reward])
+
+  const finishSpin = (won: SpinReward) => {
+    pendingRewardRef.current = null
+    onRewardChange?.(won, 0)
+    setSpinning(false)
+    showToast(getSpinRewardMessage(won), 'success')
+  }
 
   const handleSpin = () => {
-    if (!user?.id || !isCustomer || spinning) return
+    if (!user?.id || !isCustomer || spinning || reward) return
 
-    const reward = pickRandomSpinReward()
+    const pickedReward = pickSpinRewardForCartTotal(estimatedTotal)
     const extraSpins = 5 + Math.floor(Math.random() * 3)
-    const landingRotation = getSpinLandingRotation(reward.segmentIndex, extraSpins)
+    const landingRotation = getNextSpinRotation(
+      rotationRef.current,
+      pickedReward.segmentIndex,
+      extraSpins,
+    )
 
+    pendingRewardRef.current = pickedReward
     setSpinning(true)
-    setRotation(landingRotation)
 
-    window.setTimeout(() => {
-      const saved = saveSpinResult(user.id, reward)
-      setStoredResult(saved)
-      const nextDiscount = calculateSpinDiscount(estimatedTotal, reward)
-      onRewardChange?.(reward, nextDiscount)
-      setSpinning(false)
-      showToast(getSpinRewardMessage(reward), reward.type === 'no_luck' ? 'info' : 'success')
-    }, 5200)
+    const wheel = wheelRef.current
+    if (!wheel) return
+
+    wheel.style.transition = 'none'
+    wheel.style.transform = `rotate(${rotationRef.current}deg)`
+    void wheel.offsetHeight
+
+    wheel.style.transition = `transform ${SPIN_ANIMATION_MS}ms ${SPIN_EASING}`
+    wheel.style.transform = `rotate(${landingRotation}deg)`
+    rotationRef.current = landingRotation
+
+    const onTransitionEnd = (event: TransitionEvent) => {
+      if (event.target !== wheel || event.propertyName !== 'transform') return
+      wheel.removeEventListener('transitionend', onTransitionEnd)
+      if (spinFinishTimerRef.current != null) {
+        window.clearTimeout(spinFinishTimerRef.current)
+        spinFinishTimerRef.current = null
+      }
+      const won = pendingRewardRef.current
+      if (won) finishSpin(won)
+    }
+
+    wheel.addEventListener('transitionend', onTransitionEnd)
+
+    if (spinFinishTimerRef.current != null) {
+      window.clearTimeout(spinFinishTimerRef.current)
+    }
+    spinFinishTimerRef.current = window.setTimeout(() => {
+      wheel.removeEventListener('transitionend', onTransitionEnd)
+      const won = pendingRewardRef.current
+      if (won) finishSpin(won)
+    }, SPIN_ANIMATION_MS + 150)
   }
 
   if (loading) {
@@ -110,7 +159,7 @@ export function SpinToWinWheel({ estimatedTotal, onRewardChange, className }: Sp
           <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.28em] text-gold-400">Premium</p>
           <h3 className="mt-2 font-display text-2xl font-bold text-white">Spin to Win</h3>
           <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-cream-100/70">
-            Log in to spin the wheel and unlock exclusive cart rewards before you send your WhatsApp enquiry.
+            Log in to spin the wheel and win a free gift with your order before you send your WhatsApp enquiry.
           </p>
           <Link
             to="/login"
@@ -145,22 +194,16 @@ export function SpinToWinWheel({ estimatedTotal, onRewardChange, className }: Sp
           </div>
           <h3 className="mt-3 font-display text-2xl font-bold text-white sm:text-[1.75rem]">Spin to Win</h3>
           <p className="mt-2 text-sm leading-relaxed text-cream-100/70">
-            One spin per day. Rewards apply to your cart estimate and WhatsApp enquiry.
+            One spin per enquiry. Win a free gift for this order — included with your WhatsApp message.
           </p>
-          {activeReward && (
+          {reward && (
             <div className="mt-4 rounded-2xl border border-gold-400/25 bg-white/5 px-4 py-3 text-left">
               <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gold-300">
                 <Trophy className="h-3.5 w-3.5" />
-                Today&apos;s reward
+                Your gift
               </p>
-              <p className="mt-1 font-display text-lg font-bold text-white">{activeReward.label}</p>
-              {rewardHasMonetaryDiscount(activeReward.type) && estimatedTotal > 0 ? (
-                <p className="mt-1 text-xs text-cream-100/65">
-                  Save {formatPrice(discount)} · Est. {formatPrice(finalTotal)}
-                </p>
-              ) : (
-                <p className="mt-1 text-xs text-cream-100/65">{getSpinRewardMessage(activeReward)}</p>
-              )}
+              <p className="mt-1 font-display text-lg font-bold text-white">{reward.label}</p>
+              <p className="mt-1 text-xs text-cream-100/65">{getSpinRewardMessage(reward)}</p>
             </div>
           )}
         </div>
@@ -176,12 +219,12 @@ export function SpinToWinWheel({ estimatedTotal, onRewardChange, className }: Sp
           <div className="absolute inset-0 rounded-full border-[6px] border-gold-400/80 shadow-[0_0_0_4px_rgba(15,13,11,0.45),0_0_40px_rgba(245,158,11,0.25)]" />
 
           <div
+            ref={wheelRef}
             className={cn(
-              'relative h-full w-full rounded-full transition-transform duration-[5000ms] ease-[cubic-bezier(0.15,0.85,0.2,1)]',
+              'relative h-full w-full origin-center rounded-full',
               spinning && 'pointer-events-none',
             )}
             style={{
-              transform: `rotate(${rotation}deg)`,
               background: wheelGradient,
             }}
           >
@@ -189,7 +232,7 @@ export function SpinToWinWheel({ estimatedTotal, onRewardChange, className }: Sp
               <div
                 key={segment.id}
                 className="absolute inset-0 flex justify-center"
-                style={{ transform: `rotate(${segment.segmentIndex * SPIN_SEGMENT_DEGREES + SPIN_SEGMENT_DEGREES / 2}deg)` }}
+                style={{ transform: `rotate(${getSegmentCenterAngle(segment.segmentIndex)}deg)` }}
               >
                 <span
                   className="mt-5 max-w-[4.5rem] text-center text-[8px] font-bold uppercase leading-tight tracking-wide sm:mt-6 sm:max-w-[5rem] sm:text-[9px]"
@@ -215,12 +258,12 @@ export function SpinToWinWheel({ estimatedTotal, onRewardChange, className }: Sp
           <button
             type="button"
             onClick={handleSpin}
-            disabled={spinning || Boolean(storedResult)}
+            disabled={spinning || Boolean(reward)}
             className={cn(
               'absolute z-30 flex h-20 w-20 items-center justify-center rounded-full border-2 border-gold-300/60 bg-gradient-to-br from-festive-500 via-gold-400 to-festive-500 text-center text-[11px] font-black uppercase leading-tight tracking-wide text-navy-950 shadow-[0_8px_24px_rgba(245,158,11,0.45)] transition hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 sm:h-24 sm:w-24 sm:text-xs',
             )}
           >
-            {spinning ? 'Spinning…' : storedResult ? 'Done' : 'Spin'}
+            {spinning ? 'Spinning…' : reward ? 'Done' : 'Spin'}
           </button>
         </div>
       </div>
