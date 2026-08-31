@@ -115,7 +115,7 @@ export function Navbar() {
                   ? 'max-w-[6.5rem] truncate text-[9px] tracking-[0.03em] min-[380px]:max-w-[7.25rem] min-[380px]:text-[10px]'
                   : 'max-w-[8.5rem] truncate text-[10px] tracking-[0.04em]',
                 'sm:max-w-none sm:truncate sm:text-sm sm:tracking-[0.06em] lg:text-lg',
-                isDarkNav ? 'text-white' : 'text-navy-900',
+                isDarkNav ? 'text-white' : 'text-festive-500',
               )}
             >
               {settings.business_name}

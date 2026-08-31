@@ -15,7 +15,7 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           <div>
-            <h3 className="font-display text-xl font-bold text-gold-400">{settings.business_name}</h3>
+            <h3 className="font-display text-xl font-bold uppercase tracking-wide text-festive-500">{settings.business_name}</h3>
             {settings.tagline && (
               <p className="mt-2 text-sm text-white/60">{settings.tagline}</p>
             )}

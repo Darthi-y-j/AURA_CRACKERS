@@ -163,10 +163,10 @@ function AdminEnquiryInbox({ mode }: { mode: EnquiryInboxMode }) {
     setDeleteId(null)
   }
 
-  const handleDownloadPdf = (enquiry: Enquiry) => {
+  const handleDownloadPdf = async (enquiry: Enquiry) => {
     setPdfDownloading(true)
     try {
-      downloadEnquiryPdf(enquiry, {
+      await downloadEnquiryPdf(enquiry, {
         businessName: settings.business_name,
         businessPhone: settings.whatsapp_number
           ? formatDisplayPhone(settings.whatsapp_number)
