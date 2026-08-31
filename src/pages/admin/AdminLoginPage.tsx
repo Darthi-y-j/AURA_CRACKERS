@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
-import { Lock, Sparkles } from 'lucide-react'
+import { Lock } from 'lucide-react'
 
 export function AdminLoginPage() {
   const { signIn, user, isAdmin, loading } = useAuth()
@@ -46,11 +46,15 @@ export function AdminLoginPage() {
 
       <div className="relative w-full max-w-md">
         <div className="mb-8 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-gold-400 to-festive-500 shadow-xl shadow-festive-500/30">
-            <Sparkles className="h-8 w-8 text-navy-950" />
+          <div className="relative mx-auto h-12 w-56 max-w-full">
+            <img
+              src="/Wordmark - Transparent-03.png"
+              alt="Aura Crackers"
+              className="pointer-events-none absolute left-1/2 top-1/2 h-[430%] w-auto max-w-none -translate-x-1/2 -translate-y-1/2 select-none sm:h-[480%]"
+              draggable={false}
+            />
           </div>
-          <h1 className="mt-5 font-display text-3xl font-bold text-cream-50">Aura Admin</h1>
-          <p className="mt-2 text-sm text-cream-100/60">Sign in to manage your store</p>
+          <p className="mt-4 text-sm text-cream-100/60">Sign in to manage your store</p>
         </div>
 
         <form onSubmit={handleSubmit} className="admin-card p-8">

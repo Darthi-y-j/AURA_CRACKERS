@@ -8,7 +8,6 @@ import {
   Settings,
   LogOut,
   X,
-  Sparkles,
   ShoppingBag,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
@@ -50,14 +49,18 @@ export function AdminSidebar({ open, onClose }: AdminSidebarProps) {
         />
 
         <div className="relative flex h-[4.25rem] items-center justify-between border-b border-white/8 px-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gold-400 to-festive-500 shadow-lg shadow-festive-500/30">
-              <Sparkles className="h-5 w-5 text-navy-950" />
+          <div className="min-w-0">
+            <div className="relative h-8 w-[8.75rem] max-w-full">
+              <img
+                src="/Wordmark - Transparent-03.png"
+                alt="Aura Crackers"
+                className="pointer-events-none absolute left-0 top-1/2 h-[430%] w-auto max-w-none -translate-y-1/2 select-none"
+                draggable={false}
+              />
             </div>
-            <div>
-              <h1 className="font-display text-base font-bold leading-tight text-cream-50">Aura Admin</h1>
-              <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-gold-300/70">Control Panel</p>
-            </div>
+            <p className="mt-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-gold-300/70">
+              Control Panel
+            </p>
           </div>
           <button onClick={onClose} className="rounded-lg p-1.5 text-white/60 hover:bg-white/10 lg:hidden">
             <X className="h-5 w-5" />
