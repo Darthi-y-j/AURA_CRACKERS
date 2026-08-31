@@ -11,6 +11,7 @@ import {
   ShoppingBag,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { SITE_LOGO_PATH, SITE_WORDMARK_PATH } from '@/lib/siteConfig'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -50,13 +51,20 @@ export function AdminSidebar({ open, onClose }: AdminSidebarProps) {
 
         <div className="relative flex h-[4.25rem] items-center justify-between border-b border-white/8 px-5">
           <div className="min-w-0">
-            <div className="relative h-8 w-[8.75rem] max-w-full">
+            <div className="flex items-center gap-1">
               <img
-                src="/Wordmark - Transparent-03.png"
+                src={SITE_LOGO_PATH}
                 alt="Aura Crackers"
-                className="pointer-events-none absolute left-0 top-1/2 h-[430%] w-auto max-w-none -translate-y-1/2 select-none"
-                draggable={false}
+                className="h-10 w-10 shrink-0 object-contain"
               />
+              <div className="relative h-8 w-[7.25rem] shrink-0 -ml-0.5">
+                <img
+                  src={SITE_WORDMARK_PATH}
+                  alt="Aura Crackers"
+                  className="pointer-events-none absolute left-0 top-1/2 h-[430%] w-auto max-w-none -translate-y-1/2 select-none"
+                  draggable={false}
+                />
+              </div>
             </div>
             <p className="mt-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-gold-300/70">
               Control Panel

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { Lock } from 'lucide-react'
+import { SITE_LOGO_PATH, SITE_WORDMARK_PATH } from '@/lib/siteConfig'
 
 export function AdminLoginPage() {
   const { signIn, user, isAdmin, loading } = useAuth()
@@ -46,13 +47,20 @@ export function AdminLoginPage() {
 
       <div className="relative w-full max-w-md">
         <div className="mb-8 text-center">
-          <div className="relative mx-auto h-12 w-56 max-w-full">
+          <div className="mx-auto flex w-fit max-w-full items-center gap-2">
             <img
-              src="/Wordmark - Transparent-03.png"
+              src={SITE_LOGO_PATH}
               alt="Aura Crackers"
-              className="pointer-events-none absolute left-1/2 top-1/2 h-[430%] w-auto max-w-none -translate-x-1/2 -translate-y-1/2 select-none sm:h-[480%]"
-              draggable={false}
+              className="h-14 w-14 shrink-0 object-contain sm:h-16 sm:w-16"
             />
+            <div className="relative h-10 w-44 shrink-0 -ml-0.5 sm:h-11 sm:w-52">
+              <img
+                src={SITE_WORDMARK_PATH}
+                alt="Aura Crackers"
+                className="pointer-events-none absolute left-0 top-1/2 h-[430%] w-auto max-w-none -translate-y-1/2 select-none sm:h-[480%]"
+                draggable={false}
+              />
+            </div>
           </div>
           <p className="mt-4 text-sm text-cream-100/60">Sign in to manage your store</p>
         </div>
