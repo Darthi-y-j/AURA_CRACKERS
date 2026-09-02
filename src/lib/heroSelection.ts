@@ -13,10 +13,10 @@ function heroSelectionScore(product: Product): number {
   return score
 }
 
-/** Products for the homepage hero strip — bestsellers & recommended first. */
+/** Products for the homepage Popular strip — featured only, ranked by badges. */
 export function pickHeroSelectionProducts(products: Product[], limit = 8): Product[] {
   return [...products]
-    .filter((product) => product.is_available !== false)
+    .filter((product) => product.is_featured && product.is_available !== false)
     .sort((a, b) => {
       const scoreDiff = heroSelectionScore(b) - heroSelectionScore(a)
       if (scoreDiff !== 0) return scoreDiff

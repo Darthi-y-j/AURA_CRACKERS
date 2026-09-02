@@ -75,26 +75,26 @@ function CartItemCard({
       {item.productName}
     </p>
   ) : (
-    <Link
+              <Link
       to={`/products/${item.slug}`}
       className="line-clamp-2 text-sm font-semibold leading-snug text-navy-900 transition hover:text-festive-600 sm:text-base"
     >
       {item.productName}
-    </Link>
+              </Link>
   )
 
-  const image = (
+                const image = (
     <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-cream-50 ring-1 ring-navy-900/8 sm:h-20 sm:w-20">
       <ProductImage src={item.imageUrl} alt={item.productName} className="h-full w-full object-cover" />
-      {isGiftBox && (
+                    {isGiftBox && (
         <span className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-navy-950 text-gold-400 ring-1 ring-white">
           <Gift className="h-2.5 w-2.5" />
-        </span>
-      )}
-    </div>
-  )
+                      </span>
+                    )}
+                  </div>
+                )
 
-  return (
+                return (
     <AnimateIn animation="fade-up" delay={40 + index * 30}>
       <article
         className={cn(
@@ -118,16 +118,16 @@ function CartItemCard({
             ) : null}
           </div>
 
-          {isGiftBox && item.giftBoxItems && item.giftBoxItems.length > 0 && (
+                        {isGiftBox && item.giftBoxItems && item.giftBoxItems.length > 0 && (
             <ul className="space-y-0.5 rounded-lg bg-cream-50 px-2.5 py-2 text-[11px] text-navy-700/75">
-              {item.giftBoxItems.map((inner) => (
+                            {item.giftBoxItems.map((inner) => (
                 <li key={inner.productId} className="flex justify-between gap-2">
-                  <span className="truncate">{inner.productName}</span>
+                                <span className="truncate">{inner.productName}</span>
                   <span className="shrink-0 font-medium">×{inner.quantity}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
 
           <div className="flex items-center justify-between gap-2">
             {item.price != null && lineTotal != null && item.quantity > 1 ? (
@@ -136,23 +136,23 @@ function CartItemCard({
               <span className="text-xs text-navy-700/55">Qty {item.quantity}</span>
             )}
             <div className="flex items-center gap-1.5">
-              <QuantitySelector
-                value={item.quantity}
+                        <QuantitySelector
+                          value={item.quantity}
                 onChange={(qty) => onUpdateQuantity(item.productId, qty)}
                 compact
                 className="w-auto shrink-0"
-              />
-              <button
-                type="button"
+                        />
+                        <button
+                          type="button"
                 onClick={() => onRemove(item.productId)}
                 className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-navy-700/40 transition hover:bg-red-50 hover:text-red-500"
-                aria-label={`Remove ${item.productName}`}
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+                          aria-label={`Remove ${item.productName}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
       </article>
     </AnimateIn>
   )
@@ -207,22 +207,22 @@ function EnquiryForm({
         />
         <div className="relative flex items-center gap-3">
           <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-gold-500/15 ring-1 ring-gold-400/30">
-            <MessageCircle className="h-5 w-5 text-gold-400" />
-          </span>
-          <div>
-            <h2 className="font-display text-lg font-bold text-cream-50">Send Enquiry</h2>
+                      <MessageCircle className="h-5 w-5 text-gold-400" />
+                    </span>
+                    <div>
+                      <h2 className="font-display text-lg font-bold text-cream-50">Send Enquiry</h2>
             <p className="text-xs text-cream-100/55">One tap to WhatsApp — no online payment</p>
-          </div>
-        </div>
-      </div>
+                    </div>
+                  </div>
+                </div>
 
-      <div className="p-5 sm:p-6">
-        {settings.whatsapp_number && (
+                <div className="p-5 sm:p-6">
+                  {settings.whatsapp_number && (
           <p className="inline-flex items-center gap-1.5 rounded-full border border-[#25D366]/25 bg-[#25D366]/10 px-3 py-1 text-xs font-semibold text-[#128C7E]">
-            <MessageCircle className="h-3.5 w-3.5" />
-            {formatDisplayPhone(settings.whatsapp_number)}
-          </p>
-        )}
+                      <MessageCircle className="h-3.5 w-3.5" />
+                      {formatDisplayPhone(settings.whatsapp_number)}
+                    </p>
+                  )}
 
         {isLoggedIn && (
           <p className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-gold-400/30 bg-gold-500/10 px-3 py-1 text-xs font-semibold text-gold-800">
@@ -232,33 +232,33 @@ function EnquiryForm({
           </p>
         )}
 
-        <div className="mt-5 space-y-4">
-          <div>
-            <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-navy-800">
-              <User className="h-3.5 w-3.5 text-gold-500" />
-              Your Name *
-            </label>
-            <input
-              type="text"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-              placeholder="Enter your name"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-navy-800">
-              <Phone className="h-3.5 w-3.5 text-gold-500" />
-              Phone *
-            </label>
-            <input
-              type="tel"
-              value={customerPhone}
-              onChange={(e) => setCustomerPhone(e.target.value)}
-              placeholder="+91 98765 43210"
-              className={inputClass}
-            />
-          </div>
+                  <div className="mt-5 space-y-4">
+                    <div>
+                      <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-navy-800">
+                        <User className="h-3.5 w-3.5 text-gold-500" />
+                        Your Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        placeholder="Enter your name"
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-navy-800">
+                        <Phone className="h-3.5 w-3.5 text-gold-500" />
+                        Phone *
+                      </label>
+                      <input
+                        type="tel"
+                        value={customerPhone}
+                        onChange={(e) => setCustomerPhone(e.target.value)}
+                        placeholder="+91 98765 43210"
+                        className={inputClass}
+                      />
+                    </div>
 
           <div className="space-y-3 rounded-xl border border-navy-900/8 bg-gradient-to-br from-cream-50/90 to-white p-3.5">
             <div className="flex items-center justify-between gap-2">
@@ -338,30 +338,30 @@ function EnquiryForm({
             </div>
           </div>
 
-          <div>
-            <label className="mb-1.5 block text-sm font-semibold text-navy-800">Message (optional)</label>
-            <textarea
-              value={customerMessage}
-              onChange={(e) => setCustomerMessage(e.target.value)}
+                    <div>
+                      <label className="mb-1.5 block text-sm font-semibold text-navy-800">Message (optional)</label>
+                      <textarea
+                        value={customerMessage}
+                        onChange={(e) => setCustomerMessage(e.target.value)}
               placeholder="Event date, bulk quantity, special instructions…"
-              rows={3}
-              className={cn(inputClass, 'resize-none')}
-            />
-          </div>
-        </div>
+                        rows={3}
+                        className={cn(inputClass, 'resize-none')}
+                      />
+                    </div>
+                  </div>
 
-        <button
-          type="button"
+                  <button
+                    type="button"
           onClick={onSendEnquiry}
-          disabled={loading}
+                    disabled={loading}
           className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3.5 text-sm font-bold text-white shadow-lg shadow-[#25D366]/30 transition hover:bg-[#20bd5a] hover:shadow-xl disabled:opacity-60"
         >
           {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <MessageCircle className="h-5 w-5" />}
-          Send Enquiry on WhatsApp
-        </button>
+                    Send Enquiry on WhatsApp
+                  </button>
 
-        <p className="mt-3 flex items-start justify-center gap-1.5 text-center text-[11px] leading-relaxed text-navy-700/50">
-          <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-gold-500" />
+                  <p className="mt-3 flex items-start justify-center gap-1.5 text-center text-[11px] leading-relaxed text-navy-700/50">
+                    <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-gold-500" />
           Enquiry only — our team confirms price &amp; stock on WhatsApp.
         </p>
       </div>
@@ -790,8 +790,8 @@ export function CartPage() {
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}
                 WhatsApp
               </button>
-            </div>
           </div>
+        </div>
         )}
       </div>
     </>

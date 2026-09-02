@@ -349,9 +349,11 @@ export const ProductCard = memo(function ProductCard({
             >
               {product.name}
             </h3>
-            <div className={cn(compact ? 'mt-1' : 'mt-2')}>
-              <PriceBlock price={price} originalPrice={originalPrice} inverted />
-            </div>
+            {!compact && (
+              <div className="mt-2">
+                <PriceBlock price={price} originalPrice={originalPrice} inverted />
+              </div>
+            )}
           </div>
         </ProductLink>
 

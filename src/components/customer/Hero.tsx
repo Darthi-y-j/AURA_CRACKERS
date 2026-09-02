@@ -147,7 +147,7 @@ export function Hero({ heroSelectionProducts = [] }: HeroProps) {
             </AnimateIn>
 
             <AnimateIn animation="fade-up" delay={400}>
-              <p className="max-w-md text-[15px] leading-relaxed text-white/85 sm:mt-6 sm:text-base sm:leading-relaxed sm:text-lg">
+              <p className="max-w-md font-display text-[15px] font-bold leading-relaxed text-white/85 sm:mt-6 sm:text-base sm:leading-relaxed sm:text-lg">
                 {settings.tagline ||
                   'Premium crackers and fireworks for Diwali, weddings, and every special moment. Browse, add to cart, and send your enquiry on WhatsApp.'}
               </p>

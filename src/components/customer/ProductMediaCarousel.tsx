@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Product } from '@/types/database'
+import { getProductImageUrls } from '@/lib/productImages'
 import { getYouTubeEmbedUrl } from '@/lib/youtube'
 import { cn } from '@/lib/utils'
 import { ProductImage } from './ProductImage'
@@ -10,16 +11,25 @@ type MediaSlideType = 'image' | 'upload' | 'youtube'
 interface MediaSlide {
   type: MediaSlideType
   label: string
+  imageUrl?: string
+  key: string
 }
 
 function buildMediaSlides(product: Product): MediaSlide[] {
-  const slides: MediaSlide[] = [{ type: 'image', label: 'Product image' }]
+  const slides: MediaSlide[] = getProductImageUrls(product).map((imageUrl, index) => ({
+    type: 'image',
+    label: index === 0 ? 'Product image' : `Product image ${index + 1}`,
+    imageUrl,
+    key: `image-${index}`,
+  }))
+
   if (product.video_url?.trim()) {
-    slides.push({ type: 'upload', label: 'Product video' })
+    slides.push({ type: 'upload', label: 'Product video', key: 'upload' })
   }
   if (product.youtube_url?.trim() && getYouTubeEmbedUrl(product.youtube_url)) {
-    slides.push({ type: 'youtube', label: 'YouTube video' })
+    slides.push({ type: 'youtube', label: 'YouTube video', key: 'youtube' })
   }
+
   return slides
 }
 
@@ -109,16 +119,16 @@ export function ProductMediaCarousel({
         >
           {slides.map((slide) => (
             <div
-              key={slide.type}
+              key={slide.key}
               className="relative h-full min-w-full shrink-0"
-              aria-hidden={slides[activeIndex]?.type !== slide.type}
+              aria-hidden={slides[activeIndex]?.key !== slide.key}
             >
-              {slide.type === 'image' && (
+              {slide.type === 'image' && slide.imageUrl && (
                 <>
                   <ProductImage
-                    src={product.image_url}
+                    src={slide.imageUrl}
                     alt={product.name}
-                    priority={priority}
+                    priority={priority && slide.key === 'image-0'}
                     className="absolute inset-0 h-full w-full object-contain object-center"
                   />
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
@@ -189,7 +199,7 @@ export function ProductMediaCarousel({
           <div className="mx-2 flex flex-1 items-center justify-center gap-2">
             {slides.map((slide, index) => (
               <button
-                key={slide.type}
+                key={slide.key}
                 type="button"
                 onClick={() => setActiveIndex(index)}
                 className={cn(

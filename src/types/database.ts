@@ -29,6 +29,7 @@ export interface Product {
   brand: string | null
   tag: string | null
   image_url: string | null
+  gallery_urls: string[] | null
   video_url: string | null
   youtube_url: string | null
   stock_quantity: number | null

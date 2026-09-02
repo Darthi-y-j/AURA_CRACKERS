@@ -7,8 +7,7 @@ export const SITE_NAME = 'Aura Crackers'
 export const DEVELOPER_CREDIT = {
   label: 'Website designed & developed by',
   name: 'IHTRAD TECHNOLOGIES',
-  /** Set when you have a company site, e.g. https://ihtradtechnologies.com */
-  url: null as string | null,
+  url: 'https://www.ihtrad.com',
 } as const
 
 export const DEFAULT_DESCRIPTION =

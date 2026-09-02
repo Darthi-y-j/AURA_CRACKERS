@@ -61,6 +61,9 @@ const AdminProductFormPage = lazy(() =>
 const AdminCategoriesPage = lazy(() =>
   import('@/pages/admin/AdminCategoriesPage').then((m) => ({ default: m.AdminCategoriesPage })),
 )
+const AdminCategoryFormPage = lazy(() =>
+  import('@/pages/admin/AdminCategoryFormPage').then((m) => ({ default: m.AdminCategoryFormPage })),
+)
 const AdminEnquiriesPage = lazy(() =>
   import('@/pages/admin/AdminEnquiriesPage').then((m) => ({ default: m.AdminEnquiriesPage })),
 )
@@ -125,6 +128,8 @@ function App() {
                         <Route path="products/new" element={<AdminProductFormPage />} />
                         <Route path="products/:id/edit" element={<AdminProductFormPage />} />
                         <Route path="categories" element={<AdminCategoriesPage />} />
+                        <Route path="categories/new" element={<AdminCategoryFormPage />} />
+                        <Route path="categories/:id/edit" element={<AdminCategoryFormPage />} />
                         <Route path="enquiries" element={<AdminEnquiriesPage />} />
                         <Route path="orders" element={<AdminOrderEnquiriesPage />} />
                         <Route path="customers" element={<AdminCustomersPage />} />

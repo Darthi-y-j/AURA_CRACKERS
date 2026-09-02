@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Gift, LogIn, Sparkles, Trophy } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
@@ -8,11 +8,12 @@ import { cn } from '@/lib/utils'
 import {
   SPIN_REWARDS,
   SPIN_ANIMATION_MS,
-  buildWheelGradient,
+  describeWheelSegmentPath,
   getNextSpinRotation,
-  getSegmentCenterAngle,
+  getSegmentArcAngles,
   getSpinRewardMessage,
   pickSpinRewardForCartTotal,
+  polarFromTop,
   type SpinReward,
 } from '@/lib/spinToWin'
 
@@ -24,6 +25,50 @@ interface SpinToWinWheelProps {
 }
 
 const SPIN_EASING = 'cubic-bezier(0.2, 0.9, 0.2, 1)'
+
+const WHEEL_SIZE = 288
+const WHEEL_CENTER = WHEEL_SIZE / 2
+const WHEEL_RADIUS = WHEEL_CENTER - 4
+const LABEL_RADIUS = WHEEL_RADIUS * 0.62
+
+function WheelSegments() {
+  return (
+    <svg
+      viewBox={`0 0 ${WHEEL_SIZE} ${WHEEL_SIZE}`}
+      className="h-full w-full"
+      aria-hidden="true"
+    >
+      {SPIN_REWARDS.map((segment) => {
+        const { center } = getSegmentArcAngles(segment.segmentIndex)
+        const labelPos = polarFromTop(WHEEL_CENTER, WHEEL_CENTER, LABEL_RADIUS, center)
+
+        return (
+          <g key={segment.id}>
+            <path
+              d={describeWheelSegmentPath(WHEEL_CENTER, WHEEL_CENTER, WHEEL_RADIUS, segment.segmentIndex)}
+              fill={segment.color}
+              stroke="rgba(255,255,255,0.35)"
+              strokeWidth={1.5}
+            />
+            <text
+              x={labelPos.x}
+              y={labelPos.y}
+              fill={segment.textColor}
+              fontSize={segment.label.length > 12 ? 7.5 : 8.5}
+              fontWeight={700}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              transform={`rotate(${center}, ${labelPos.x}, ${labelPos.y})`}
+              style={{ letterSpacing: '0.04em' }}
+            >
+              {segment.label}
+            </text>
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
 
 export function SpinToWinWheel({
   estimatedTotal,
@@ -38,8 +83,6 @@ export function SpinToWinWheel({
   const wheelRef = useRef<HTMLDivElement>(null)
   const pendingRewardRef = useRef<SpinReward | null>(null)
   const spinFinishTimerRef = useRef<number | null>(null)
-
-  const wheelGradient = useMemo(() => buildWheelGradient(), [])
 
   const applyWheelRotation = (degrees: number, animate: boolean) => {
     const wheel = wheelRef.current
@@ -224,35 +267,16 @@ export function SpinToWinWheel({
               'relative h-full w-full origin-center rounded-full',
               spinning && 'pointer-events-none',
             )}
-            style={{
-              background: wheelGradient,
-            }}
           >
-            {SPIN_REWARDS.map((segment) => (
-              <div
-                key={segment.id}
-                className="absolute inset-0 flex justify-center"
-                style={{ transform: `rotate(${getSegmentCenterAngle(segment.segmentIndex)}deg)` }}
-              >
-                <span
-                  className="mt-5 max-w-[4.5rem] text-center text-[8px] font-bold uppercase leading-tight tracking-wide sm:mt-6 sm:max-w-[5rem] sm:text-[9px]"
-                  style={{
-                    color: segment.textColor,
-                    transform: 'rotate(90deg)',
-                  }}
-                >
-                  {segment.label}
-                </span>
-              </div>
-            ))}
+            <WheelSegments />
+          </div>
 
-            <div className="absolute inset-[28%] flex items-center justify-center overflow-hidden rounded-full border border-gold-300/40 bg-gradient-to-br from-navy-950 to-[#2a1a08] shadow-inner">
-              <img
-                src={SITE_LOGO_PATH}
-                alt=""
-                className="h-[70%] w-[70%] scale-125 object-contain"
-              />
-            </div>
+          <div className="pointer-events-none absolute inset-[28%] flex items-center justify-center overflow-hidden rounded-full border border-gold-300/40 bg-gradient-to-br from-navy-950 to-[#2a1a08] shadow-inner">
+            <img
+              src={SITE_LOGO_PATH}
+              alt=""
+              className="h-[70%] w-[70%] scale-125 object-contain"
+            />
           </div>
 
           <button

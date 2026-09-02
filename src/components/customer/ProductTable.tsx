@@ -6,7 +6,6 @@ import { EmptyState } from './EmptyState'
 import { WishlistButton } from './WishlistButton'
 import { ProductTagBadge } from './ProductTagBadge'
 import { ProductLink } from './ProductLink'
-import { DiscountOfferTag } from './DiscountOfferTag'
 import { QuantitySelector } from './QuantitySelector'
 import { ProductPiecesBadge } from './ProductPiecesBadge'
 import { ProductBrandBadge } from './ProductBrandBadge'
@@ -151,7 +150,7 @@ export function ProductTableCategoryRow({
     >
       <h2
         className={cn(
-          'w-full font-display text-[15px] font-bold uppercase tracking-[0.08em] sm:text-base lg:text-[17px]',
+          'w-full font-brand text-[15px] font-bold uppercase tracking-[0.08em] sm:text-base lg:text-[17px]',
           TABLE_CATEGORY_TEXT_CLASS,
         )}
       >
@@ -259,11 +258,6 @@ function MobileProductTableRow({ product, index }: { product: Product; index: nu
               className="h-full w-full object-cover"
             />
           </div>
-          {hasDiscount && (
-            <span className="absolute left-0 top-0 rounded-br bg-gradient-to-r from-festive-500 to-gold-500 px-1 py-px text-[7px] font-bold leading-none text-navy-950">
-              {product.discount_percentage}%
-            </span>
-          )}
         </ProductLink>
 
         <div className="min-w-0 flex-1 overflow-hidden">
@@ -376,13 +370,6 @@ function ProductTableRowCard({
                   className="h-full w-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
-                {hasDiscount && (
-                  <DiscountOfferTag
-                    percentage={product.discount_percentage!}
-                    variant={isElite ? 'elite' : 'festive'}
-                    className="w-7 pt-1 pb-2 [&_span:first-child]:text-[9px] [&_span:last-child]:text-[7px]"
-                  />
-                )}
               </div>
             </ProductLink>
 
@@ -415,12 +402,12 @@ function ProductTableRowCard({
             <ProductPiecesBadge pieces={product.pieces} variant="table" />
           </div>
 
-          <div className={cn(TABLE_CELL, 'flex items-center')}>
+          <div className={cn(TABLE_CELL, 'flex min-w-0 items-center')}>
             {brandName ? (
               <ProductBrandBadge
                 brand={brandName}
                 variant="table"
-                className="w-full max-w-full min-w-0 truncate px-2 py-1 text-[9px] lg:text-[10px]"
+                className="max-w-full min-w-0"
               />
             ) : (
               <span className={cn('text-[11px]', TABLE_META_CLASS)}>—</span>

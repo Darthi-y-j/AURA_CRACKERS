@@ -86,7 +86,7 @@ export function ProductBrandBadge({
         wrap
           ? 'line-clamp-2 inline-block w-max max-w-full whitespace-normal rounded-lg border px-2 py-1 text-left text-[9px] leading-snug sm:text-[10px]'
           : variant === 'table'
-            ? 'inline-flex w-full min-w-0 max-w-full items-center truncate rounded-2xl border px-2 py-1 text-[9px] leading-snug sm:px-2.5 sm:text-[10px]'
+            ? 'inline-flex w-fit min-w-0 max-w-full items-center rounded-2xl border px-2 py-1 text-[9px] leading-snug sm:px-2.5 sm:text-[10px]'
             : variant === 'overlay' || variant === 'dark'
               ? 'inline-flex w-max max-w-full items-center justify-center whitespace-nowrap rounded-full border px-2 py-1 text-[8px] normal-case leading-none tracking-normal sm:px-2.5 sm:text-[10px]'
               : 'inline-flex w-max max-w-full items-center justify-center truncate rounded-full border px-2 py-1 text-[9px] leading-none sm:px-2.5 sm:text-[10px]',
@@ -120,7 +120,7 @@ export function ProductBrandBadge({
           decoding="async"
         />
       ) : (
-        <span className="truncate">{name}</span>
+        <span className="min-w-0 truncate">{name}</span>
       )}
     </span>
   )

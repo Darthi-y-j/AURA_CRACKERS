@@ -117,6 +117,38 @@ export function getNextSpinRotation(
   return currentRotation + delta + extraSpins * 360
 }
 
+export function getSegmentArcAngles(segmentIndex: number): {
+  start: number
+  end: number
+  center: number
+} {
+  const start = segmentIndex * SPIN_SEGMENT_DEGREES
+  const end = start + SPIN_SEGMENT_DEGREES
+  return { start, end, center: getSegmentCenterAngle(segmentIndex) }
+}
+
+/** Map clockwise degrees from 12 o'clock to SVG x/y. */
+export function polarFromTop(cx: number, cy: number, radius: number, degreesFromTop: number) {
+  const radians = ((degreesFromTop - 90) * Math.PI) / 180
+  return {
+    x: cx + radius * Math.cos(radians),
+    y: cy + radius * Math.sin(radians),
+  }
+}
+
+export function describeWheelSegmentPath(
+  cx: number,
+  cy: number,
+  outerRadius: number,
+  segmentIndex: number,
+): string {
+  const { start, end } = getSegmentArcAngles(segmentIndex)
+  const startPoint = polarFromTop(cx, cy, outerRadius, start)
+  const endPoint = polarFromTop(cx, cy, outerRadius, end)
+  const largeArc = end - start > 180 ? 1 : 0
+  return `M ${cx} ${cy} L ${startPoint.x} ${startPoint.y} A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${endPoint.x} ${endPoint.y} Z`
+}
+
 export function buildWheelGradient(): string {
   const stops = SPIN_REWARDS.map((segment) => {
     const start = segment.segmentIndex * SPIN_SEGMENT_DEGREES

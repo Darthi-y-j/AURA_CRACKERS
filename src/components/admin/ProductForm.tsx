@@ -15,6 +15,7 @@ import { ImageUploader } from './ImageUploader'
 import { VideoUploader } from './VideoUploader'
 import { useToast } from '@/contexts/ToastContext'
 import { isValidYouTubeUrl } from '@/lib/youtube'
+import { buildProductGalleryPayload, getInitialGallerySlots } from '@/lib/productImages'
 
 interface ProductFormProps {
   product?: Product
@@ -82,6 +83,7 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
     discount_percentage: initialPricing.discount_percentage,
     selling_price: initialPricing.selling_price,
     image_url: product?.image_url || '',
+    gallery_slots: getInitialGallerySlots(product),
     video_url: product?.video_url || '',
     youtube_url: product?.youtube_url || '',
     is_available: product?.is_available ?? true,
@@ -245,6 +247,8 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
       }
     })
 
+    const galleryPayload = buildProductGalleryPayload(form.gallery_slots)
+
     const payload = {
       name: form.name,
       slug: form.slug,
@@ -258,7 +262,8 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
       stock_alert_limit,
       brand: form.brand.trim() || null,
       tag: form.tag || null,
-      image_url: form.image_url || null,
+      image_url: galleryPayload.image_url,
+      gallery_urls: galleryPayload.gallery_urls,
       video_url: form.video_url.trim() || null,
       youtube_url: form.youtube_url.trim() || null,
       is_available: form.is_available,
@@ -504,12 +509,36 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
         </div>
 
         <div className="space-y-4">
-          <ImageUploader
-            bucket="product-images"
-            currentUrl={form.image_url}
-            onUpload={(url) => setForm({ ...form, image_url: url })}
-            onRemove={() => setForm({ ...form, image_url: '' })}
-          />
+          <div>
+            <p className="text-sm font-medium text-slate-700">Product images (1–3)</p>
+            <p className="mt-1 text-xs text-slate-500">
+              Image 1 is the main thumbnail in the shop. Add up to two more for the product detail carousel.
+            </p>
+            <div className="mt-3 grid gap-4 sm:grid-cols-3">
+              {form.gallery_slots.map((url, index) => (
+                <ImageUploader
+                  key={index}
+                  bucket="product-images"
+                  label={index === 0 ? 'Image 1 (main)' : `Image ${index + 1} (optional)`}
+                  currentUrl={url}
+                  onUpload={(uploadedUrl) =>
+                    setForm((prev) => {
+                      const gallery_slots = [...prev.gallery_slots] as [string, string, string]
+                      gallery_slots[index] = uploadedUrl
+                      return { ...prev, gallery_slots, image_url: gallery_slots[0] || '' }
+                    })
+                  }
+                  onRemove={() =>
+                    setForm((prev) => {
+                      const gallery_slots = [...prev.gallery_slots] as [string, string, string]
+                      gallery_slots[index] = ''
+                      return { ...prev, gallery_slots, image_url: gallery_slots[0] || '' }
+                    })
+                  }
+                />
+              ))}
+            </div>
+          </div>
 
           <VideoUploader
             currentUrl={form.video_url}
@@ -601,7 +630,8 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
               </label>
             </div>
             <p className="mt-2 text-xs text-slate-500">
-              Recommended and Best Seller show as badges on product cards across the shop.
+              Featured adds the product to the homepage Popular carousel. Recommended and Best Seller
+              show as badges on product cards across the shop.
             </p>
           </div>
         </div>

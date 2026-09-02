@@ -13,6 +13,8 @@ interface SectionHeaderProps {
   showAccent?: boolean
   theme?: 'light' | 'dark'
   accent?: SectionAccent
+  /** Orbitron on home page; default Playfair Display elsewhere */
+  titleFont?: 'brand' | 'display'
 }
 
 function getHighlightVariant(theme: 'light' | 'dark', accent: SectionAccent) {
@@ -68,7 +70,9 @@ export function SectionHeader({
   showAccent = true,
   theme = 'light',
   accent = 'gold',
+  titleFont = 'display',
 }: SectionHeaderProps) {
+  const titleFontClass = titleFont === 'brand' ? 'font-brand' : 'font-display'
   const isCenter = align === 'center'
   const isDark = theme === 'dark'
   const titleColor = isDark ? 'text-cream-50' : 'text-navy-900'
@@ -137,7 +141,8 @@ export function SectionHeader({
       {/* Title */}
       <h2
         className={cn(
-          'mt-3 font-display text-[1.65rem] font-bold leading-[1.15] sm:mt-4 sm:text-4xl sm:leading-tight',
+          'mt-3 text-[1.65rem] font-bold leading-[1.15] sm:mt-4 sm:text-4xl sm:leading-tight',
+          titleFontClass,
           isCenter && 'mx-auto',
         )}
       >

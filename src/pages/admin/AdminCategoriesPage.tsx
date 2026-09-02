@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
 import { Plus, Pencil, Trash2, Archive, ArchiveRestore, GripVertical } from 'lucide-react'
 import { AdminHeader } from '@/components/admin/AdminHeader'
-import { CategoryForm } from '@/components/admin/CategoryForm'
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog'
 import {
   getCategories,
@@ -24,8 +23,6 @@ export function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [archiveFilter, setArchiveFilter] = useState<CategoryArchiveFilter>('active')
-  const [showForm, setShowForm] = useState(false)
-  const [editingCategory, setEditingCategory] = useState<Category | undefined>()
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [archiveId, setArchiveId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -91,21 +88,6 @@ export function AdminCategoriesPage() {
     setDeleteId(null)
   }
 
-  const openCreate = () => {
-    setEditingCategory(undefined)
-    setShowForm(true)
-  }
-
-  const openEdit = (category: Category) => {
-    setEditingCategory(category)
-    setShowForm(true)
-  }
-
-  const closeForm = () => {
-    setShowForm(false)
-    setEditingCategory(undefined)
-  }
-
   const persistCategoryOrder = async (nextCategories: Category[]) => {
     const ordered = withSequentialSortOrder(nextCategories)
     setCategories(ordered)
@@ -160,30 +142,12 @@ export function AdminCategoriesPage() {
           </div>
 
           {archiveFilter === 'active' && (
-            <button onClick={openCreate} className="admin-btn-primary">
+            <Link to="/admin/categories/new" className="admin-btn-primary">
               <Plus className="h-4 w-4" />
               Add Category
-            </button>
+            </Link>
           )}
         </div>
-
-        {showForm && archiveFilter === 'active' && (
-          <div className="admin-card mb-6 p-6">
-            <h3 className="mb-4 font-display text-lg font-bold text-navy-900">
-              {editingCategory ? 'Edit Category' : 'New Category'}
-            </h3>
-            <CategoryForm
-              key={editingCategory?.id ?? 'new'}
-              category={editingCategory}
-              existingCategories={categories}
-              onSuccess={() => {
-                closeForm()
-                loadCategories()
-              }}
-              onCancel={closeForm}
-            />
-          </div>
-        )}
 
         {canReorder && categories.length > 1 && (
           <p className="mb-3 text-xs text-slate-500">
@@ -287,13 +251,13 @@ export function AdminCategoriesPage() {
                         <div className="flex items-center gap-2">
                           {archiveFilter === 'active' ? (
                             <>
-                              <button
-                                onClick={() => openEdit(category)}
+                              <Link
+                                to={`/admin/categories/${category.id}/edit`}
                                 className="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-festive-500"
                                 title="Edit"
                               >
                                 <Pencil className="h-4 w-4" />
-                              </button>
+                              </Link>
                               <button
                                 onClick={() => setArchiveId(category.id)}
                                 className="rounded p-1.5 text-slate-500 hover:bg-amber-50 hover:text-amber-700"
