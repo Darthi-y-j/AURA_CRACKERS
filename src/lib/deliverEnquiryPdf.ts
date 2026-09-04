@@ -1,43 +1,38 @@
 import { buildWhatsAppUrl } from '@/lib/whatsapp'
 import { downloadPdfBlob } from '@/lib/cartEnquiryPdf'
 
-export type MobileDeliveryResult = 'shared' | 'fallback' | 'cancelled'
+export type PdfDeliveryResult = 'opened'
 
-/** Open WhatsApp with a pre-filled message (desktop flow). */
-export function openWhatsAppChat(whatsappNumber: string, message: string): void {
+/** Open WhatsApp in a tab/window opened during the click handler (avoids popup blockers). */
+export function openWhatsAppInTab(tab: Window | null, whatsappNumber: string, message: string): void {
   const url = buildWhatsAppUrl(whatsappNumber, message)
-  window.open(url, '_blank', 'noopener,noreferrer')
+
+  if (tab && !tab.closed) {
+    tab.location.href = url
+    return
+  }
+
+  const link = document.createElement('a')
+  link.href = url
+  link.target = '_blank'
+  link.rel = 'noopener noreferrer'
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
 }
 
 /**
- * Mobile: share PDF + message via the system share sheet (pick WhatsApp).
- * Falls back to PDF download + WhatsApp link if share is unavailable.
+ * Download the enquiry PDF and navigate the pre-opened tab to WhatsApp.
+ * The tab must be opened synchronously in the click handler before any await.
  */
-export async function deliverMobileEnquiryWithPdf(params: {
+export function deliverEnquiryWithPdf(params: {
   blob: Blob
   filename: string
-  message: string
   whatsappNumber: string
-}): Promise<MobileDeliveryResult> {
-  const file = new File([params.blob], params.filename, { type: 'application/pdf' })
-  const shareData: ShareData = {
-    files: [file],
-    text: params.message,
-    title: 'Aura Crackers Order',
-  }
-
-  if (navigator.share && navigator.canShare?.(shareData)) {
-    try {
-      await navigator.share(shareData)
-      return 'shared'
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        return 'cancelled'
-      }
-    }
-  }
-
+  message: string
+  whatsappTab: Window | null
+}): PdfDeliveryResult {
   downloadPdfBlob(params.blob, params.filename)
-  openWhatsAppChat(params.whatsappNumber, params.message)
-  return 'fallback'
+  openWhatsAppInTab(params.whatsappTab, params.whatsappNumber, params.message)
+  return 'opened'
 }

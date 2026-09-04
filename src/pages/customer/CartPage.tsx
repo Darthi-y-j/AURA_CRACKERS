@@ -30,8 +30,7 @@ import { SpinToWinWheel } from '@/components/customer/SpinToWinWheel'
 import { createCartEnquiry } from '@/services/enquiries'
 import { buildCartWhatsAppMessage } from '@/lib/whatsapp'
 import { generateCartEnquiryPdfBlob } from '@/lib/cartEnquiryPdf'
-import { deliverMobileEnquiryWithPdf, openWhatsAppChat } from '@/lib/deliverEnquiryPdf'
-import { isMobileDevice } from '@/lib/isMobileDevice'
+import { deliverEnquiryWithPdf } from '@/lib/deliverEnquiryPdf'
 import { generateEnquiryNumber } from '@/lib/utils'
 import type { SpinReward } from '@/lib/spinToWin'
 import type { CartEnquiryFormData } from '@/types/database'
@@ -366,7 +365,7 @@ function EnquiryForm({
 
                   <p className="mt-3 flex items-start justify-center gap-1.5 text-center text-[11px] leading-relaxed text-navy-700/50">
                     <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-gold-500" />
-          On phone: share sheet sends PDF + message to WhatsApp. On desktop: message only.
+          WhatsApp opens with your message. Attach the downloaded PDF using the 📎 button.
         </p>
       </div>
     </div>
@@ -495,41 +494,15 @@ export function CartPage() {
       return
     }
 
-    const enquiryNumber = generateEnquiryNumber()
-    const message = buildCartWhatsAppMessage(formData)
-    const mobile = isMobileDevice()
-
-    if (!mobile) {
-      openWhatsAppChat(settings.whatsapp_number, message)
-      setLoading(true)
-
-      try {
-        const { error } = await createCartEnquiry(formData, enquiryNumber)
-
-        if (error) {
-          showToast('Enquiry could not be saved online, but WhatsApp is open', 'info')
-        } else {
-          showToast('WhatsApp opened with your enquiry message', 'success')
-        }
-
-        clearCart()
-        resetSpinForNewEnquiry()
-        setCustomerName('')
-        setCustomerPhone('')
-        setAddressFields(emptyAddressFields())
-        setCustomerMessage('')
-        setPrefilledFromAccount(false)
-      } catch {
-        showToast('Something went wrong. Please try again.', 'error')
-      } finally {
-        setLoading(false)
-      }
-      return
-    }
+    // Open tab synchronously on click so popup blockers allow WhatsApp after PDF generation.
+    const whatsappTab = window.open('about:blank', '_blank')
 
     setLoading(true)
 
     try {
+      const enquiryNumber = generateEnquiryNumber()
+      const message = buildCartWhatsAppMessage(formData)
+
       const { blob, filename } = await generateCartEnquiryPdfBlob(formData, {
         businessName: settings.business_name || 'Aura Crackers',
         businessPhone: settings.whatsapp_number
@@ -540,27 +513,16 @@ export function CartPage() {
         spinDiscount,
       })
 
-      const deliveryResult = await deliverMobileEnquiryWithPdf({
+      deliverEnquiryWithPdf({
         blob,
         filename,
         message,
         whatsappNumber: settings.whatsapp_number,
+        whatsappTab,
       })
 
-      if (deliveryResult === 'cancelled') {
-        showToast('Share cancelled — your cart is still saved', 'info')
-        return
-      }
-
-      if (deliveryResult === 'shared') {
-        showToast(
-          `Pick WhatsApp and send to ${formatDisplayPhone(settings.whatsapp_number)}`,
-          'success',
-        )
-      } else {
-        setShowAttachPdfHint(true)
-        showToast('WhatsApp opened — attach the downloaded PDF with 📎', 'success')
-      }
+      setShowAttachPdfHint(true)
+      showToast('WhatsApp opened — attach the downloaded PDF with the 📎 button', 'success')
 
       const { error } = await createCartEnquiry(formData, enquiryNumber)
 
@@ -576,6 +538,7 @@ export function CartPage() {
       setCustomerMessage('')
       setPrefilledFromAccount(false)
     } catch {
+      whatsappTab?.close()
       showToast('Something went wrong. Please try again.', 'error')
     } finally {
       setLoading(false)
