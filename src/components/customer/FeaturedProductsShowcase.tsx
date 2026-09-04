@@ -22,15 +22,21 @@ export function FeaturedProductsShowcase({
   variant = 'default',
 }: FeaturedProductsShowcaseProps) {
   const { ref, paused } = usePauseWhenHidden<HTMLElement>()
-  const loopProducts = useMemo(() => [...products, ...products], [products])
+  const isHero = variant === 'hero'
+  const shouldPauseMarquee = paused
+  const marqueeProducts = useMemo(
+    () => products.slice(0, isHero ? 6 : 10),
+    [products, isHero],
+  )
+  const loopProducts = useMemo(
+    () => [...marqueeProducts, ...marqueeProducts],
+    [marqueeProducts],
+  )
+  const marqueeStyle = {
+    '--marquee-duration': `${Math.max(marqueeProducts.length * (isHero ? 4 : 6), isHero ? 28 : 36)}s`,
+  } as CSSProperties
 
   if (products.length === 0) return null
-
-  const isHero = variant === 'hero'
-  const shouldPauseMarquee = !isHero && paused
-  const marqueeStyle = {
-    '--marquee-duration': `${Math.max(products.length * (isHero ? 4 : 6), isHero ? 28 : 36)}s`,
-  } as CSSProperties
 
   if (isHero) {
     return (
@@ -64,7 +70,7 @@ export function FeaturedProductsShowcase({
                   variant="featured"
                   compact
                   showQuickAdd
-                  index={i % products.length}
+                  index={i % marqueeProducts.length}
                 />
               </div>
             ))}
@@ -106,7 +112,7 @@ export function FeaturedProductsShowcase({
               key={`${product.id}-${i}`}
               className="w-[240px] shrink-0 self-start sm:w-[260px] lg:w-[280px]"
             >
-              <ProductCard product={product} variant="featured" index={i % products.length} />
+              <ProductCard product={product} variant="featured" index={i % marqueeProducts.length} />
             </div>
           ))}
         </div>

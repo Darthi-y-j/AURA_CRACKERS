@@ -26,6 +26,26 @@ function chatbotProxy(): ProxyOptions {
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+          if (id.includes('@supabase')) return 'supabase'
+          if (id.includes('jspdf') || id.includes('html2canvas')) return 'pdf'
+          if (id.includes('xlsx')) return 'xlsx'
+          if (
+            id.includes('react-router') ||
+            id.includes('react-dom') ||
+            /[/\\]react[/\\]/.test(id)
+          ) {
+            return 'vendor-react'
+          }
+          return 'vendor'
+        },
+      },
+    },
+  },
   resolve: {
     dedupe: ['react', 'react-dom'],
     alias: {

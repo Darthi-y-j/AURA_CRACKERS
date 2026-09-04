@@ -81,7 +81,6 @@ export function Hero({ heroSelectionProducts = [] }: HeroProps) {
 
     observer.observe(video)
     document.addEventListener('visibilitychange', onVisibility)
-    loadVideo()
 
     return () => {
       observer.disconnect()

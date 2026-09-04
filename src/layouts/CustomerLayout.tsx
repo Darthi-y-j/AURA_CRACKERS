@@ -1,25 +1,27 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { Navbar } from '@/components/customer/Navbar'
 import { Footer } from '@/components/customer/Footer'
 import { RouteSEO } from '@/components/shared/RouteSEO'
 import { ToastContainer } from '@/components/customer/Toast'
 import { CollectiveCartBar } from '@/components/customer/CollectiveCartBar'
-import { Chatbot } from '@/components/customer/Chatbot'
 import { ImportantNoticeModal } from '@/components/customer/ImportantNoticeModal'
 import { HeroSlideProvider } from '@/contexts/HeroSlideContext'
 import { getCategories } from '@/services/categories'
 import { getProducts } from '@/services/products'
 import { cn } from '@/lib/utils'
 
+const Chatbot = lazy(() =>
+  import('@/components/customer/Chatbot').then((module) => ({ default: module.Chatbot })),
+)
+
 export function CustomerLayout() {
   const location = useLocation()
 
   useEffect(() => {
-    if (location.pathname === '/') return
     void getCategories().catch(() => undefined)
     void getProducts({ sortBy: 'sort_order', lite: true }).catch(() => undefined)
-  }, [location.pathname])
+  }, [])
   const isCataloguePage = location.pathname === '/products'
   const isProductDetailPage = /^\/products\/[^/]+$/.test(location.pathname)
   const isCartPage = location.pathname === '/cart'
@@ -49,7 +51,11 @@ export function CustomerLayout() {
         </main>
         {!isCataloguePage && <Footer />}
         {!isProductDetailPage && !isCartPage && <CollectiveCartBar />}
-        {!hideChatbot && <Chatbot />}
+        {!hideChatbot && (
+          <Suspense fallback={null}>
+            <Chatbot />
+          </Suspense>
+        )}
         <ToastContainer />
       </div>
     </HeroSlideProvider>

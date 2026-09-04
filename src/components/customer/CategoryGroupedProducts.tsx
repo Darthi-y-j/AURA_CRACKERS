@@ -76,8 +76,8 @@ function CategoryProductSection({ group }: { group: CategoryProductGroup }) {
         products={group.products}
         columns={3}
         variant="catalogue"
-        initialVisible={group.products.length}
-        batchSize={group.products.length}
+        initialVisible={12}
+        batchSize={24}
       />
     </section>
   )

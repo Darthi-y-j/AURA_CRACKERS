@@ -2,6 +2,7 @@ import {
   createContext,
   useContext,
   useCallback,
+  useMemo,
   useSyncExternalStore,
   type ReactNode,
 } from 'react'
@@ -63,20 +64,33 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const value = useMemo(
+    () => ({
+      items,
+      itemCount,
+      addItem,
+      setCartItem: setItem,
+      removeItem: removeItemHandler,
+      updateQuantity: updateQuantityHandler,
+      clearCart,
+      isInCart,
+      getItemQuantity,
+    }),
+    [
+      items,
+      itemCount,
+      addItem,
+      setItem,
+      removeItemHandler,
+      updateQuantityHandler,
+      clearCart,
+      isInCart,
+      getItemQuantity,
+    ],
+  )
+
   return (
-    <CartContext.Provider
-      value={{
-        items,
-        itemCount,
-        addItem,
-        setCartItem: setItem,
-        removeItem: removeItemHandler,
-        updateQuantity: updateQuantityHandler,
-        clearCart,
-        isInCart,
-        getItemQuantity,
-      }}
-    >
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   )

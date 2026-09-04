@@ -1,4 +1,4 @@
-import { Eye, ShoppingCart } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState, memo } from 'react'
 import type { Product } from '@/types/database'
 import { getImageUrl, IMAGE_WIDTH, truncate, cn } from '@/lib/utils'
 import { useProductCartState } from '@/hooks/useProductCartState'
@@ -20,6 +20,8 @@ import {
 import { isCardVisibleProductTag } from '@/lib/productTags'
 import { getDisplayBrand } from '@/lib/brand'
 import { Link } from 'react-router-dom'
+import { Eye, ShoppingCart } from 'lucide-react'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 interface ProductTableGroup {
   id: string
@@ -91,6 +93,34 @@ const TABLE_PRODUCT_CATEGORY_CLASS =
 const TABLE_STRIPE_EVEN = 'bg-white'
 const TABLE_STRIPE_ODD = 'bg-[#fffbf2]'
 const TABLE_BORDER = 'border-stone-200/90'
+const TABLE_INITIAL_PRODUCTS = 36
+const TABLE_PRODUCT_BATCH = 24
+
+type TableEntry =
+  | { kind: 'category'; group: ProductTableGroup }
+  | { kind: 'product'; product: Product; index: number }
+
+function buildVisibleTableEntries(entries: TableEntry[], maxProducts: number): TableEntry[] {
+  let shown = 0
+  const result: TableEntry[] = []
+  let pendingCategory: Extract<TableEntry, { kind: 'category' }> | null = null
+
+  for (const entry of entries) {
+    if (entry.kind === 'category') {
+      pendingCategory = entry
+      continue
+    }
+    if (shown >= maxProducts) break
+    if (pendingCategory) {
+      result.push(pendingCategory)
+      pendingCategory = null
+    }
+    result.push(entry)
+    shown++
+  }
+
+  return result
+}
 const TABLE_IN_CART_BG = 'bg-festive-50/90'
 const TABLE_THUMB_CLASS = 'bg-stone-100 ring-1 ring-stone-200/90'
 
@@ -274,6 +304,8 @@ function MobileProductTableRow({ product, index }: { product: Product; index: nu
             <img
               src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.thumb)}
               alt=""
+              loading="lazy"
+              decoding="async"
               className="h-full w-full object-cover"
             />
           </div>
@@ -373,7 +405,7 @@ function ProductTableRowCard({
   return (
     <article
       className={cn(
-        'product-grid-item group relative hidden border-b md:grid md:items-start',
+        'product-grid-item group relative border-b md:grid md:items-start',
         TABLE_BORDER,
         DESKTOP_ROW_GRID,
         'px-3 py-3 lg:px-4 lg:py-3.5',
@@ -386,6 +418,8 @@ function ProductTableRowCard({
                 <img
                   src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.thumb)}
                   alt={product.name}
+                  loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
@@ -512,6 +546,9 @@ function ProductTableRowCard({
   )
 }
 
+const MobileProductTableRowMemo = memo(MobileProductTableRow)
+const ProductTableRowCardMemo = memo(ProductTableRowCard)
+
 export function ProductTable({
   products = [],
   groups,
@@ -519,7 +556,66 @@ export function ProductTable({
   emptyDescription = 'Try adjusting your filters or check back later.',
   showHeader = true,
 }: ProductTableProps) {
+  const isDesktop = useMediaQuery('(min-width: 768px)')
+  const [visibleProductCount, setVisibleProductCount] = useState(TABLE_INITIAL_PRODUCTS)
+  const loadMoreRef = useRef<HTMLDivElement>(null)
+
   const resolvedProducts = groups?.flatMap((group) => group.products) ?? products
+
+  const tableEntries = useMemo(() => {
+    let stripeIndex = 0
+    if (groups) {
+      return groups.flatMap((group) => [
+        { kind: 'category' as const, group },
+        ...group.products.map((product) => ({
+          kind: 'product' as const,
+          product,
+          index: stripeIndex++,
+        })),
+      ])
+    }
+    return products.map((product, index) => ({
+      kind: 'product' as const,
+      product,
+      index,
+    }))
+  }, [groups, products])
+
+  const totalProducts = useMemo(
+    () => tableEntries.filter((entry) => entry.kind === 'product').length,
+    [tableEntries],
+  )
+
+  const visibleEntries = useMemo(
+    () => buildVisibleTableEntries(tableEntries, visibleProductCount),
+    [tableEntries, visibleProductCount],
+  )
+
+  const hasMore = visibleProductCount < totalProducts
+
+  useEffect(() => {
+    setVisibleProductCount(TABLE_INITIAL_PRODUCTS)
+  }, [tableEntries])
+
+  useEffect(() => {
+    if (!hasMore) return
+    const sentinel = loadMoreRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisibleProductCount((current) =>
+            Math.min(current + TABLE_PRODUCT_BATCH, totalProducts),
+          )
+        }
+      },
+      { rootMargin: '600px 0px' },
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [hasMore, totalProducts])
 
   if (resolvedProducts.length === 0) {
     return (
@@ -538,50 +634,49 @@ export function ProductTable({
     )
   }
 
-  let stripeIndex = 0
-
-  const tableEntries = groups
-    ? groups.flatMap((group) => [
-        { kind: 'category' as const, group },
-        ...group.products.map((product) => ({ kind: 'product' as const, product, index: stripeIndex++ })),
-      ])
-    : products.map((product, index) => ({ kind: 'product' as const, product, index }))
-
-  const mobileRows = tableEntries.map((entry) =>
+  const rows = visibleEntries.map((entry) =>
     entry.kind === 'category' ? (
       <ProductTableCategoryRow
         key={`cat-${entry.group.id}`}
         id={entry.group.id}
         name={entry.group.name}
+        variant={isDesktop ? 'desktop' : 'mobile'}
       />
-    ) : (
-      <MobileProductTableRow key={entry.product.id} product={entry.product} index={entry.index} />
-    ),
-  )
-
-  const desktopRows = tableEntries.map((entry) =>
-    entry.kind === 'category' ? (
-      <ProductTableCategoryRow
-        key={`cat-${entry.group.id}`}
-        id={entry.group.id}
-        name={entry.group.name}
-        variant="desktop"
-        className="hidden md:flex"
-      />
-    ) : (
-      <ProductTableRowCard
+    ) : isDesktop ? (
+      <ProductTableRowCardMemo
         key={entry.product.id}
         product={entry.product}
         index={entry.index}
         showCategoryLabel={!groups}
       />
+    ) : (
+      <MobileProductTableRowMemo key={entry.product.id} product={entry.product} index={entry.index} />
     ),
   )
 
+  const loadMoreSentinel = hasMore ? <div ref={loadMoreRef} className="h-1 w-full" aria-hidden="true" /> : null
+
+  if (isDesktop) {
+    return (
+      <div className="space-y-3">
+        <div className={cn('mx-auto flex w-full max-w-6xl flex-col gap-0 rounded-xl', TABLE_SHELL_CLASS)}>
+          <div className={TABLE_TOP_BAR_CLASS} aria-hidden="true" />
+          {showHeader ? <ProductTableHeader /> : null}
+          {rows}
+          {loadMoreSentinel}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-3">
-      {/* Mobile — compact table list */}
-      <div className={cn('flex flex-col gap-0 border border-x-0 pb-28 max-md:-mx-4 max-md:rounded-none md:hidden', TABLE_SHELL_CLASS)}>
+      <div
+        className={cn(
+          'flex flex-col gap-0 border border-x-0 pb-28 max-md:-mx-4 max-md:rounded-none',
+          TABLE_SHELL_CLASS,
+        )}
+      >
         <div className={TABLE_TOP_BAR_CLASS} aria-hidden="true" />
         <div
           id="catalogue-table-header"
@@ -597,13 +692,8 @@ export function ProductTable({
             Price · Add
           </span>
         </div>
-        {mobileRows}
-      </div>
-
-      <div className={cn('mx-auto hidden w-full max-w-6xl flex-col gap-0 rounded-xl md:flex', TABLE_SHELL_CLASS)}>
-        <div className={TABLE_TOP_BAR_CLASS} aria-hidden="true" />
-        {showHeader ? <ProductTableHeader /> : null}
-        {desktopRows}
+        {rows}
+        {loadMoreSentinel}
       </div>
     </div>
   )

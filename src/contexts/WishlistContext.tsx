@@ -2,6 +2,7 @@ import {
   createContext,
   useContext,
   useCallback,
+  useMemo,
   useSyncExternalStore,
   type ReactNode,
 } from 'react'
@@ -52,18 +53,21 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const value = useMemo(
+    () => ({
+      items,
+      itemCount,
+      addItem,
+      removeItem,
+      toggleItem,
+      clearWishlist,
+      isWishlisted,
+    }),
+    [items, itemCount, addItem, removeItem, toggleItem, clearWishlist, isWishlisted],
+  )
+
   return (
-    <WishlistContext.Provider
-      value={{
-        items,
-        itemCount,
-        addItem,
-        removeItem,
-        toggleItem,
-        clearWishlist,
-        isWishlisted,
-      }}
-    >
+    <WishlistContext.Provider value={value}>
       {children}
     </WishlistContext.Provider>
   )

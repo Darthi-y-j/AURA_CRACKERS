@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import type { Product } from '@/types/database'
 import { formatPrice } from '@/lib/utils'
 import { resolveProductPrice, resolveOriginalPriceForDisplay } from '@/lib/pricing'
@@ -22,9 +22,9 @@ export function useProductCartState(product: Product) {
   const originalPriceValue = resolveOriginalPriceForDisplay(product)
   const originalPrice = originalPriceValue != null ? formatPrice(originalPriceValue) : null
 
-  const packaging = resolveProductPackaging(product)
+  const packaging = useMemo(() => resolveProductPackaging(product), [product])
 
-  const handleQuantityChange = (qty: number) => {
+  const handleQuantityChange = useCallback((qty: number) => {
     if (qty < 1) {
       setCartItem({
         productId: product.id,
@@ -51,9 +51,9 @@ export function useProductCartState(product: Product) {
       packaging,
       quantity: qty,
     })
-  }
+  }, [product, sellingPrice, packaging])
 
-  const handleAddToCart = () => {
+  const handleAddToCart = useCallback(() => {
     setCartItem({
       productId: product.id,
       productName: product.name,
@@ -68,7 +68,7 @@ export function useProductCartState(product: Product) {
       inCart ? `Updated ${product.name} quantity` : `Added ${product.name} to cart`,
       'success',
     )
-  }
+  }, [inCart, product, quantity, sellingPrice, packaging, showToast])
 
   return {
     inCart,
