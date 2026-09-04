@@ -113,7 +113,8 @@ const visionPillars = [
   { icon: Flame, word: 'Celebration', text: 'Making every festive moment brighter, easier, and more memorable.' },
 ]
 
-const ABOUT_QUALITY_IMAGE = '/about-quality-products.png'
+const ABOUT_QUALITY_IMAGE = '/instagram-product-showcase.webp'
+const ABOUT_QUALITY_IMAGE_FALLBACK = '/instagram-product-showcase.png'
 const ABOUT_CELEBRATION_IMAGE = '/about-celebration-sparkler.jpg'
 const STORY_SECTION_BG = '/how-it-works-bg.webp'
 const STORY_SECTION_BG_FALLBACK = '/how-it-works-bg.png'
@@ -289,14 +290,17 @@ export function AboutPage() {
           <div className="grid items-stretch gap-8 lg:grid-cols-2 lg:gap-12">
             <AnimateIn animation="fade-up" className="h-full">
               <div className="group relative flex h-full min-h-[420px] flex-col overflow-hidden rounded-2xl border border-navy-900/10 shadow-[0_16px_48px_rgba(46,30,22,0.12)]">
-                <img
-                  src={ABOUT_QUALITY_IMAGE}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  aria-hidden="true"
-                  className="absolute inset-0 h-full w-full scale-[1.03] object-cover object-center blur-[3px] transition-transform duration-700 group-hover:scale-[1.06]"
-                />
+                <picture>
+                  <source srcSet={ABOUT_QUALITY_IMAGE} type="image/webp" />
+                  <img
+                    src={ABOUT_QUALITY_IMAGE_FALLBACK}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    aria-hidden="true"
+                    className="absolute inset-0 h-full w-full scale-[1.03] object-cover object-center blur-[3px] transition-transform duration-700 group-hover:scale-[1.06]"
+                  />
+                </picture>
                 <div
                   className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/65 to-black/30"
                   aria-hidden="true"

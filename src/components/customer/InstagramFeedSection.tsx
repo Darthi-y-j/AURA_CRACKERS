@@ -1,5 +1,26 @@
+import { memo } from 'react'
 import { useSettings } from '@/contexts/SettingsContext'
-import { INSTAGRAM_FEED_IMAGES, getInstagramHandle } from '@/lib/instagramFeed'
+import { INSTAGRAM_FEED_IMAGES, getInstagramHandle, type InstagramFeedImage } from '@/lib/instagramFeed'
+
+const InstagramTile = memo(function InstagramTile({ image }: { image: InstagramFeedImage }) {
+  return (
+    <div className="relative aspect-square w-[42vw] shrink-0 overflow-hidden rounded-xl sm:w-auto">
+      <picture>
+        <source srcSet={image.webp} type="image/webp" />
+        <img
+          src={image.src}
+          alt={image.alt}
+          width={image.width}
+          height={image.height}
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
+          className="h-full w-full object-cover"
+        />
+      </picture>
+    </div>
+  )
+})
 
 export function InstagramFeedSection() {
   const { settings } = useSettings()
@@ -25,32 +46,27 @@ export function InstagramFeedSection() {
           )}
         </div>
 
-        <div className="mt-8 flex gap-3 overflow-x-auto pb-2 sm:mt-10 sm:grid sm:grid-cols-5 sm:gap-4 sm:overflow-visible sm:pb-0">
+        <div
+          className="mt-8 flex gap-3 overflow-x-auto pb-2 sm:mt-10 sm:grid sm:grid-cols-5 sm:gap-4 sm:overflow-visible sm:pb-0"
+          style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 280px' }}
+        >
           {INSTAGRAM_FEED_IMAGES.map((image) => {
-            const content = (
-              <div className="relative aspect-square w-[42vw] shrink-0 overflow-hidden rounded-xl sm:w-auto">
-                <img
-                  src={image.src}
-                  alt={image.alt}
-                  loading="lazy"
-                  decoding="async"
-                  className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                />
-              </div>
-            )
+            const tile = <InstagramTile image={image} />
 
-            if (!instagramUrl) return <div key={image.src}>{content}</div>
+            if (!instagramUrl) {
+              return <div key={image.webp}>{tile}</div>
+            }
 
             return (
               <a
-                key={image.src}
+                key={image.webp}
                 href={instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`View ${image.alt} on Instagram`}
                 className="block"
               >
-                {content}
+                {tile}
               </a>
             )
           })}
