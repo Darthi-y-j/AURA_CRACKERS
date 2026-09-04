@@ -7,6 +7,8 @@ function heroSelectionScore(product: Product): number {
   let score = 0
   if (product.is_best_seller) score += 100
   if (product.is_recommended) score += 60
+  if (product.is_new_arrival) score += 40
+  if (product.is_kids_special) score += 35
   if (product.is_featured) score += 30
   if (product.discount_percentage != null && product.discount_percentage > 0) score += 20
   if (product.is_available) score += 10

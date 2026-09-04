@@ -95,6 +95,8 @@ async function upsertProducts(categoryIds: Map<string, string>) {
       is_featured: product.is_featured,
       is_recommended: product.is_recommended,
       is_best_seller: product.is_best_seller,
+      is_new_arrival: false,
+      is_kids_special: false,
       is_archived: false,
       archived_at: null,
       sort_order: product.sort_order,
@@ -115,6 +117,8 @@ async function upsertProducts(categoryIds: Map<string, string>) {
           stock_alert_limit: _alert,
           is_recommended: _recommended,
           is_best_seller: _bestSeller,
+          is_new_arrival: _newArrival,
+          is_kids_special: _kidsSpecial,
           original_price: _original,
           discount_percentage: _discount,
           ...rest

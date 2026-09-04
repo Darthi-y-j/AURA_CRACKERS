@@ -43,7 +43,7 @@ export function AdminProductFormPage() {
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-festive-500 border-t-transparent" />
           </div>
         ) : (
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="mx-auto w-full rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <ProductForm
               key={product?.id ?? 'new'}
               product={product}

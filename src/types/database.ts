@@ -50,6 +50,8 @@ export interface Product {
   is_featured: boolean
   is_recommended: boolean
   is_best_seller: boolean
+  is_new_arrival: boolean
+  is_kids_special: boolean
   is_archived: boolean
   archived_at: string | null
   sort_order: number

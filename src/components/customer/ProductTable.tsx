@@ -586,19 +586,25 @@ export function ProductTable({
     [tableEntries],
   )
 
+  const useProgressiveLoad = !groups
+
   const visibleEntries = useMemo(
-    () => buildVisibleTableEntries(tableEntries, visibleProductCount),
-    [tableEntries, visibleProductCount],
+    () =>
+      useProgressiveLoad
+        ? buildVisibleTableEntries(tableEntries, visibleProductCount)
+        : tableEntries,
+    [tableEntries, visibleProductCount, useProgressiveLoad],
   )
 
-  const hasMore = visibleProductCount < totalProducts
+  const hasMore = useProgressiveLoad && visibleProductCount < totalProducts
 
   useEffect(() => {
+    if (!useProgressiveLoad) return
     setVisibleProductCount(TABLE_INITIAL_PRODUCTS)
-  }, [tableEntries])
+  }, [tableEntries, useProgressiveLoad])
 
   useEffect(() => {
-    if (!hasMore) return
+    if (!useProgressiveLoad || !hasMore) return
     const sentinel = loadMoreRef.current
     if (!sentinel) return
 

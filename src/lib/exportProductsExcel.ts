@@ -24,6 +24,8 @@ export function downloadProductsExcel(products: Product[], categories: Category[
     Featured: product.is_featured ? 'Yes' : 'No',
     Recommended: product.is_recommended ? 'Yes' : 'No',
     'Best Seller': product.is_best_seller ? 'Yes' : 'No',
+    'New Arrival': product.is_new_arrival ? 'Yes' : 'No',
+    'Kids Special': product.is_kids_special ? 'Yes' : 'No',
     'Sort Order': product.sort_order,
     'Image URL': product.image_url || '',
     Description: product.description || '',

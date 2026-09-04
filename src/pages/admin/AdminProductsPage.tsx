@@ -28,6 +28,35 @@ import { downloadProductsExcel } from '@/lib/exportProductsExcel'
 import { clearCatalogOnly } from '@/services/catalogCleanup'
 import type { Product, Category } from '@/types/database'
 
+const TH = 'px-2 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500'
+const TD = 'px-2 py-2.5 align-middle'
+
+function AdminProductBadges({ product }: { product: Product }) {
+  const flags = [
+    { label: 'F', title: 'Featured', on: product.is_featured, className: 'bg-amber-100 text-amber-800' },
+    { label: 'R', title: 'Recommended', on: product.is_recommended, className: 'bg-orange-100 text-orange-800' },
+    { label: 'B', title: 'Best Seller', on: product.is_best_seller, className: 'bg-pink-100 text-pink-800' },
+    { label: 'N', title: 'New Arrival', on: product.is_new_arrival, className: 'bg-sky-100 text-sky-800' },
+    { label: 'K', title: 'Kids Special', on: product.is_kids_special, className: 'bg-violet-100 text-violet-800' },
+  ].filter((flag) => flag.on)
+
+  if (flags.length === 0) return <span className="text-slate-400">—</span>
+
+  return (
+    <div className="flex flex-wrap gap-0.5">
+      {flags.map((flag) => (
+        <span
+          key={flag.label}
+          title={flag.title}
+          className={cn('rounded px-1 py-px text-[9px] font-bold leading-none', flag.className)}
+        >
+          {flag.label}
+        </span>
+      ))}
+    </div>
+  )
+}
+
 export function AdminProductsPage() {
   const { onMenuClick } = useOutletContext<{ onMenuClick: () => void }>()
   const { showToast } = useToast()
@@ -244,7 +273,8 @@ export function AdminProductsPage() {
     <>
       <AdminHeader title="Products" onMenuClick={onMenuClick} />
 
-      <div className="flex-1 overflow-auto p-4 sm:p-6">
+      <div className="flex-1 overflow-auto">
+        <div className="px-4 py-4 sm:px-6 sm:pt-6">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-1 flex-wrap items-center gap-3">
             <div className="inline-flex rounded-xl border border-navy-900/8 bg-white p-1 shadow-sm">
@@ -344,22 +374,52 @@ export function AdminProductsPage() {
             Clear search and filters to drag and reorder products.
           </p>
         )}
+        </div>
 
-        <div className="admin-card overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full table-auto text-left text-sm">
+        <div className="w-full border-y border-slate-200 bg-white">
+          <table className="w-full table-fixed text-xs">
+            <colgroup>
+              {canReorder ? (
+                <>
+                  <col style={{ width: '2.5%' }} />
+                  <col style={{ width: '21%' }} />
+                  <col style={{ width: '12%' }} />
+                  <col style={{ width: '8%' }} />
+                  <col style={{ width: '7%' }} />
+                  <col style={{ width: '15%' }} />
+                  <col style={{ width: '9%' }} />
+                  <col style={{ width: '10%' }} />
+                  <col style={{ width: '7%' }} />
+                  <col style={{ width: '10%' }} />
+                </>
+              ) : (
+                <>
+                  <col style={{ width: '23%' }} />
+                  <col style={{ width: '14%' }} />
+                  <col style={{ width: '8%' }} />
+                  <col style={{ width: '7%' }} />
+                  <col style={{ width: '17%' }} />
+                  <col style={{ width: '9%' }} />
+                  <col style={{ width: '11%' }} />
+                  <col style={{ width: '8%' }} />
+                  <col style={{ width: '7%' }} />
+                </>
+              )}
+            </colgroup>
               <thead className="border-b border-slate-200 bg-slate-50">
                 <tr>
-                  {canReorder && <th className="w-10 px-2 py-3" aria-label="Reorder" />}
-                  <th className="px-4 py-3 font-medium text-slate-600">Product</th>
-                  <th className="px-4 py-3 font-medium text-slate-600">Brand</th>
-                  <th className="px-4 py-3 font-medium text-slate-600">Tag</th>
-                  <th className="w-px whitespace-nowrap px-3 py-3 font-medium text-slate-600">Price</th>
-                  <th className="w-px whitespace-nowrap px-3 py-3 font-medium text-slate-600">Packaging</th>
-                  <th className="w-px whitespace-nowrap px-3 py-3 font-medium text-slate-600">Stock</th>
-                  <th className="w-px whitespace-nowrap px-3 py-3 font-medium text-slate-600">Status</th>
-                  <th className="w-px whitespace-nowrap px-3 py-3 font-medium text-slate-600">Featured</th>
-                  <th className="w-px whitespace-nowrap px-3 py-3 font-medium text-slate-600">Actions</th>
+                  {canReorder && <th className={TH} aria-label="Reorder" />}
+                  <th className={cn(TH, 'text-left')}>Product</th>
+                  <th className={cn(TH, 'text-left')}>Brand</th>
+                  <th className={cn(TH, 'text-left')}>Tag</th>
+                  <th className={cn(TH, 'text-left')}>Price</th>
+                  <th className={cn(TH, 'text-left')}>Pack</th>
+                  <th className={cn(TH, 'text-left')}>Status</th>
+                  <th className={cn(TH, 'text-left')} title="F=Featured, R=Recommended, B=Best Seller, N=New Arrival, K=Kids Special">
+                    Badges
+                  </th>
+                  <th className={cn(TH, 'text-left')}>Stock</th>
+                  <th className={cn(TH, 'text-left')}>Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -414,7 +474,7 @@ export function AdminProductsPage() {
                         e.preventDefault()
                         void handleDrop(product.id)
                       }}
-                      className={`transition-colors ${
+                      className={`group transition-colors ${
                         draggedId === product.id
                           ? 'opacity-50'
                           : dragOverId === product.id
@@ -423,46 +483,69 @@ export function AdminProductsPage() {
                       }`}
                     >
                       {canReorder && (
-                        <td className="px-2 py-3 text-slate-400">
+                        <td className={cn(TD, 'text-slate-400')}>
                           <button
                             type="button"
                             aria-label={`Drag to reorder ${product.name}`}
-                            className="cursor-grab rounded p-1 hover:bg-slate-100 hover:text-slate-600 active:cursor-grabbing"
+                            className="cursor-grab rounded p-0.5 hover:bg-slate-100 hover:text-slate-600 active:cursor-grabbing"
                             onMouseDown={(e) => e.stopPropagation()}
                           >
-                            <GripVertical className="h-4 w-4" />
+                            <GripVertical className="h-3.5 w-3.5" />
                           </button>
                         </td>
                       )}
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3 pl-2">
+                      <td className={TD}>
+                        <div className="flex min-w-0 items-center gap-1.5">
                           <img
                             src={getImageUrl(product.image_url)}
-                            alt={product.name}
-                            className="h-10 w-10 rounded-lg object-cover"
+                            alt=""
+                            className="h-7 w-7 shrink-0 rounded object-cover"
                           />
-                          <div>
-                            <span className="font-medium text-slate-900">{product.name}</span>
-                          </div>
+                          <span className="truncate font-medium text-slate-900" title={product.name}>
+                            {product.name}
+                          </span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-slate-600">{product.brand || '—'}</td>
-                      <td className="px-4 py-3">
+                      <td className={TD} title={product.brand || undefined}>
+                        <span className="block truncate text-slate-600">{product.brand || '—'}</span>
+                      </td>
+                      <td className={TD}>
                         {product.tag ? (
-                          <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+                          <span
+                            className="inline-flex max-w-full truncate rounded bg-amber-50 px-1 py-px text-[10px] font-medium text-amber-700"
+                            title={getProductTagLabel(product.tag)}
+                          >
                             {getProductTagLabel(product.tag)}
                           </span>
                         ) : (
                           <span className="text-slate-400">—</span>
                         )}
                       </td>
-                      <td className="w-px whitespace-nowrap px-3 py-3 text-slate-600">
-                        {formatPrice(resolveProductPrice(product)) || 'Enquire'}
+                      <td className={cn(TD, 'whitespace-nowrap text-slate-600')}>
+                        {formatPrice(resolveProductPrice(product)) || '—'}
                       </td>
-                      <td className="w-px whitespace-nowrap px-3 py-3 text-slate-600">
-                        {formatPackagingShort(resolveProductPackaging(product)) ?? '—'}
+                      <td className={TD} title={formatPackagingShort(resolveProductPackaging(product)) ?? undefined}>
+                        <span className="line-clamp-2 text-[10px] leading-tight text-slate-600">
+                          {formatPackagingShort(resolveProductPackaging(product)) ?? '—'}
+                        </span>
                       </td>
-                      <td className="w-px whitespace-nowrap px-3 py-3">
+                      <td className={TD}>
+                        <button
+                          onClick={() => toggleAvailability(product)}
+                          className={cn(
+                            'rounded-full px-1.5 py-px text-[10px] font-semibold',
+                            product.is_available
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-red-100 text-red-700',
+                          )}
+                        >
+                          {product.is_available ? 'Live' : 'Off'}
+                        </button>
+                      </td>
+                      <td className={TD}>
+                        <AdminProductBadges product={product} />
+                      </td>
+                      <td className={cn(TD, 'whitespace-nowrap')}>
                         {product.stock_quantity != null ? (
                           <span
                             className={
@@ -473,73 +556,54 @@ export function AdminProductsPage() {
                           >
                             {product.stock_quantity}
                             {product.stock_alert_limit != null && (
-                              <span className="text-slate-400"> / {product.stock_alert_limit}</span>
+                              <span className="text-slate-400">/{product.stock_alert_limit}</span>
                             )}
                           </span>
                         ) : (
                           <span className="text-slate-400">—</span>
                         )}
                       </td>
-                      <td className="w-px whitespace-nowrap px-3 py-3">
-                        <button
-                          onClick={() => toggleAvailability(product)}
-                          className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                            product.is_available
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-red-100 text-red-700'
-                          }`}
-                        >
-                          {product.is_available ? 'Available' : 'Unavailable'}
-                        </button>
-                      </td>
-                      <td className="w-px whitespace-nowrap px-3 py-3">
-                        {product.is_featured ? (
-                          <span className="text-xs font-medium text-amber-600">Yes</span>
-                        ) : (
-                          <span className="text-xs text-slate-400">No</span>
-                        )}
-                      </td>
-                      <td className="w-px whitespace-nowrap px-3 py-3">
-                        <div className="flex items-center gap-2">
+                      <td className={TD}>
+                        <div className="flex items-center gap-0.5">
                           {archiveFilter === 'active' ? (
                             <>
                               <button
                                 onClick={() => setSaleProduct(product)}
-                                className="rounded p-1.5 text-slate-500 hover:bg-emerald-50 hover:text-emerald-700"
+                                className="rounded p-1 text-slate-500 hover:bg-emerald-50 hover:text-emerald-700"
                                 title="Mark sold"
                               >
-                                <ShoppingBag className="h-4 w-4" />
+                                <ShoppingBag className="h-3.5 w-3.5" />
                               </button>
                               <Link
                                 to={`/admin/products/${product.id}/edit`}
-                                className="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-festive-500"
+                                className="rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-festive-500"
                                 title="Edit"
                               >
-                                <Pencil className="h-4 w-4" />
+                                <Pencil className="h-3.5 w-3.5" />
                               </Link>
                               <button
                                 onClick={() => setArchiveId(product.id)}
-                                className="rounded p-1.5 text-slate-500 hover:bg-amber-50 hover:text-amber-700"
+                                className="rounded p-1 text-slate-500 hover:bg-amber-50 hover:text-amber-700"
                                 title="Archive"
                               >
-                                <Archive className="h-4 w-4" />
+                                <Archive className="h-3.5 w-3.5" />
                               </button>
                             </>
                           ) : (
                             <>
                               <button
                                 onClick={() => handleRestore(product.id)}
-                                className="rounded p-1.5 text-slate-500 hover:bg-emerald-50 hover:text-emerald-700"
+                                className="rounded p-1 text-slate-500 hover:bg-emerald-50 hover:text-emerald-700"
                                 title="Restore"
                               >
-                                <ArchiveRestore className="h-4 w-4" />
+                                <ArchiveRestore className="h-3.5 w-3.5" />
                               </button>
                               <button
                                 onClick={() => setDeleteId(product.id)}
-                                className="rounded p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600"
+                                className="rounded p-1 text-slate-500 hover:bg-red-50 hover:text-red-600"
                                 title="Delete permanently"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-3.5 w-3.5" />
                               </button>
                             </>
                           )}
@@ -551,8 +615,8 @@ export function AdminProductsPage() {
                 )}
               </tbody>
             </table>
-          </div>
         </div>
+        <div className="h-4 sm:h-6" aria-hidden="true" />
       </div>
 
       <RecordSaleDialog

@@ -100,6 +100,8 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
     is_featured: product?.is_featured ?? false,
     is_recommended: product?.is_recommended ?? false,
     is_best_seller: product?.is_best_seller ?? false,
+    is_new_arrival: product?.is_new_arrival ?? false,
+    is_kids_special: product?.is_kids_special ?? false,
     sort_order:
       product?.sort_order?.toString() || getNextSortOrder(existingProducts).toString(),
     packaging_sell_unit: initialPackaging.sellUnit,
@@ -320,6 +322,8 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
       is_featured: form.is_featured,
       is_recommended: form.is_recommended,
       is_best_seller: form.is_best_seller,
+      is_new_arrival: form.is_new_arrival,
+      is_kids_special: form.is_kids_special,
       sort_order: sortOrder,
       specifications: Object.keys(specs).length > 0 ? specs : null,
     }
@@ -351,7 +355,7 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
         <div className="space-y-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Product Name *</label>
@@ -502,6 +506,152 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
             </div>
           </div>
 
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Sort Order</label>
+            <input
+              type="number"
+              min={0}
+              value={form.sort_order}
+              onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
+              className={inputClass}
+            />
+            {!product && (
+              <p className="mt-1 text-xs text-slate-500">
+                Next available: {getNextSortOrder(existingProducts)}
+              </p>
+            )}
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+            <p className="mb-3 text-sm font-semibold text-slate-800">Product status & badges</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={form.is_available}
+                  onChange={(e) => setForm({ ...form, is_available: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-festive-500"
+                />
+                Available
+              </label>
+              <label className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={form.is_featured}
+                  onChange={(e) => setForm({ ...form, is_featured: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-festive-500"
+                />
+                Featured (home carousel)
+              </label>
+              <label className="flex items-center gap-2.5 rounded-lg border border-amber-200 bg-amber-50/50 px-3 py-2.5 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={form.is_recommended}
+                  onChange={(e) => setForm({ ...form, is_recommended: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-festive-500"
+                />
+                Recommended badge
+              </label>
+              <label className="flex items-center gap-2.5 rounded-lg border border-pink-200 bg-pink-50/50 px-3 py-2.5 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={form.is_best_seller}
+                  onChange={(e) => setForm({ ...form, is_best_seller: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-festive-500"
+                />
+                Best Seller badge (blinks)
+              </label>
+              <label className="flex items-center gap-2.5 rounded-lg border border-sky-200 bg-sky-50/50 px-3 py-2.5 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={form.is_new_arrival}
+                  onChange={(e) => setForm({ ...form, is_new_arrival: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-festive-500"
+                />
+                New Arrival badge
+              </label>
+              <label className="flex items-center gap-2.5 rounded-lg border border-violet-200 bg-violet-50/50 px-3 py-2.5 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={form.is_kids_special}
+                  onChange={(e) => setForm({ ...form, is_kids_special: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-festive-500"
+                />
+                Kids Special badge
+              </label>
+            </div>
+            <p className="mt-2 text-xs text-slate-500">
+              Featured adds the product to the homepage Popular carousel. Recommended, Best Seller, New
+              Arrival, and Kids Special show as badges on product cards across the shop.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm font-medium text-slate-700">Product images (1–3)</p>
+            <p className="mt-1 text-xs text-slate-500">
+              Image 1 is the main thumbnail in the shop. Add up to two more for the product detail carousel.
+            </p>
+            <div className="mt-3 grid gap-4 sm:grid-cols-3">
+              {form.gallery_slots.map((url, index) => (
+                <ImageUploader
+                  key={index}
+                  bucket="product-images"
+                  label={index === 0 ? 'Image 1 (main)' : `Image ${index + 1} (optional)`}
+                  currentUrl={url}
+                  onUpload={(uploadedUrl) =>
+                    setForm((prev) => {
+                      const gallery_slots = [...prev.gallery_slots] as [string, string, string]
+                      gallery_slots[index] = uploadedUrl
+                      return { ...prev, gallery_slots, image_url: gallery_slots[0] || '' }
+                    })
+                  }
+                  onRemove={() =>
+                    setForm((prev) => {
+                      const gallery_slots = [...prev.gallery_slots] as [string, string, string]
+                      gallery_slots[index] = ''
+                      return { ...prev, gallery_slots, image_url: gallery_slots[0] || '' }
+                    })
+                  }
+                />
+              ))}
+            </div>
+          </div>
+
+          <VideoUploader
+            currentUrl={form.video_url}
+            onUpload={(url) => setForm({ ...form, video_url: url })}
+            onRemove={() => setForm({ ...form, video_url: '' })}
+          />
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">YouTube link</label>
+            <input
+              type="url"
+              value={form.youtube_url}
+              onChange={(e) => setForm({ ...form, youtube_url: e.target.value })}
+              className={inputClass}
+              placeholder="https://www.youtube.com/watch?v=..."
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Optional. Paste a YouTube watch, Shorts, or youtu.be link. You can add an upload and a YouTube link.
+            </p>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">
+              Specifications (one per line, format: Key: Value)
+            </label>
+            <textarea
+              value={form.specifications}
+              onChange={(e) => setForm({ ...form, specifications: e.target.value })}
+              rows={4}
+              className={inputClass}
+              placeholder="Duration: 30 seconds&#10;Type: Aerial"
+            />
+          </div>
+
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-sm font-semibold text-slate-800">Packaging</p>
             <p className="mt-1 text-xs text-slate-500">
@@ -615,7 +765,7 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
 
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
             <p className="mb-3 text-sm font-semibold text-slate-800">Stock &amp; alerts</p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">
                   Available quantity
@@ -650,137 +800,9 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
             </p>
           </div>
         </div>
-
-        <div className="space-y-4">
-          <div>
-            <p className="text-sm font-medium text-slate-700">Product images (1–3)</p>
-            <p className="mt-1 text-xs text-slate-500">
-              Image 1 is the main thumbnail in the shop. Add up to two more for the product detail carousel.
-            </p>
-            <div className="mt-3 grid gap-4 sm:grid-cols-3">
-              {form.gallery_slots.map((url, index) => (
-                <ImageUploader
-                  key={index}
-                  bucket="product-images"
-                  label={index === 0 ? 'Image 1 (main)' : `Image ${index + 1} (optional)`}
-                  currentUrl={url}
-                  onUpload={(uploadedUrl) =>
-                    setForm((prev) => {
-                      const gallery_slots = [...prev.gallery_slots] as [string, string, string]
-                      gallery_slots[index] = uploadedUrl
-                      return { ...prev, gallery_slots, image_url: gallery_slots[0] || '' }
-                    })
-                  }
-                  onRemove={() =>
-                    setForm((prev) => {
-                      const gallery_slots = [...prev.gallery_slots] as [string, string, string]
-                      gallery_slots[index] = ''
-                      return { ...prev, gallery_slots, image_url: gallery_slots[0] || '' }
-                    })
-                  }
-                />
-              ))}
-            </div>
-          </div>
-
-          <VideoUploader
-            currentUrl={form.video_url}
-            onUpload={(url) => setForm({ ...form, video_url: url })}
-            onRemove={() => setForm({ ...form, video_url: '' })}
-          />
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">YouTube link</label>
-            <input
-              type="url"
-              value={form.youtube_url}
-              onChange={(e) => setForm({ ...form, youtube_url: e.target.value })}
-              className={inputClass}
-              placeholder="https://www.youtube.com/watch?v=..."
-            />
-            <p className="mt-1 text-xs text-slate-500">
-              Optional. Paste a YouTube watch, Shorts, or youtu.be link. You can add an upload and a YouTube link.
-            </p>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
-              Specifications (one per line, format: Key: Value)
-            </label>
-            <textarea
-              value={form.specifications}
-              onChange={(e) => setForm({ ...form, specifications: e.target.value })}
-              rows={4}
-              className={inputClass}
-              placeholder="Duration: 30 seconds&#10;Type: Aerial"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Sort Order</label>
-            <input
-              type="number"
-              min={0}
-              value={form.sort_order}
-              onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
-              className={inputClass}
-            />
-            {!product && (
-              <p className="mt-1 text-xs text-slate-500">
-                Next available: {getNextSortOrder(existingProducts)}
-              </p>
-            )}
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
-            <p className="mb-3 text-sm font-semibold text-slate-800">Product status & badges</p>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={form.is_available}
-                  onChange={(e) => setForm({ ...form, is_available: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-festive-500"
-                />
-                Available
-              </label>
-              <label className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={form.is_featured}
-                  onChange={(e) => setForm({ ...form, is_featured: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-festive-500"
-                />
-                Featured (home carousel)
-              </label>
-              <label className="flex items-center gap-2.5 rounded-lg border border-amber-200 bg-amber-50/50 px-3 py-2.5 text-sm font-medium text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={form.is_recommended}
-                  onChange={(e) => setForm({ ...form, is_recommended: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-festive-500"
-                />
-                Recommended badge
-              </label>
-              <label className="flex items-center gap-2.5 rounded-lg border border-pink-200 bg-pink-50/50 px-3 py-2.5 text-sm font-medium text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={form.is_best_seller}
-                  onChange={(e) => setForm({ ...form, is_best_seller: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-festive-500"
-                />
-                Best Seller badge (blinks)
-              </label>
-            </div>
-            <p className="mt-2 text-xs text-slate-500">
-              Featured adds the product to the homepage Popular carousel. Recommended and Best Seller
-              show as badges on product cards across the shop.
-            </p>
-          </div>
-        </div>
       </div>
 
-      <div className="flex gap-3 border-t border-slate-200 pt-6">
+      <div className="flex flex-wrap justify-end gap-3 border-t border-slate-200 pt-6">
         <button
           type="submit"
           disabled={loading}

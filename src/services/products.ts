@@ -11,7 +11,7 @@ const inflight = new Map<string, Promise<Product[]>>()
 
 /** Catalogue pages — omit specifications & media URLs to cut payload size */
 const CATALOGUE_PRODUCT_SELECT =
-  'id, category_id, name, slug, description, price, original_price, discount_percentage, pieces, packaging, brand, tag, image_url, stock_quantity, stock_alert_limit, is_available, is_featured, is_recommended, is_best_seller, is_archived, sort_order, created_at, category:categories(id, name, slug, sort_order, is_active, is_archived)'
+  'id, category_id, name, slug, description, price, original_price, discount_percentage, pieces, packaging, brand, tag, image_url, stock_quantity, stock_alert_limit, is_available, is_featured, is_recommended, is_best_seller, is_new_arrival, is_kids_special, is_archived, sort_order, created_at, category:categories(id, name, slug, sort_order, is_active, is_archived)'
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -161,9 +161,14 @@ async function queryProductsWithArchiveFallbackRest(filters: ProductFilters): Pr
   try {
     return await fetchProductsFromRest(filters, true)
   } catch (error) {
-    if (isMissingColumnError(error, 'is_recommended') || isMissingColumnError(error, 'is_best_seller')) {
+    if (
+      isMissingColumnError(error, 'is_recommended') ||
+      isMissingColumnError(error, 'is_best_seller') ||
+      isMissingColumnError(error, 'is_new_arrival') ||
+      isMissingColumnError(error, 'is_kids_special')
+    ) {
       throw new Error(
-        'Product badges are not set up yet. Run migration 021_product_highlight_badges.sql in Supabase SQL Editor.',
+        'Product badges are not set up yet. Run migrations 021 and 025 in Supabase SQL Editor.',
       )
     }
     if (isMissingColumnError(error, 'is_archived')) {
@@ -318,6 +323,8 @@ export async function archiveProduct(id: string): Promise<{ error: string | null
     is_featured: false,
     is_recommended: false,
     is_best_seller: false,
+    is_new_arrival: false,
+    is_kids_special: false,
   })
   if (error && isMissingColumnError(error, 'is_archived')) {
     return { error: 'Archive is not available yet. Run migration 014_archive_products_categories.sql in Supabase.' }
