@@ -11,7 +11,7 @@ import { WishlistButton } from './WishlistButton'
 import { ProductBrandBadge } from './ProductBrandBadge'
 import { ProductTagBadge } from './ProductTagBadge'
 import { ProductHighlightBadges } from './ProductHighlightBadges'
-import { getCardDescriptionClass, getCardCategoryClass, getCardTitleClass, CARD_TITLE_BASE_CLASS, getCardViewButtonClass, getCardPerforationDotClass, getCardPerforationLineClass, isEliteProductTag } from '@/lib/productCardThemes'
+import { getCardDescriptionClass, getCardCategoryClass, getCardTitleClass, CARD_TITLE_BASE_CLASS, getCardViewButtonClass, getDiscountOfferTagVariant, getCardPerforationDotClass, getCardPerforationLineClass } from '@/lib/productCardThemes'
 import { isCardVisibleProductTag } from '@/lib/productTags'
 
 interface CatalogueProductCardProps {
@@ -44,7 +44,7 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({ product
           {hasDiscount && (
             <DiscountOfferTag
               percentage={product.discount_percentage!}
-              variant={isEliteProductTag(product.tag) ? 'elite' : 'festive'}
+              variant={getDiscountOfferTagVariant(product.tag)}
               className="z-20 w-8 pt-1.5 pb-2.5 sm:w-[42px] sm:pt-2 sm:pb-3.5 [&_span:first-child]:text-[10px] sm:[&_span:first-child]:text-[13px]"
             />
           )}
@@ -116,7 +116,7 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({ product
               </span>
             )}
           </div>
-          <ProductPiecesBadge pieces={product.pieces} className="hidden shrink-0 sm:inline-flex" />
+          <ProductPiecesBadge pieces={product.pieces} packaging={product.packaging} className="hidden shrink-0 sm:inline-flex" />
         </div>
 
         {product.is_available ? (

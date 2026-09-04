@@ -1,7 +1,7 @@
 import { Crown, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CARD_VISIBLE_PRODUCT_TAGS, type ProductTag } from '@/lib/productTags'
-import { SILVER_METALLIC_BG } from '@/lib/productCardThemes'
+import { SILVER_METALLIC_BG, GOLD_METALLIC_BG } from '@/lib/productCardThemes'
 interface ProductTagBadgeProps {
   tag?: string | null
   variant?: 'overlay' | 'dark' | 'light'
@@ -11,9 +11,6 @@ interface ProductTagBadgeProps {
 }
 
 const VISIBLE_TAGS = CARD_VISIBLE_PRODUCT_TAGS
-
-const GOLD_METALLIC =
-  'bg-[linear-gradient(90deg,#8a6b12_0%,#c9a227_28%,#f9e076_50%,#c9a227_72%,#8a6b12_100%)]'
 
 const TAG_STYLES: Record<
   Extract<ProductTag, 'Premium' | 'Premium Plus' | 'Elite Setout'>,
@@ -41,10 +38,10 @@ const TAG_STYLES: Record<
     icon: Sparkles,
     overlay: cn(
       'border-[#c9a227]/70 text-black shadow-[0_4px_16px_rgba(212,175,55,0.4)]',
-      GOLD_METALLIC,
+      GOLD_METALLIC_BG,
     ),
-    dark: cn('border-[#c9a227]/70 text-black', GOLD_METALLIC),
-    light: cn('border-[#c9a227]/70 text-black', GOLD_METALLIC),
+    dark: cn('border-[#c9a227]/70 text-black', GOLD_METALLIC_BG),
+    light: cn('border-[#c9a227]/70 text-black', GOLD_METALLIC_BG),
   },
   'Elite Setout': {
     label: 'Elite',

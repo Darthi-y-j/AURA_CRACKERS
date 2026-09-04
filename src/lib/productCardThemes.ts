@@ -1,6 +1,10 @@
 export const SILVER_METALLIC_BG =
   'bg-[linear-gradient(90deg,#3f444c_0%,#7a828c_24%,#f3f6f8_50%,#7a828c_76%,#3f444c_100%)]'
 
+/** Matches Premium+ badge metallic gold */
+export const GOLD_METALLIC_BG =
+  'bg-[linear-gradient(90deg,#8a6b12_0%,#c9a227_28%,#f9e076_50%,#c9a227_72%,#8a6b12_100%)]'
+
 /** Featured marquee cards — warm bronze into deep charcoal */
 export const FEATURED_CARD_GRADIENT = 'bg-gradient-to-r from-[#43302b] to-[#140f0d]'
 
@@ -105,6 +109,24 @@ export function getCardViewButtonClass(tag: string | null | undefined): string {
     return 'border-orange-400/35 text-orange-200 hover:border-orange-300/50 hover:bg-orange-950/35'
   }
   return 'border-cream-100/12 text-cream-100/90 hover:border-gold-400/35 hover:bg-white/[0.04]'
+}
+
+export function getCardAddToCartButtonClass(tag: string | null | undefined): string {
+  if (isEliteProductTag(tag)) {
+    return `${SILVER_METALLIC_BG} text-navy-950 shadow-[0_2px_10px_rgba(148,163,184,0.35)] hover:brightness-110`
+  }
+  if (isPremiumPlusProductTag(tag)) {
+    return `${GOLD_METALLIC_BG} text-black shadow-[0_2px_10px_rgba(212,175,55,0.35)] hover:brightness-110`
+  }
+  return 'bg-gradient-to-r from-festive-500 to-gold-500 text-navy-950'
+}
+
+export type DiscountOfferTagVariant = 'festive' | 'elite' | 'premium-plus'
+
+export function getDiscountOfferTagVariant(tag: string | null | undefined): DiscountOfferTagVariant {
+  if (isEliteProductTag(tag)) return 'elite'
+  if (isPremiumPlusProductTag(tag)) return 'premium-plus'
+  return 'festive'
 }
 
 const CARD_PERFORATION_DOT_GOLD =

@@ -7,7 +7,7 @@ import { WishlistButton } from './WishlistButton'
 import { ProductTagBadge } from './ProductTagBadge'
 import { ProductLink } from './ProductLink'
 import { QuantitySelector } from './QuantitySelector'
-import { ProductPiecesBadge } from './ProductPiecesBadge'
+import { formatPackagingShort, formatPackagingTableLines, resolveProductPackaging } from '@/lib/productPackaging'
 import { ProductBrandBadge } from './ProductBrandBadge'
 import { ProductHighlightBadges } from './ProductHighlightBadges'
 import {
@@ -36,7 +36,7 @@ interface ProductTableProps {
 }
 
 const DESKTOP_ROW_GRID =
-  'grid grid-cols-[minmax(0,1.35fr)_3.5rem_minmax(6.5rem,7.25rem)_4.25rem_3.25rem_5rem_minmax(10.75rem,11.5rem)] items-center gap-x-2.5 lg:gap-x-3'
+  'grid grid-cols-[minmax(0,1.2fr)_minmax(5.75rem,7rem)_minmax(5.5rem,6.75rem)_4.25rem_3.25rem_5rem_minmax(10.75rem,11.5rem)] items-center gap-x-2 lg:gap-x-2.5'
 
 const MOBILE_ROW_GRID =
   'grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2'
@@ -98,6 +98,27 @@ function getTableStripeClass(index: number): string {
   return index % 2 === 0 ? TABLE_STRIPE_EVEN : TABLE_STRIPE_ODD
 }
 
+function TablePackagingCell({ product }: { product: Product }) {
+  const lines = formatPackagingTableLines(resolveProductPackaging(product))
+
+  if (lines.length === 0) {
+    return <span className={cn('text-[11px]', TABLE_META_CLASS)}>—</span>
+  }
+
+  return (
+    <div className="flex min-w-0 flex-col gap-0.5 text-left leading-tight">
+      {lines.map((line) => (
+        <span
+          key={line}
+          className="block text-[10px] font-medium normal-case tracking-normal text-stone-600 lg:text-[11px]"
+        >
+          {line}
+        </span>
+      ))}
+    </div>
+  )
+}
+
 function ProductTableHeader({ className, sticky = true }: { className?: string; sticky?: boolean }) {
   return (
     <div
@@ -111,7 +132,7 @@ function ProductTableHeader({ className, sticky = true }: { className?: string; 
       )}
     >
       <span className={TABLE_HEADER_LABEL}>Product</span>
-      <span className={cn(TABLE_CELL, 'text-center', TABLE_HEADER_LABEL_MUTED)}>Pcs</span>
+      <span className={cn(TABLE_CELL, 'text-left', TABLE_HEADER_LABEL_MUTED)}>Pack</span>
       <span className={cn(TABLE_CELL, TABLE_HEADER_LABEL)}>Brand</span>
       <span className={cn(TABLE_CELL, TABLE_HEADER_LABEL_ACCENT)}>Price</span>
       <span className={cn(TABLE_CELL, 'text-center', TABLE_HEADER_LABEL_ACCENT)}>Off</span>
@@ -235,10 +256,8 @@ function MobileProductTableRow({ product, index }: { product: Product; index: nu
   const hasDiscount = product.discount_percentage != null && product.discount_percentage > 0
   const isElite = isEliteProductTag(product.tag)
   const displayBrand = getDisplayBrand(product.brand)
-  const metaParts = [
-    displayBrand,
-    product.pieces != null && product.pieces >= 1 ? `${product.pieces} pcs` : null,
-  ].filter(Boolean)
+  const packagingLabel = formatPackagingShort(resolveProductPackaging(product))
+  const metaParts = [displayBrand, packagingLabel].filter(Boolean)
 
   return (
     <article
@@ -268,7 +287,7 @@ function MobileProductTableRow({ product, index }: { product: Product; index: nu
             </h3>
           </ProductLink>
           {metaParts.length > 0 ? (
-            <p className="mt-0.5 truncate text-[9px] leading-none text-stone-500">
+            <p className="mt-0.5 line-clamp-2 text-[9px] leading-snug text-stone-500">
               {metaParts.join(' · ')}
             </p>
           ) : null}
@@ -354,7 +373,7 @@ function ProductTableRowCard({
   return (
     <article
       className={cn(
-        'product-grid-item group relative hidden border-b md:grid md:items-center',
+        'product-grid-item group relative hidden border-b md:grid md:items-start',
         TABLE_BORDER,
         DESKTOP_ROW_GRID,
         'px-3 py-3 lg:px-4 lg:py-3.5',
@@ -398,11 +417,11 @@ function ProductTableRowCard({
             </div>
           </div>
 
-          <div className={cn(TABLE_CELL, 'flex justify-center')}>
-            <ProductPiecesBadge pieces={product.pieces} variant="table" />
+          <div className={cn(TABLE_CELL, 'flex min-w-0 items-start justify-start py-0.5')}>
+            <TablePackagingCell product={product} />
           </div>
 
-          <div className={cn(TABLE_CELL, 'flex min-w-0 items-center')}>
+          <div className={cn(TABLE_CELL, 'flex min-w-0 items-center self-center')}>
             {brandName ? (
               <ProductBrandBadge
                 brand={brandName}
@@ -414,7 +433,7 @@ function ProductTableRowCard({
             )}
           </div>
 
-          <div className={cn(TABLE_CELL, 'flex items-center')}>
+          <div className={cn(TABLE_CELL, 'flex items-center self-center')}>
             <TablePrice
               price={price}
               originalPrice={originalPrice}
@@ -422,7 +441,7 @@ function ProductTableRowCard({
             />
           </div>
 
-          <div className={cn(TABLE_CELL, 'flex justify-center')}>
+          <div className={cn(TABLE_CELL, 'flex justify-center self-center')}>
             {hasDiscount ? (
               <span className="inline-flex items-center rounded-lg bg-gradient-to-r from-festive-500 to-gold-500 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-navy-950 shadow-[0_2px_10px_rgba(234,88,12,0.25)]">
                 {product.discount_percentage}%
@@ -432,11 +451,11 @@ function ProductTableRowCard({
             )}
           </div>
 
-          <div className={cn(TABLE_CELL, 'flex justify-center')}>
+          <div className={cn(TABLE_CELL, 'flex justify-center self-center')}>
             <TableStatus available={product.is_available} />
           </div>
 
-          <div className={cn(TABLE_CELL, 'flex min-w-0 items-center justify-end gap-1')}>
+          <div className={cn(TABLE_CELL, 'flex min-w-0 items-center justify-end gap-1 self-center')}>
             {product.is_available ? (
               <>
                 <ProductLink

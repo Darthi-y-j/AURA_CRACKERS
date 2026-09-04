@@ -14,6 +14,7 @@ import { resolveProductPrice } from '@/lib/pricing'
 import { filterProductsByQuery } from '@/lib/productSearch'
 import { createGiftBoxCartItem, giftBoxItemCount, giftBoxLineTotal } from '@/lib/giftBox'
 import { formatPrice, getImageUrl, IMAGE_WIDTH, cn } from '@/lib/utils'
+import { formatPackagingShort, resolveProductPackaging } from '@/lib/productPackaging'
 import type { Category, GiftBoxContentItem, Product } from '@/types/database'
 
 const DRAFT_KEY = 'aura-gift-box-draft'
@@ -78,8 +79,10 @@ function GiftBoxProductRow({
             {product.brand?.trim() ? (
               <ProductBrandBadge brand={product.brand} variant="overlay" className="h-5 px-1.5 text-[8px]" />
             ) : null}
-            {product.pieces != null && product.pieces >= 1 ? (
-              <span className="text-[10px] text-white/35">{product.pieces} pcs</span>
+            {formatPackagingShort(resolveProductPackaging(product)) ? (
+              <span className="text-[10px] text-white/35">
+                {formatPackagingShort(resolveProductPackaging(product))}
+              </span>
             ) : null}
           </div>
           <p className="mt-1.5 text-sm font-bold tabular-nums text-gold-300 sm:text-base">

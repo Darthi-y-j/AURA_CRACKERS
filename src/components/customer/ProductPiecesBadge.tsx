@@ -1,8 +1,11 @@
 import { Package } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { ProductPackaging } from '@/types/database'
+import { formatPackagingShort } from '@/lib/productPackaging'
 
 interface ProductPiecesBadgeProps {
-  pieces: number | null | undefined
+  pieces?: number | null
+  packaging?: ProductPackaging | null
   variant?: 'ember' | 'light' | 'silver' | 'elite' | 'table'
   suffix?: string
   className?: string
@@ -10,11 +13,13 @@ interface ProductPiecesBadgeProps {
 
 export function ProductPiecesBadge({
   pieces,
+  packaging,
   variant = 'ember',
   suffix = '/ pack',
   className,
 }: ProductPiecesBadgeProps) {
-  if (pieces == null || pieces < 1) return null
+  const label = formatPackagingShort(packaging ?? null, pieces)
+  if (!label) return null
 
   return (
     <span
@@ -36,7 +41,7 @@ export function ProductPiecesBadge({
         <>
           <Package
             className={cn(
-              'h-2.5 w-2.5',
+              'h-2.5 w-2.5 shrink-0',
               variant === 'table'
                 ? 'text-festive-500'
                 : variant === 'elite'
@@ -46,13 +51,13 @@ export function ProductPiecesBadge({
                   : 'text-gold-400/80',
             )}
           />
-          <span>{pieces} pcs</span>
+          <span className="normal-case tracking-normal">{label}</span>
         </>
       ) : (
         <>
-          <Package className="h-3 w-3 text-festive-500" />
-          <span>{pieces} pcs</span>
-          {suffix && (
+          <Package className="h-3 w-3 shrink-0 text-festive-500" />
+          <span className="normal-case tracking-normal">{label}</span>
+          {suffix && !label.includes('/') && (
             <span className="font-semibold normal-case tracking-normal text-festive-500/80">
               {suffix}
             </span>

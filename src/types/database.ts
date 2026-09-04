@@ -1,6 +1,17 @@
 export type EnquiryStatus = 'new' | 'contacted' | 'completed' | 'cancelled'
 export type EnquiryType = 'cart' | 'contact' | 'account' | 'order'
 
+export type PackagingUnit = 'piece' | 'pack' | 'box' | 'bundle' | 'carton'
+
+export interface ProductPackaging {
+  sellUnit: PackagingUnit
+  /** How many sell units per item (e.g. 2 bundles). Defaults to 1. */
+  sellUnitCount?: number | null
+  innerCount?: number | null
+  innerLabel?: string | null
+  piecesPerInner?: number | null
+}
+
 export interface Category {
   id: string
   name: string
@@ -26,6 +37,7 @@ export interface Product {
   original_price: number | null
   discount_percentage: number | null
   pieces: number | null
+  packaging: ProductPackaging | null
   brand: string | null
   tag: string | null
   image_url: string | null
@@ -90,6 +102,7 @@ export interface CartItem {
   price: number | null
   quantity: number
   pieces?: number | null
+  packaging?: ProductPackaging | null
   isGiftBox?: boolean
   giftBoxItems?: GiftBoxContentItem[]
 }

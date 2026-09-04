@@ -34,7 +34,7 @@ import { useToast } from '@/contexts/ToastContext'
 import { useStockAlerts } from '@/contexts/StockAlertContext'
 import { applyEnquiryStockChange } from '@/services/products'
 import { getEnquiryStockItems } from '@/lib/stock'
-import { buildWhatsAppContactUrl } from '@/lib/whatsapp'
+import { buildWhatsAppContactUrl, buildEnquiryWhatsAppDisplay } from '@/lib/whatsapp'
 import { downloadEnquiryPdf } from '@/lib/cartEnquiryPdf'
 import { formatDisplayPhone } from '@/lib/businessInfo'
 import { formatDate, formatDateShort, cn } from '@/lib/utils'
@@ -278,6 +278,10 @@ function AdminEnquiryInbox({ mode }: { mode: EnquiryInboxMode }) {
   const selectedParsed = selectedEnquiry ? parseEnquiryMessage(selectedEnquiry.customer_message) : null
   const selectedEmail = selectedEnquiry?.customer_email || selectedParsed?.email || null
   const selectedMessageBody = selectedParsed?.body || selectedEnquiry?.customer_message || ''
+  const selectedIsOrder =
+    selectedType === 'cart' || selectedType === 'order'
+  const selectedOrderDisplay =
+    selectedEnquiry && selectedIsOrder ? buildEnquiryWhatsAppDisplay(selectedEnquiry) : ''
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -502,24 +506,19 @@ function AdminEnquiryInbox({ mode }: { mode: EnquiryInboxMode }) {
                     </div>
                   </div>
 
-                  {(selectedType === 'cart' || selectedType === 'order') && selectedEnquiry.items && selectedEnquiry.items.length > 0 && (
-                    <div className="mt-4 rounded-xl border border-slate-100 bg-white p-4">
-                      <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  {(selectedType === 'cart' || selectedType === 'order') && selectedOrderDisplay && (
+                    <div className="mt-4">
+                      <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                         <Package className="h-3.5 w-3.5" />
-                        Order items
+                        Enquiry summary
                       </div>
-                      <ul className="space-y-2">
-                        {selectedEnquiry.items.map((item, i) => (
-                          <li key={i} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-sm">
-                            <span className="font-medium text-slate-800">{item.product_name}</span>
-                            <span className="text-slate-500">× {item.quantity}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <pre className="overflow-x-auto rounded-xl border border-navy-900/8 bg-slate-950 px-4 py-4 font-mono text-xs leading-relaxed text-cream-100 whitespace-pre-wrap">
+                        {selectedOrderDisplay}
+                      </pre>
                     </div>
                   )}
 
-                  {selectedMessageBody && (
+                  {!selectedIsOrder && selectedMessageBody && (
                     <div className="mt-4">
                       <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Message</p>
                       <blockquote className="rounded-xl border border-navy-900/8 bg-cream-50 px-4 py-4 text-sm leading-relaxed text-navy-800">

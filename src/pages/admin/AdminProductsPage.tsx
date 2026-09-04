@@ -22,6 +22,7 @@ import { useToast } from '@/contexts/ToastContext'
 import { useStockAlerts } from '@/contexts/StockAlertContext'
 import { isLowStock } from '@/lib/stock'
 import { groupProductsByCategory } from '@/components/customer/CategoryGroupedProducts'
+import { formatPackagingShort, resolveProductPackaging } from '@/lib/productPackaging'
 import { getSupabaseErrorMessage } from '@/lib/supabase'
 import { downloadProductsExcel } from '@/lib/exportProductsExcel'
 import { clearCatalogOnly } from '@/services/catalogCleanup'
@@ -354,7 +355,7 @@ export function AdminProductsPage() {
                   <th className="px-4 py-3 font-medium text-slate-600">Brand</th>
                   <th className="px-4 py-3 font-medium text-slate-600">Tag</th>
                   <th className="w-px whitespace-nowrap px-3 py-3 font-medium text-slate-600">Price</th>
-                  <th className="w-px whitespace-nowrap px-3 py-3 font-medium text-slate-600">Pieces</th>
+                  <th className="w-px whitespace-nowrap px-3 py-3 font-medium text-slate-600">Packaging</th>
                   <th className="w-px whitespace-nowrap px-3 py-3 font-medium text-slate-600">Stock</th>
                   <th className="w-px whitespace-nowrap px-3 py-3 font-medium text-slate-600">Status</th>
                   <th className="w-px whitespace-nowrap px-3 py-3 font-medium text-slate-600">Featured</th>
@@ -459,7 +460,7 @@ export function AdminProductsPage() {
                         {formatPrice(resolveProductPrice(product)) || 'Enquire'}
                       </td>
                       <td className="w-px whitespace-nowrap px-3 py-3 text-slate-600">
-                        {product.pieces != null ? product.pieces : '—'}
+                        {formatPackagingShort(resolveProductPackaging(product)) ?? '—'}
                       </td>
                       <td className="w-px whitespace-nowrap px-3 py-3">
                         {product.stock_quantity != null ? (

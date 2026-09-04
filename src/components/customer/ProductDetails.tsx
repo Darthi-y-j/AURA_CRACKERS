@@ -24,8 +24,9 @@ import {
   getCardPerforationLineClass,
   getCardPricePanelClass,
   getCardTitleClass,
-  isEliteProductTag,
+  getDiscountOfferTagVariant,
 } from '@/lib/productCardThemes'
+import { formatPackagingDetail, resolveProductPackaging } from '@/lib/productPackaging'
 
 interface ProductDetailsProps {
   product: Product
@@ -54,8 +55,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       : null
   const specs = product.specifications ? Object.entries(product.specifications) : []
   const hasDiscount = product.discount_percentage != null && product.discount_percentage > 0
-  const isElite = isEliteProductTag(product.tag)
-  const discountVariant = isElite ? 'elite' : 'festive'
+  const discountVariant = getDiscountOfferTagVariant(product.tag)
+  const packaging = resolveProductPackaging(product)
+  const packagingDetail = formatPackagingDetail(packaging)
 
   const handleQuantityChange = (qty: number) => {
     if (inCart) {
@@ -72,6 +74,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         imageUrl: product.image_url,
         price: sellingPrice,
         pieces: product.pieces ?? null,
+        packaging,
         quantity: qty,
       })
       return
@@ -87,6 +90,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       imageUrl: product.image_url,
       price: sellingPrice,
       pieces: product.pieces ?? null,
+      packaging,
       quantity,
     })
     showToast(`Added ${product.name} to cart`, 'success')
@@ -120,8 +124,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             <p className="mt-1 text-xs font-semibold text-emerald-400/90">You save {savings}</p>
           )}
         </div>
-        <ProductPiecesBadge pieces={product.pieces} className="shrink-0" />
+        <ProductPiecesBadge pieces={product.pieces} packaging={packaging} className="shrink-0" />
       </div>
+      {packagingDetail && (
+        <p className="mt-2 text-xs leading-relaxed text-cream-100/65">{packagingDetail}</p>
+      )}
     </div>
   )
 

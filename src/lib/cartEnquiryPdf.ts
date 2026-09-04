@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import type { CartEnquiryFormData, Enquiry } from '@/types/database'
+import { formatPackagingShort } from '@/lib/productPackaging'
 import { PDF_LOGO_PATH, SITE_NAME, SITE_WORDMARK_PATH } from '@/lib/siteConfig'
 import { BUSINESS_ADDRESS } from '@/lib/businessInfo'
 import { generateEnquiryNumber } from '@/lib/utils'
@@ -118,9 +119,14 @@ async function loadWordmarkForPdf(
   }
 }
 
-function formatProductLabel(name: string, pieces?: number | null): string {
-  if (pieces != null) {
-    return `${name} (${pieces} pcs/pack)`
+function formatProductLabel(
+  name: string,
+  pieces?: number | null,
+  packaging?: CartEnquiryFormData['items'][number]['packaging'],
+): string {
+  const packagingLabel = formatPackagingShort(packaging ?? null, pieces)
+  if (packagingLabel) {
+    return `${name} (${packagingLabel})`
   }
   return name
 }
@@ -290,7 +296,7 @@ export async function generateCartEnquiryPdfBlob(
     const lineTotal = item.price != null ? item.price * item.quantity : null
     tableBody.push([
       index + 1,
-      formatProductLabel(item.productName, item.pieces),
+      formatProductLabel(item.productName, item.pieces, item.packaging),
       item.quantity,
       formatPdfAmount(item.price),
       formatPdfAmount(lineTotal),

@@ -2,9 +2,17 @@ import { cn } from '@/lib/utils'
 
 interface DiscountOfferTagProps {
   percentage: number
-  variant?: 'festive' | 'elite'
+  variant?: 'festive' | 'elite' | 'premium-plus'
   className?: string
 }
+
+const DISCOUNT_TAG_STYLES = {
+  festive: 'bg-gradient-to-b from-red-500 to-orange-500 text-white shadow-[0_4px_14px_rgba(234,88,12,0.45)]',
+  elite:
+    'bg-[linear-gradient(180deg,#475569_0%,#cbd5e1_48%,#67e8f9_100%)] text-navy-950 shadow-[0_4px_14px_rgba(34,211,238,0.22)]',
+  'premium-plus':
+    'bg-[linear-gradient(180deg,#8a6b12_0%,#c9a227_48%,#f9e076_100%)] text-black shadow-[0_4px_14px_rgba(212,175,55,0.4)]',
+} as const
 
 /** Vertical ribbon with fishtail — pinned top-right */
 export function DiscountOfferTag({
@@ -12,15 +20,11 @@ export function DiscountOfferTag({
   variant = 'festive',
   className,
 }: DiscountOfferTagProps) {
-  const isElite = variant === 'elite'
-
   return (
     <div
       className={cn(
-        'absolute right-0 top-0 z-10 flex w-[42px] flex-col items-center pt-2 pb-3.5 text-center shadow-[0_4px_14px_rgba(234,88,12,0.45)]',
-        isElite
-          ? 'bg-[linear-gradient(180deg,#475569_0%,#cbd5e1_48%,#67e8f9_100%)] text-navy-950 shadow-[0_4px_14px_rgba(34,211,238,0.22)]'
-          : 'bg-gradient-to-b from-red-500 to-orange-500 text-white',
+        'absolute right-0 top-0 z-10 flex w-[42px] flex-col items-center pt-2 pb-3.5 text-center',
+        DISCOUNT_TAG_STYLES[variant],
         className,
       )}
       style={{

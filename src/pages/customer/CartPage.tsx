@@ -28,9 +28,7 @@ import { useToast } from '@/contexts/ToastContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { SpinToWinWheel } from '@/components/customer/SpinToWinWheel'
 import { createCartEnquiry } from '@/services/enquiries'
-import { buildCartWhatsAppMessage } from '@/lib/whatsapp'
-import { generateCartEnquiryPdfBlob } from '@/lib/cartEnquiryPdf'
-import { deliverEnquiryWithPdf } from '@/lib/deliverEnquiryPdf'
+import { buildCartWhatsAppMessage, buildWhatsAppUrl } from '@/lib/whatsapp'
 import { generateEnquiryNumber } from '@/lib/utils'
 import type { SpinReward } from '@/lib/spinToWin'
 import type { CartEnquiryFormData } from '@/types/database'
@@ -365,7 +363,7 @@ function EnquiryForm({
 
                   <p className="mt-3 flex items-start justify-center gap-1.5 text-center text-[11px] leading-relaxed text-navy-700/50">
                     <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-gold-500" />
-          WhatsApp opens with your message. Attach the downloaded PDF using the 📎 button.
+          WhatsApp opens with your order details pre-filled — just tap Send.
         </p>
       </div>
     </div>
@@ -386,8 +384,6 @@ export function CartPage() {
   const [spinReward, setSpinReward] = useState<SpinReward | null>(null)
   const [spinDiscount, setSpinDiscount] = useState(0)
   const [prefilledFromAccount, setPrefilledFromAccount] = useState(false)
-  const [showAttachPdfHint, setShowAttachPdfHint] = useState(false)
-
   const customerEmail = isCustomer && user?.email ? user.email : undefined
 
   useEffect(() => {
@@ -494,40 +490,20 @@ export function CartPage() {
       return
     }
 
-    // Open tab synchronously on click so popup blockers allow WhatsApp after PDF generation.
-    const whatsappTab = window.open('about:blank', '_blank')
+    const enquiryNumber = generateEnquiryNumber()
+    const message = buildCartWhatsAppMessage(formData)
+    const url = buildWhatsAppUrl(settings.whatsapp_number, message)
+    window.open(url, '_blank', 'noopener,noreferrer')
 
     setLoading(true)
 
     try {
-      const enquiryNumber = generateEnquiryNumber()
-      const message = buildCartWhatsAppMessage(formData)
-
-      const { blob, filename } = await generateCartEnquiryPdfBlob(formData, {
-        businessName: settings.business_name || 'Aura Crackers',
-        businessPhone: settings.whatsapp_number
-          ? formatDisplayPhone(settings.whatsapp_number)
-          : undefined,
-        enquiryNumber,
-        estimatedTotal,
-        spinDiscount,
-      })
-
-      deliverEnquiryWithPdf({
-        blob,
-        filename,
-        message,
-        whatsappNumber: settings.whatsapp_number,
-        whatsappTab,
-      })
-
-      setShowAttachPdfHint(true)
-      showToast('WhatsApp opened — attach the downloaded PDF with the 📎 button', 'success')
-
       const { error } = await createCartEnquiry(formData, enquiryNumber)
 
       if (error) {
         showToast('Enquiry could not be saved online, but you can still send on WhatsApp', 'info')
+      } else {
+        showToast('WhatsApp opened with your enquiry', 'success')
       }
 
       clearCart()
@@ -538,7 +514,6 @@ export function CartPage() {
       setCustomerMessage('')
       setPrefilledFromAccount(false)
     } catch {
-      whatsappTab?.close()
       showToast('Something went wrong. Please try again.', 'error')
     } finally {
       setLoading(false)
@@ -823,50 +798,6 @@ export function CartPage() {
         </div>
         )}
       </div>
-
-      {showAttachPdfHint && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-navy-950/60 p-4 sm:items-center"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="attach-pdf-title"
-        >
-          <div className="w-full max-w-md rounded-2xl border border-gold-400/25 bg-white p-5 shadow-2xl sm:p-6">
-            <h3 id="attach-pdf-title" className="font-display text-lg font-bold text-navy-900">
-              Attach your order PDF
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-navy-700/75">
-              WhatsApp is open with your message. To include the PDF:
-            </p>
-            <ol className="mt-3 space-y-2 text-sm text-navy-800">
-              <li className="flex gap-2">
-                <span className="font-bold text-gold-600">1.</span>
-                Tap the <strong>📎 attachment</strong> icon in WhatsApp
-              </li>
-              <li className="flex gap-2">
-                <span className="font-bold text-gold-600">2.</span>
-                Choose <strong>Document</strong> and select the downloaded PDF
-              </li>
-              <li className="flex gap-2">
-                <span className="font-bold text-gold-600">3.</span>
-                Tap <strong>Send</strong>
-              </li>
-            </ol>
-            {settings.whatsapp_number && (
-              <p className="mt-4 rounded-xl bg-gold-50 px-3 py-2 text-xs font-semibold text-gold-800">
-                Send to: {formatDisplayPhone(settings.whatsapp_number)}
-              </p>
-            )}
-            <button
-              type="button"
-              onClick={() => setShowAttachPdfHint(false)}
-              className="mt-5 w-full rounded-xl bg-navy-900 py-3 text-sm font-bold text-white transition hover:bg-navy-800"
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
     </>
   )
 }

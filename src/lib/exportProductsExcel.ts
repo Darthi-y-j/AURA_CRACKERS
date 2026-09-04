@@ -2,6 +2,7 @@ import * as XLSX from 'xlsx'
 import type { Category, Product } from '@/types/database'
 import { resolveProductPrice } from '@/lib/pricing'
 import { getProductTagLabel } from '@/lib/productTags'
+import { formatPackagingDetail, resolveProductPackaging } from '@/lib/productPackaging'
 
 export function downloadProductsExcel(products: Product[], categories: Category[]): void {
   const categoryMap = new Map(categories.map((category) => [category.id, category.name]))
@@ -16,6 +17,7 @@ export function downloadProductsExcel(products: Product[], categories: Category[
     'Original Price': product.original_price ?? '',
     'Discount %': product.discount_percentage ?? '',
     Pieces: product.pieces ?? '',
+    Packaging: formatPackagingDetail(resolveProductPackaging(product)) ?? '',
     Stock: product.stock_quantity ?? '',
     'Stock Alert': product.stock_alert_limit ?? '',
     Status: product.is_available ? 'Available' : 'Unavailable',

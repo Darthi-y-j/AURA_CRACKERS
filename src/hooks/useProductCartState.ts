@@ -4,6 +4,7 @@ import { formatPrice } from '@/lib/utils'
 import { resolveProductPrice, resolveOriginalPriceForDisplay } from '@/lib/pricing'
 import { useCartItem } from '@/contexts/CartContext'
 import { setCartItem } from '@/lib/cartStore'
+import { resolveProductPackaging } from '@/lib/productPackaging'
 import { useToast } from '@/contexts/ToastContext'
 
 export function useProductCartState(product: Product) {
@@ -21,6 +22,8 @@ export function useProductCartState(product: Product) {
   const originalPriceValue = resolveOriginalPriceForDisplay(product)
   const originalPrice = originalPriceValue != null ? formatPrice(originalPriceValue) : null
 
+  const packaging = resolveProductPackaging(product)
+
   const handleQuantityChange = (qty: number) => {
     if (qty < 1) {
       setCartItem({
@@ -30,6 +33,7 @@ export function useProductCartState(product: Product) {
         imageUrl: product.image_url,
         price: sellingPrice,
         pieces: product.pieces ?? null,
+        packaging,
         quantity: 0,
       })
       setQuantity(1)
@@ -44,6 +48,7 @@ export function useProductCartState(product: Product) {
       imageUrl: product.image_url,
       price: sellingPrice,
       pieces: product.pieces ?? null,
+      packaging,
       quantity: qty,
     })
   }
@@ -56,6 +61,7 @@ export function useProductCartState(product: Product) {
       imageUrl: product.image_url,
       price: sellingPrice,
       pieces: product.pieces ?? null,
+      packaging,
       quantity,
     })
     showToast(

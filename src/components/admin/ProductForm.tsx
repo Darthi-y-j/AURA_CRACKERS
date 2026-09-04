@@ -16,6 +16,14 @@ import { VideoUploader } from './VideoUploader'
 import { useToast } from '@/contexts/ToastContext'
 import { isValidYouTubeUrl } from '@/lib/youtube'
 import { buildProductGalleryPayload, getInitialGallerySlots } from '@/lib/productImages'
+import {
+  PACKAGING_UNITS,
+  DEFAULT_INNER_LABEL,
+  buildPackagingFromForm,
+  formatPackagingDetail,
+  getPackagingFormState,
+  isNestedPackaging,
+} from '@/lib/productPackaging'
 
 interface ProductFormProps {
   product?: Product
@@ -74,6 +82,8 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
   const [loading, setLoading] = useState(false)
   const initialPricing = getInitialPricing(product)
 
+  const initialPackaging = getPackagingFormState(product)
+
   const [form, setForm] = useState({
     name: product?.name || '',
     slug: product?.slug || '',
@@ -92,7 +102,11 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
     is_best_seller: product?.is_best_seller ?? false,
     sort_order:
       product?.sort_order?.toString() || getNextSortOrder(existingProducts).toString(),
-    pieces: product?.pieces?.toString() || '',
+    packaging_sell_unit: initialPackaging.sellUnit,
+    packaging_sell_unit_count: initialPackaging.sellUnitCount,
+    packaging_inner_count: initialPackaging.innerCount,
+    packaging_inner_label: initialPackaging.innerLabel,
+    packaging_pieces_per_inner: initialPackaging.piecesPerInner,
     stock_quantity: product?.stock_quantity?.toString() || '',
     stock_alert_limit: product?.stock_alert_limit?.toString() || '',
     brand: product?.brand || '',
@@ -103,6 +117,29 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
   })
 
   const [pricingSource, setPricingSource] = useState<'original' | 'selling'>('original')
+
+  const packagingPreview = useMemo(
+    () =>
+      formatPackagingDetail(
+        buildPackagingFromForm({
+          sellUnit: form.packaging_sell_unit,
+          sellUnitCount: form.packaging_sell_unit_count,
+          innerCount: form.packaging_inner_count,
+          innerLabel: form.packaging_inner_label,
+          piecesPerInner: form.packaging_pieces_per_inner,
+        }).packaging,
+      ),
+    [
+      form.packaging_sell_unit,
+      form.packaging_sell_unit_count,
+      form.packaging_inner_count,
+      form.packaging_inner_label,
+      form.packaging_pieces_per_inner,
+    ],
+  )
+
+  const showNestedPackaging = isNestedPackaging(form.packaging_sell_unit)
+  const showPiecesPerUnit = form.packaging_sell_unit !== 'piece'
 
   const pricingPreview = useMemo(
     () => formatPricingPreview(form.original_price, form.discount_percentage, formatPrice),
@@ -202,15 +239,27 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
       return
     }
 
-    let pieces: number | null = null
-    if (form.pieces.trim()) {
-      const parsedPieces = parseInt(form.pieces, 10)
-      if (Number.isNaN(parsedPieces) || parsedPieces < 1) {
-        showToast('Enter a valid number of pieces (1 or higher), or leave blank.', 'error')
-        return
-      }
-      pieces = parsedPieces
+    const packagingResult = buildPackagingFromForm({
+      sellUnit: form.packaging_sell_unit,
+      sellUnitCount: form.packaging_sell_unit_count,
+      innerCount: form.packaging_inner_count,
+      innerLabel: form.packaging_inner_label,
+      piecesPerInner: form.packaging_pieces_per_inner,
+    })
+
+    const wantsPackaging =
+      form.packaging_sell_unit === 'piece' ||
+      Boolean(form.packaging_pieces_per_inner.trim()) ||
+      Boolean(form.packaging_inner_count.trim()) ||
+      (form.packaging_sell_unit_count.trim() && form.packaging_sell_unit_count.trim() !== '1')
+
+    if (wantsPackaging && packagingResult.error) {
+      showToast(packagingResult.error, 'error')
+      return
     }
+
+    const pieces = wantsPackaging ? packagingResult.pieces : null
+    const packaging = wantsPackaging ? packagingResult.packaging : null
 
     let stock_quantity: number | null = null
     if (form.stock_quantity.trim()) {
@@ -258,6 +307,7 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
       original_price: pricing.original_price,
       discount_percentage: pricing.discount_percentage,
       pieces,
+      packaging,
       stock_quantity,
       stock_alert_limit,
       brand: form.brand.trim() || null,
@@ -452,22 +502,115 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
             </div>
           </div>
 
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
-              Pieces (per pack)
-            </label>
-            <input
-              type="number"
-              min={1}
-              step={1}
-              value={form.pieces}
-              onChange={(e) => setForm({ ...form, pieces: e.target.value })}
-              className={inputClass}
-              placeholder="e.g. 10"
-            />
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-sm font-semibold text-slate-800">Packaging</p>
             <p className="mt-1 text-xs text-slate-500">
-              Number of pieces in one unit. Shown to customers on the product page.
+              What the customer buys and how it is packed inside (e.g. 1 bundle · 5 boxes · 10 pcs/box).
             </p>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className="mb-1 block text-sm font-medium text-slate-700">
+                  Customer buys (sell unit)
+                </label>
+                <select
+                  value={form.packaging_sell_unit}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      packaging_sell_unit: e.target.value as typeof form.packaging_sell_unit,
+                    })
+                  }
+                  className={inputClass}
+                >
+                  {PACKAGING_UNITS.map((unit) => (
+                    <option key={unit.value} value={unit.value}>
+                      {unit.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {form.packaging_sell_unit !== 'piece' && (
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-sm font-medium text-slate-700">
+                    Number of {form.packaging_sell_unit}s per item
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={form.packaging_sell_unit_count}
+                    onChange={(e) =>
+                      setForm({ ...form, packaging_sell_unit_count: e.target.value })
+                    }
+                    className={inputClass}
+                    placeholder="e.g. 1"
+                  />
+                  <p className="mt-1 text-xs text-slate-500">
+                    How many {form.packaging_sell_unit}s the customer gets in one unit (usually 1).
+                  </p>
+                </div>
+              )}
+
+              {showNestedPackaging && (
+                <>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-slate-700">
+                      {form.packaging_inner_label || DEFAULT_INNER_LABEL}s per {form.packaging_sell_unit}
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      step={1}
+                      value={form.packaging_inner_count}
+                      onChange={(e) => setForm({ ...form, packaging_inner_count: e.target.value })}
+                      className={inputClass}
+                      placeholder="e.g. 5"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-slate-700">
+                      Inner unit name
+                    </label>
+                    <input
+                      type="text"
+                      value={form.packaging_inner_label}
+                      onChange={(e) => setForm({ ...form, packaging_inner_label: e.target.value })}
+                      className={inputClass}
+                      placeholder="e.g. box"
+                    />
+                  </div>
+                </>
+              )}
+
+              {showPiecesPerUnit && (
+                <div className={showNestedPackaging ? '' : 'sm:col-span-2'}>
+                  <label className="mb-1 block text-sm font-medium text-slate-700">
+                    {showNestedPackaging
+                      ? `Pieces per ${form.packaging_inner_label || DEFAULT_INNER_LABEL}`
+                      : `Pieces per ${form.packaging_sell_unit}`}
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={form.packaging_pieces_per_inner}
+                    onChange={(e) =>
+                      setForm({ ...form, packaging_pieces_per_inner: e.target.value })
+                    }
+                    className={inputClass}
+                    placeholder="e.g. 10"
+                  />
+                </div>
+              )}
+            </div>
+
+            {packagingPreview && (
+              <p className="mt-3 rounded-lg border border-amber-200/80 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-950">
+                Preview: {packagingPreview}
+              </p>
+            )}
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
