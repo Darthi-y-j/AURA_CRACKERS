@@ -32,6 +32,10 @@ export const SITE_LOGO_PATH = `${SITE_LOGO_FILE}?v=${FAVICON_VERSION}`
 export const SITE_WORDMARK_FILE = '/Wordmark - Transparent-03.png'
 export const SITE_WORDMARK_PATH = SITE_WORDMARK_FILE
 
+/** Circular primary logo for enquiry PDF header. */
+export const PDF_LOGO_FILE = '/Primary_Logo_-_BG-01-removebg-preview (1).png'
+export const PDF_LOGO_PATH = PDF_LOGO_FILE
+
 /** Trimmed favicons generated from SITE_LOGO_FILE — use for browser tab / PWA. */
 export const FAVICON_PATH = `/favicon.png?v=${FAVICON_VERSION}`
 export const FAVICON_32_PATH = `/favicon-32x32.png?v=${FAVICON_VERSION}`

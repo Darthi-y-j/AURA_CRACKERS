@@ -1,45 +1,36 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import type { CartEnquiryFormData, Enquiry } from '@/types/database'
-import { SITE_LOGO_PATH, SITE_NAME, SITE_WORDMARK_PATH } from '@/lib/siteConfig'
+import { PDF_LOGO_PATH, SITE_NAME, SITE_WORDMARK_PATH } from '@/lib/siteConfig'
 import { BUSINESS_ADDRESS } from '@/lib/businessInfo'
 import { generateEnquiryNumber } from '@/lib/utils'
 
 const BRAND_ORANGE: [number, number, number] = [234, 88, 12]
+const BRAND_GOLD: [number, number, number] = [255, 204, 0]
 const NAVY: [number, number, number] = [30, 27, 75]
-const ORBITRON_FONT_FILE = 'Orbitron-Bold.ttf'
-
-let orbitronFontBase64: string | null = null
+const SPIN_HIGHLIGHT: [number, number, number] = [255, 247, 237]
+const PDF_FONT = 'helvetica'
 
 function formatPdfAmount(price: number | null | undefined): string {
-  if (price == null) return '—'
+  if (price == null) return '-'
   return `Rs. ${price.toLocaleString('en-IN')}`
 }
 
-async function loadOrbitronFont(): Promise<string> {
-  if (orbitronFontBase64) return orbitronFontBase64
-  const fontUrl = new URL('../assets/fonts/Orbitron-Bold.ttf', import.meta.url)
-  const response = await fetch(fontUrl)
-  const buffer = await response.arrayBuffer()
-  const bytes = new Uint8Array(buffer)
-  let binary = ''
-  for (let i = 0; i < bytes.length; i++) {
-    binary += String.fromCharCode(bytes[i]!)
-  }
-  orbitronFontBase64 = btoa(binary)
-  return orbitronFontBase64
+function setHeadingFont(doc: jsPDF, size: number): void {
+  doc.setFont(PDF_FONT, 'bold')
+  doc.setFontSize(size)
 }
 
-function registerOrbitronFont(doc: jsPDF, base64: string): void {
-  doc.addFileToVFS(ORBITRON_FONT_FILE, base64)
-  doc.addFont(ORBITRON_FONT_FILE, 'Orbitron', 'bold')
+function setBodyFont(doc: jsPDF, style: 'normal' | 'bold' | 'italic' = 'normal', size = 9): void {
+  doc.setFont(PDF_FONT, style)
+  doc.setFontSize(size)
 }
 
 async function loadImageDataUrl(
   path: string,
 ): Promise<{ dataUrl: string; format: 'PNG' | 'JPEG' } | null> {
   try {
-    const response = await fetch(path)
+    const response = await fetch(encodeURI(path))
     if (!response.ok) return null
     const blob = await response.blob()
     const format: 'PNG' | 'JPEG' = blob.type.includes('png') ? 'PNG' : 'JPEG'
@@ -127,6 +118,13 @@ async function loadWordmarkForPdf(
   }
 }
 
+function formatProductLabel(name: string, pieces?: number | null): string {
+  if (pieces != null) {
+    return `${name} (${pieces} pcs/pack)`
+  }
+  return name
+}
+
 function drawSpinRewardCallout(
   doc: jsPDF,
   margin: number,
@@ -135,80 +133,68 @@ function drawSpinRewardCallout(
   label: string,
 ): number {
   const boxWidth = pageWidth - margin * 2
-  const boxHeight = 16
+  const boxHeight = 18
   const boxY = y
 
-  doc.setFillColor(255, 247, 237)
-  doc.setDrawColor(...BRAND_ORANGE)
-  doc.setLineWidth(0.3)
+  doc.setFillColor(...SPIN_HIGHLIGHT)
+  doc.setDrawColor(...BRAND_GOLD)
+  doc.setLineWidth(0.5)
   doc.roundedRect(margin, boxY, boxWidth, boxHeight, 2, 2, 'FD')
 
-  doc.setFont('Orbitron', 'bold')
-  doc.setFontSize(9)
+  setHeadingFont(doc, 9)
   doc.setTextColor(...BRAND_ORANGE)
-  doc.text('Spin to Win Gift', margin + 4, boxY + 6)
+  doc.text('Spin to Win — FREE GIFT', margin + 4, boxY + 7)
 
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(9)
-  doc.text(label, margin + 4, boxY + 12)
+  setBodyFont(doc, 'bold', 10)
+  doc.setTextColor(120, 53, 15)
+  doc.text(label, margin + 4, boxY + 14)
 
-  doc.setFont('helvetica', 'italic')
-  doc.setFontSize(8)
-  doc.text('Free gift with order', pageWidth - margin - 4, boxY + 12, { align: 'right' })
+  setBodyFont(doc, 'italic', 8)
+  doc.setTextColor(...BRAND_ORANGE)
+  doc.text('Included with your order', pageWidth - margin - 4, boxY + 14, { align: 'right' })
 
   return boxY + boxHeight + 6
 }
 
-export interface CartEnquiryPdfOptions {
-  businessName: string
-  businessPhone?: string
-  enquiryNumber?: string
-  estimatedTotal?: number
-  spinDiscount?: number
-}
-
-export async function downloadCartEnquiryPdf(
-  data: CartEnquiryFormData,
+async function drawPdfBrandHeader(
+  doc: jsPDF,
+  margin: number,
+  pageWidth: number,
   options: CartEnquiryPdfOptions,
-): Promise<string> {
-  const enquiryNumber = options.enquiryNumber ?? generateEnquiryNumber()
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const margin = 14
+): Promise<number> {
+  const contentWidth = pageWidth - margin * 2
   let y = margin
 
-  const [fontBase64, logo, wordmark] = await Promise.all([
-    loadOrbitronFont(),
-    loadImageDataUrl(SITE_LOGO_PATH),
+  const [logo, wordmark] = await Promise.all([
+    loadImageDataUrl(PDF_LOGO_PATH),
     loadWordmarkForPdf(SITE_WORDMARK_PATH),
   ])
-  registerOrbitronFont(doc, fontBase64)
 
   const businessName = (options.businessName || SITE_NAME).toUpperCase()
-  const logoSize = 18
-  const wordmarkX = margin + logoSize + 3
+  const logoSize = 22
+  const logoGap = 4
+  const wordmarkX = margin + logoSize + logoGap
 
   if (logo) {
-    doc.addImage(logo.dataUrl, logo.format, margin, y - 2, logoSize, logoSize)
+    doc.addImage(logo.dataUrl, logo.format, margin, y, logoSize, logoSize)
   }
 
   if (wordmark) {
-    const wordmarkHeight = 10
+    const wordmarkHeight = 11
     const wordmarkWidth = wordmarkHeight * wordmark.aspectRatio
-    const wordmarkY = y - 2 + (logoSize - wordmarkHeight) / 2
+    const wordmarkY = y + (logoSize - wordmarkHeight) / 2
     doc.addImage(wordmark.dataUrl, 'PNG', wordmarkX, wordmarkY, wordmarkWidth, wordmarkHeight)
   } else {
-    doc.setFont('Orbitron', 'bold')
-    doc.setFontSize(16)
+    setHeadingFont(doc, 16)
     doc.setTextColor(...BRAND_ORANGE)
-    doc.text(businessName, logo ? wordmarkX : margin, y + 5)
+    doc.text(businessName, logo ? wordmarkX : margin, y + logoSize / 2 + 2)
   }
 
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(9)
+  y += logoSize + 4
+
+  setBodyFont(doc, 'normal', 9)
   doc.setTextColor(80, 80, 80)
-  y += logoSize + 2
-  const addressLines = doc.splitTextToSize(BUSINESS_ADDRESS.replace(/\n/g, ', '), pageWidth - margin * 2)
+  const addressLines = doc.splitTextToSize(BUSINESS_ADDRESS.replace(/\n/g, ', '), contentWidth)
   doc.text(addressLines, margin, y)
   y += addressLines.length * 4
 
@@ -221,16 +207,40 @@ export async function downloadCartEnquiryPdf(
   doc.setDrawColor(...BRAND_ORANGE)
   doc.setLineWidth(0.4)
   doc.line(margin, y, pageWidth - margin, y)
-  y += 8
+  return y + 8
+}
 
-  doc.setFont('Orbitron', 'bold')
-  doc.setFontSize(13)
+export interface CartEnquiryPdfOptions {
+  businessName: string
+  businessPhone?: string
+  enquiryNumber?: string
+  estimatedTotal?: number
+  spinDiscount?: number
+}
+
+export interface CartEnquiryPdfResult {
+  enquiryNumber: string
+  filename: string
+  blob: Blob
+}
+
+export async function generateCartEnquiryPdfBlob(
+  data: CartEnquiryFormData,
+  options: CartEnquiryPdfOptions,
+): Promise<CartEnquiryPdfResult> {
+  const enquiryNumber = options.enquiryNumber ?? generateEnquiryNumber()
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+  const pageWidth = doc.internal.pageSize.getWidth()
+  const margin = 14
+
+  let y = await drawPdfBrandHeader(doc, margin, pageWidth, options)
+
+  setHeadingFont(doc, 13)
   doc.setTextColor(...NAVY)
   doc.text('Order Enquiry / Estimate', margin, y)
   y += 7
 
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(9)
+  setBodyFont(doc, 'normal', 9)
   doc.setTextColor(60, 60, 60)
   const now = new Date()
   doc.text(`Enquiry No: ${enquiryNumber}`, margin, y)
@@ -242,14 +252,12 @@ export async function downloadCartEnquiryPdf(
   )
   y += 10
 
-  doc.setFont('Orbitron', 'bold')
-  doc.setFontSize(11)
+  setHeadingFont(doc, 11)
   doc.setTextColor(...NAVY)
   doc.text('Customer Details', margin, y)
   y += 6
 
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(9)
+  setBodyFont(doc, 'normal', 9)
   doc.setTextColor(50, 50, 50)
 
   const customerLines: string[] = [
@@ -271,8 +279,7 @@ export async function downloadCartEnquiryPdf(
   }
 
   y += 4
-  doc.setFont('Orbitron', 'bold')
-  doc.setFontSize(11)
+  setHeadingFont(doc, 11)
   doc.setTextColor(...NAVY)
   doc.text('Order Items', margin, y)
   y += 2
@@ -283,7 +290,7 @@ export async function downloadCartEnquiryPdf(
     const lineTotal = item.price != null ? item.price * item.quantity : null
     tableBody.push([
       index + 1,
-      item.productName,
+      formatProductLabel(item.productName, item.pieces),
       item.quantity,
       formatPdfAmount(item.price),
       formatPdfAmount(lineTotal),
@@ -295,23 +302,44 @@ export async function downloadCartEnquiryPdf(
           '',
           `  • ${inner.productName}`,
           inner.quantity,
-          inner.price != null ? formatPdfAmount(inner.price) : '—',
-          '—',
+          inner.price != null ? formatPdfAmount(inner.price) : '-',
+          '-',
         ])
       })
     }
   })
+
+  if (data.spinReward?.label) {
+    tableBody.push([
+      '',
+      `* Spin to Win Gift: ${data.spinReward.label}`,
+      1,
+      'FREE',
+      'FREE',
+    ])
+  }
+
+  const spinRowIndex = data.spinReward?.label ? tableBody.length - 1 : -1
+
+  setBodyFont(doc, 'normal', 8.5)
 
   autoTable(doc, {
     startY: y + 2,
     head: [['#', 'Product', 'Qty', 'Unit Price', 'Amount']],
     body: tableBody,
     margin: { left: margin, right: margin },
-    styles: { fontSize: 8.5, cellPadding: 2.5, textColor: [40, 40, 40] },
+    styles: {
+      font: PDF_FONT,
+      fontStyle: 'normal',
+      fontSize: 8.5,
+      cellPadding: 2.5,
+      textColor: [40, 40, 40],
+    },
     headStyles: {
+      font: PDF_FONT,
+      fontStyle: 'bold',
       fillColor: NAVY,
       textColor: [255, 255, 255],
-      fontStyle: 'bold',
     },
     columnStyles: {
       0: { cellWidth: 10, halign: 'center' },
@@ -320,6 +348,16 @@ export async function downloadCartEnquiryPdf(
       4: { cellWidth: 28, halign: 'right' },
     },
     alternateRowStyles: { fillColor: [252, 250, 245] },
+    didParseCell: (hookData) => {
+      if (spinRowIndex >= 0 && hookData.section === 'body' && hookData.row.index === spinRowIndex) {
+        hookData.cell.styles.fillColor = SPIN_HIGHLIGHT
+        hookData.cell.styles.textColor = [120, 53, 15]
+        hookData.cell.styles.fontStyle = 'bold'
+        if (hookData.column.index === 1) {
+          hookData.cell.styles.textColor = BRAND_ORANGE
+        }
+      }
+    },
   })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -335,30 +373,45 @@ export async function downloadCartEnquiryPdf(
   }
 
   if (hasPricing && subtotal > 0) {
-    const totalsX = pageWidth - margin - 55
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(9)
-    doc.setTextColor(50, 50, 50)
-    doc.text('Subtotal:', totalsX, y)
-    doc.text(formatPdfAmount(subtotal), pageWidth - margin, y, { align: 'right' })
-    y += 6
+    const totalsBoxY = y
+    const totalsBoxWidth = 70
+    const totalsBoxX = pageWidth - margin - totalsBoxWidth
+    const totalsBoxHeight = spinDiscount > 0 ? 22 : 14
 
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(11)
+    doc.setFillColor(252, 250, 245)
+    doc.setDrawColor(...BRAND_ORANGE)
+    doc.setLineWidth(0.3)
+    doc.roundedRect(totalsBoxX, totalsBoxY, totalsBoxWidth, totalsBoxHeight, 2, 2, 'FD')
+
+    const totalsX = totalsBoxX + 4
+    let totalsY = totalsBoxY + 6
+
+    setBodyFont(doc, 'normal', 9)
+    doc.setTextColor(50, 50, 50)
+    doc.text('Subtotal:', totalsX, totalsY)
+    doc.text(formatPdfAmount(subtotal), pageWidth - margin - 4, totalsY, { align: 'right' })
+    totalsY += 6
+
+    if (spinDiscount > 0) {
+      doc.setTextColor(...BRAND_ORANGE)
+      doc.text('Spin Discount:', totalsX, totalsY)
+      doc.text(`- ${formatPdfAmount(spinDiscount)}`, pageWidth - margin - 4, totalsY, { align: 'right' })
+      totalsY += 6
+    }
+
+    setHeadingFont(doc, 11)
     doc.setTextColor(...NAVY)
-    doc.text('Estimated Total:', totalsX, y)
-    doc.text(formatPdfAmount(finalTotal), pageWidth - margin, y, { align: 'right' })
-    y += 10
+    doc.text('Total:', totalsX, totalsY)
+    doc.text(formatPdfAmount(finalTotal), pageWidth - margin - 4, totalsY, { align: 'right' })
+    y = totalsBoxY + totalsBoxHeight + 8
   }
 
   if (data.customerMessage?.trim()) {
-    doc.setFont('Orbitron', 'bold')
-    doc.setFontSize(10)
+    setHeadingFont(doc, 10)
     doc.setTextColor(...NAVY)
     doc.text('Customer Message', margin, y)
     y += 5
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(9)
+    setBodyFont(doc, 'normal', 9)
     doc.setTextColor(50, 50, 50)
     const msgLines = doc.splitTextToSize(data.customerMessage.trim(), pageWidth - margin * 2)
     doc.text(msgLines, margin, y)
@@ -368,8 +421,7 @@ export async function downloadCartEnquiryPdf(
   const footerY = Math.max(y + 6, doc.internal.pageSize.getHeight() - 22)
   doc.setDrawColor(220, 220, 220)
   doc.line(margin, footerY, pageWidth - margin, footerY)
-  doc.setFont('helvetica', 'italic')
-  doc.setFontSize(8)
+  setBodyFont(doc, 'italic', 8)
   doc.setTextColor(120, 120, 120)
   const disclaimer = doc.splitTextToSize(
     'This document is an enquiry estimate for billing reference. Final price, stock availability, and delivery charges will be confirmed on WhatsApp. Not a tax invoice.',
@@ -378,7 +430,28 @@ export async function downloadCartEnquiryPdf(
   doc.text(disclaimer, margin, footerY + 5)
 
   const filename = `${enquiryNumber.replace(/[^a-zA-Z0-9-]/g, '')}.pdf`
-  doc.save(filename)
+  const blob = doc.output('blob')
+  return { enquiryNumber, filename, blob }
+}
+
+export function downloadPdfBlob(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.rel = 'noopener'
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+export async function downloadCartEnquiryPdf(
+  data: CartEnquiryFormData,
+  options: CartEnquiryPdfOptions,
+): Promise<string> {
+  const { blob, filename, enquiryNumber } = await generateCartEnquiryPdfBlob(data, options)
+  downloadPdfBlob(blob, filename)
   return enquiryNumber
 }
 

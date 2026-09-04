@@ -224,12 +224,13 @@ export async function createEnquiry(
 
 export async function createCartEnquiry(
   formData: CartEnquiryFormData,
+  enquiryNumberOverride?: string,
 ): Promise<{ data: Enquiry | null; error: string | null }> {
   if (formData.items.length === 0) {
     return { data: null, error: 'Cart is empty' }
   }
 
-  const enquiryNumber = generateEnquiryNumber()
+  const enquiryNumber = enquiryNumberOverride ?? generateEnquiryNumber()
   const phone = cleanPhone(formData.customerPhone)
   const enquiryItems = expandCartItemsForEnquiry(formData.items)
   const totalQuantity = enquiryItems.reduce((sum, i) => sum + i.quantity, 0)
