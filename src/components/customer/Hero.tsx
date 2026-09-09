@@ -13,8 +13,9 @@ interface HeroProps {
   heroSelectionProducts?: Product[]
 }
 
-const HERO_VIDEO = '/hero.mp4'
-const HERO_POSTER = '/hero-slide-2.png'
+const HERO_VIDEO_MP4 = '/hero.mp4'
+const HERO_POSTER = '/hero-poster.jpg'
+const HERO_POSTER_WEBP = '/hero-poster.webp'
 
 function shouldPlayHeroVideo(): boolean {
   if (typeof window === 'undefined') return false
@@ -105,17 +106,20 @@ export function Hero({ heroSelectionProducts = [] }: HeroProps) {
               poster={HERO_POSTER}
               aria-hidden="true"
             >
-              <source src={HERO_VIDEO} type="video/mp4" />
+              <source src={HERO_VIDEO_MP4} type="video/mp4" />
             </video>
           ) : (
-            <img
-              src={HERO_POSTER}
-              alt=""
-              fetchPriority="high"
-              decoding="async"
-              className="absolute inset-0 h-full w-full object-cover object-center max-sm:object-[center_30%]"
-              aria-hidden="true"
-            />
+            <picture className="absolute inset-0">
+              <source srcSet={HERO_POSTER_WEBP} type="image/webp" />
+              <img
+                src={HERO_POSTER}
+                alt=""
+                fetchPriority="high"
+                decoding="async"
+                className="h-full w-full object-cover object-center max-sm:object-[center_30%]"
+                aria-hidden="true"
+              />
+            </picture>
           )}
 
           <div

@@ -66,14 +66,6 @@ export function resolveOriginalPriceForDisplay(product: {
   return null
 }
 
-export function shouldShowOriginalPrice(product: {
-  price?: number | null
-  original_price?: number | null
-  discount_percentage?: number | null
-}): boolean {
-  return resolveOriginalPriceForDisplay(product) != null
-}
-
 export function buildProductPricingPayload(
   originalPriceInput: string,
   discountInput: string

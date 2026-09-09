@@ -7,9 +7,11 @@ import {
   DEFAULT_OG_IMAGE,
   FAVICON_192_PATH,
   FAVICON_32_PATH,
+  FAVICON_ICO_PATH,
   FAVICON_PATH,
   SITE_NAME,
   SITE_URL,
+  SITEMAP_URL,
 } from '@/lib/siteConfig'
 
 interface SEOProps {
@@ -58,11 +60,13 @@ export function SEO({
       <meta name="application-name" content={SITE_NAME} />
       <meta name="theme-color" content="#0c0806" />
       <link rel="canonical" href={canonical} />
+      <link rel="icon" href={FAVICON_ICO_PATH} sizes="any" />
       <link rel="icon" href={FAVICON_32_PATH} type="image/png" sizes="32x32" />
       <link rel="icon" href={FAVICON_192_PATH} type="image/png" sizes="192x192" />
       <link rel="shortcut icon" href={FAVICON_PATH} type="image/png" />
       <link rel="apple-touch-icon" href={APPLE_TOUCH_ICON_PATH} />
       <link rel="manifest" href="/site.webmanifest" />
+      <link rel="sitemap" type="application/xml" title="Sitemap" href={SITEMAP_URL} />
 
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:title" content={fullTitle} />

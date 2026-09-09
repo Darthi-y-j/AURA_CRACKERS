@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { ChevronLeft, Pencil } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export function getInitials(name: string): string {
+function getInitials(name: string): string {
   return name
     .split(/\s+/)
     .slice(0, 2)

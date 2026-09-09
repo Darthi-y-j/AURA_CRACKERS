@@ -216,7 +216,7 @@ async function drawPdfBrandHeader(
   return y + 8
 }
 
-export interface CartEnquiryPdfOptions {
+interface CartEnquiryPdfOptions {
   businessName: string
   businessPhone?: string
   enquiryNumber?: string
@@ -224,13 +224,13 @@ export interface CartEnquiryPdfOptions {
   spinDiscount?: number
 }
 
-export interface CartEnquiryPdfResult {
+interface CartEnquiryPdfResult {
   enquiryNumber: string
   filename: string
   blob: Blob
 }
 
-export async function generateCartEnquiryPdfBlob(
+async function generateCartEnquiryPdfBlob(
   data: CartEnquiryFormData,
   options: CartEnquiryPdfOptions,
 ): Promise<CartEnquiryPdfResult> {
@@ -440,7 +440,7 @@ export async function generateCartEnquiryPdfBlob(
   return { enquiryNumber, filename, blob }
 }
 
-export function downloadPdfBlob(blob: Blob, filename: string): void {
+function downloadPdfBlob(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
@@ -452,7 +452,7 @@ export function downloadPdfBlob(blob: Blob, filename: string): void {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
-export async function downloadCartEnquiryPdf(
+async function downloadCartEnquiryPdf(
   data: CartEnquiryFormData,
   options: CartEnquiryPdfOptions,
 ): Promise<string> {

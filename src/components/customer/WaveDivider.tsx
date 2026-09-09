@@ -1,9 +1,9 @@
 /** Static wave — gentle S-curve with built-in gradient fill */
-export const HERO_WAVE_VIEWBOX = '0 0 1440 100'
+const HERO_WAVE_VIEWBOX = '0 0 1440 100'
 
-export const HERO_WAVE_CURVE = 'M0,52 C400,92 1000,12 1440,48'
+const HERO_WAVE_CURVE = 'M0,52 C400,92 1000,12 1440,48'
 
-export const HERO_WAVE_PATH = `${HERO_WAVE_CURVE} V100 H0 Z`
+const HERO_WAVE_PATH = `${HERO_WAVE_CURVE} V100 H0 Z`
 
 const WAVE_HEIGHT = 'h-20 sm:h-36 md:h-44'
 
@@ -76,13 +76,3 @@ export function WaveDividerWhite() {
   )
 }
 
-export function WaveDividerDark() {
-  return (
-    <div
-      className={`relative block w-full overflow-hidden bg-navy-950 leading-[0] ${WAVE_HEIGHT}`}
-      aria-hidden="true"
-    >
-      <WaveSvg fill="#1a100c" />
-    </div>
-  )
-}

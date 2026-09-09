@@ -4,16 +4,6 @@ export function getNextSortOrder(items: { sort_order?: number | null }[]): numbe
   return max + 1
 }
 
-export function isSortOrderTaken(
-  items: { id?: string; sort_order?: number | null }[],
-  sortOrder: number,
-  excludeId?: string
-): boolean {
-  return items.some(
-    (item) => item.id !== excludeId && (item.sort_order ?? 0) === sortOrder
-  )
-}
-
 export function getSortOrderConflictMessage(
   items: { id?: string; name?: string; sort_order?: number | null }[],
   sortOrder: number,

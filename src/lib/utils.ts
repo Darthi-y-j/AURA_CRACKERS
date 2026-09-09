@@ -20,11 +20,6 @@ export function formatPrice(price: number | null | undefined): string | null {
   }).format(price)
 }
 
-export function formatPieces(pieces: number | null | undefined): string | null {
-  if (pieces == null || pieces < 1) return null
-  return `${pieces} piece${pieces !== 1 ? 's' : ''}`
-}
-
 export function formatDate(date: string): string {
   return new Intl.DateTimeFormat('en-IN', {
     day: 'numeric',
@@ -64,16 +59,6 @@ export function generateEnquiryNumber(): string {
 export function truncate(text: string, length: number): string {
   if (text.length <= length) return text
   return text.slice(0, length).trim() + '...'
-}
-
-/** Fisher–Yates shuffle (returns a new array). */
-export function shuffleArray<T>(items: T[]): T[] {
-  const result = [...items]
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[result[i], result[j]] = [result[j], result[i]]
-  }
-  return result
 }
 
 const SUPABASE_OBJECT_PATH = '/storage/v1/object/public/'

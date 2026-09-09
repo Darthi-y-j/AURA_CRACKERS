@@ -21,6 +21,10 @@ const BRANDS = [
   { name: 'RR', src: '/brands/rr.jpg', dark: false },
 ] as const
 
+function brandWebpSrc(src: string): string {
+  return src.replace(/\.(png|jpe?g)$/i, '.webp')
+}
+
 function BrandLogo({
   brand,
   index,
@@ -49,13 +53,16 @@ function BrandLogo({
         className="flex items-center justify-center"
         style={scale !== 1 ? { transform: `scale(${scale})` } : undefined}
       >
-        <img
-          src={brand.src}
-          alt={`${brand.name} brand logo`}
-          className="max-h-[46px] max-w-[78%] object-contain transition-transform duration-300 group-hover:scale-105 sm:max-h-[52px]"
-          loading={index < 3 ? 'eager' : 'lazy'}
-          decoding="async"
-        />
+        <picture>
+          <source srcSet={brandWebpSrc(brand.src)} type="image/webp" />
+          <img
+            src={brand.src}
+            alt={`${brand.name} brand logo`}
+            className="max-h-[46px] max-w-[78%] object-contain transition-transform duration-300 group-hover:scale-105 sm:max-h-[52px]"
+            loading={index < 3 ? 'eager' : 'lazy'}
+            decoding="async"
+          />
+        </picture>
       </span>
     </div>
   )

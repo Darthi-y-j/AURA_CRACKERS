@@ -2,8 +2,8 @@ import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { WaveDividerWhite } from './WaveDivider'
 
-export const PRODUCTS_HERO_IMAGE = '/products-hero.webp'
-export const PRODUCTS_HERO_IMAGE_FALLBACK = '/products-hero.png'
+const PRODUCTS_HERO_IMAGE = '/products-hero.webp'
+const PRODUCTS_HERO_IMAGE_FALLBACK = '/products-hero.png'
 
 interface CatalogueHeroProps {
   children: ReactNode

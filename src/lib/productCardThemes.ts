@@ -27,11 +27,11 @@ export function isPremiumPlusProductTag(tag: string | null | undefined): boolean
   return tag?.trim() === 'Premium Plus'
 }
 
-export function isSkyworksFunctionTag(tag: string | null | undefined): boolean {
+function isSkyworksFunctionTag(tag: string | null | undefined): boolean {
   return tag?.trim() === 'Special Function Skyshots'
 }
 
-export function isSkyworksColorsTag(tag: string | null | undefined): boolean {
+function isSkyworksColorsTag(tag: string | null | undefined): boolean {
   return tag?.trim() === 'Special Colors Skyshot'
 }
 

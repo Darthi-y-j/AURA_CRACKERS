@@ -115,13 +115,16 @@ const visionPillars = [
 
 const ABOUT_QUALITY_IMAGE = '/instagram-product-showcase.webp'
 const ABOUT_QUALITY_IMAGE_FALLBACK = '/instagram-product-showcase.png'
-const ABOUT_CELEBRATION_IMAGE = '/about-celebration-sparkler.jpg'
+const ABOUT_CELEBRATION_IMAGE = '/about-celebration-sparkler-instagram.webp'
+const ABOUT_CELEBRATION_IMAGE_FALLBACK = '/about-celebration-sparkler.jpg'
 const STORY_SECTION_BG = '/how-it-works-bg.webp'
 const STORY_SECTION_BG_FALLBACK = '/how-it-works-bg.png'
 const PROMISE_CARD_BG = '/premium-quality-card.webp'
 const PROMISE_CARD_BG_FALLBACK = '/premium-quality-card.png'
-const SAFETY_CARD_BG = '/about-safety-bg.png'
-const ABOUT_HEADER_QUOTE_BG = '/about-celebration-sparkler.jpg'
+const SAFETY_CARD_BG = '/about-safety-bg.webp'
+const SAFETY_CARD_BG_FALLBACK = '/about-safety-bg.png'
+const ABOUT_HEADER_QUOTE_BG = '/about-celebration-sparkler-instagram.webp'
+const ABOUT_HEADER_QUOTE_BG_FALLBACK = '/about-celebration-sparkler.jpg'
 
 const headerHighlights = ['Premium Quality', 'Wide Range', 'Family Trusted']
 
@@ -186,14 +189,17 @@ function AboutPageHeader() {
 
           <AnimateIn animation="fade-up" delay={120}>
             <div className="group relative min-h-[260px] overflow-hidden rounded-2xl border border-gold-400/25 shadow-[0_20px_60px_rgba(46,30,22,0.18)] sm:min-h-[280px]">
-              <img
-                src={ABOUT_HEADER_QUOTE_BG}
-                alt=""
-                loading="eager"
-                decoding="async"
-                aria-hidden="true"
-                className="absolute inset-0 h-full w-full scale-105 object-cover object-[center_38%] blur-[2px] transition-transform duration-700 group-hover:scale-110"
-              />
+              <picture className="absolute inset-0">
+                <source srcSet={ABOUT_HEADER_QUOTE_BG} type="image/webp" />
+                <img
+                  src={ABOUT_HEADER_QUOTE_BG_FALLBACK}
+                  alt=""
+                  loading="eager"
+                  decoding="async"
+                  aria-hidden="true"
+                  className="h-full w-full scale-105 object-cover object-[center_38%] blur-[2px] transition-transform duration-700 group-hover:scale-110"
+                />
+              </picture>
               <div
                 className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/35"
                 aria-hidden="true"
@@ -333,14 +339,17 @@ export function AboutPage() {
 
             <AnimateIn animation="fade-up" delay={100} className="h-full">
               <div className="group relative flex h-full min-h-[420px] flex-col overflow-hidden rounded-2xl border border-navy-900/10 shadow-[0_16px_48px_rgba(46,30,22,0.12)]">
-                <img
-                  src={ABOUT_CELEBRATION_IMAGE}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  aria-hidden="true"
-                  className="absolute inset-0 h-full w-full scale-[1.03] object-cover object-[center_35%] blur-[3px] transition-transform duration-700 group-hover:scale-[1.06]"
-                />
+                <picture className="absolute inset-0">
+                  <source srcSet={ABOUT_CELEBRATION_IMAGE} type="image/webp" />
+                  <img
+                    src={ABOUT_CELEBRATION_IMAGE_FALLBACK}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    aria-hidden="true"
+                    className="h-full w-full scale-[1.03] object-cover object-[center_35%] blur-[3px] transition-transform duration-700 group-hover:scale-[1.06]"
+                  />
+                </picture>
                 <div
                   className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/60 to-black/25"
                   aria-hidden="true"
@@ -477,14 +486,17 @@ export function AboutPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <AnimateIn animation="fade-up">
             <div className="group relative overflow-hidden rounded-2xl border border-green-600/20 shadow-[0_12px_40px_rgba(22,101,52,0.1)]">
-              <img
-                src={SAFETY_CARD_BG}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                aria-hidden="true"
-                className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-[1.02]"
-              />
+              <picture className="absolute inset-0">
+                <source srcSet={SAFETY_CARD_BG} type="image/webp" />
+                <img
+                  src={SAFETY_CARD_BG_FALLBACK}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  aria-hidden="true"
+                  className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-[1.02]"
+                />
+              </picture>
               <div
                 className="absolute inset-0 bg-white/25"
                 aria-hidden="true"

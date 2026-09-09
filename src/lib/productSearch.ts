@@ -65,7 +65,7 @@ function tokenMatches(token: string, words: string[], haystack: string): boolean
   return words.some((word) => fuzzyWordMatch(token, word))
 }
 
-export function buildProductSearchWords(product: Product): string[] {
+function buildProductSearchWords(product: Product): string[] {
   const raw = [
     product.name,
     product.description,
@@ -80,7 +80,7 @@ export function buildProductSearchWords(product: Product): string[] {
   return normalize(raw).split(' ').filter(Boolean)
 }
 
-export function productSearchScore(product: Product, query: string): number {
+function productSearchScore(product: Product, query: string): number {
   const normalizedQuery = normalize(query)
   if (!normalizedQuery) return 0
 

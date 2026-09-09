@@ -1,7 +1,7 @@
 import type { Product } from '@/types/database'
 import { getImageUrl } from '@/lib/utils'
 
-export type ProductLinkState = {
+type ProductLinkState = {
   product: Product
 }
 
@@ -15,7 +15,7 @@ export function preloadProductImage(url: string | null | undefined) {
   img.src = src
 }
 
-export function productDetailPath(slug: string) {
+function productDetailPath(slug: string) {
   return `/products/${slug}`
 }
 

@@ -32,13 +32,6 @@ export interface NotificationPrefs {
   whatsappNotifications: boolean
 }
 
-export interface AccountPrefs {
-  language: string
-  emailPreferences: boolean
-  whatsappPreferences: boolean
-  theme: 'light' | 'dark' | 'system'
-}
-
 const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
   orderUpdates: true,
   deliveryUpdates: true,
@@ -47,13 +40,6 @@ const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
   festivalOffers: true,
   promotionalEmails: false,
   whatsappNotifications: false,
-}
-
-const DEFAULT_ACCOUNT_PREFS: AccountPrefs = {
-  language: 'en',
-  emailPreferences: true,
-  whatsappPreferences: true,
-  theme: 'light',
 }
 
 function storageKey(userId: string, suffix: string) {
@@ -96,14 +82,6 @@ export function getNotificationPrefs(userId: string): NotificationPrefs {
 
 export function saveNotificationPrefs(userId: string, prefs: NotificationPrefs) {
   writeJson(storageKey(userId, 'notifications'), prefs)
-}
-
-export function getAccountPrefs(userId: string): AccountPrefs {
-  return readJson(storageKey(userId, 'preferences'), DEFAULT_ACCOUNT_PREFS)
-}
-
-export function saveAccountPrefs(userId: string, prefs: AccountPrefs) {
-  writeJson(storageKey(userId, 'preferences'), prefs)
 }
 
 export function splitFullName(fullName: string): { firstName: string; lastName: string } {

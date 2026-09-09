@@ -1,4 +1,4 @@
-export const PRODUCT_TAG_OPTIONS = [
+const PRODUCT_TAG_OPTIONS = [
   { value: 'Premium', label: 'Premium' },
   { value: 'Premium Plus', label: 'Premium+' },
   { value: 'Elite Setout', label: 'Elite' },

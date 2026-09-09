@@ -15,16 +15,16 @@ export interface SpinReward {
   textColor: string
 }
 
-export const SPIN_SEGMENT_COUNT = 6
-export const SPIN_SEGMENT_DEGREES = 360 / SPIN_SEGMENT_COUNT
+const SPIN_SEGMENT_COUNT = 6
+const SPIN_SEGMENT_DEGREES = 360 / SPIN_SEGMENT_COUNT
 export const SPIN_ANIMATION_MS = 5000
 
 /** Clockwise degrees from 12 o'clock to the centre of a wheel segment. */
-export function getSegmentCenterAngle(segmentIndex: number): number {
+function getSegmentCenterAngle(segmentIndex: number): number {
   return segmentIndex * SPIN_SEGMENT_DEGREES + SPIN_SEGMENT_DEGREES / 2
 }
 
-export function normalizeWheelDegrees(degrees: number): number {
+function normalizeWheelDegrees(degrees: number): number {
   return ((degrees % 360) + 360) % 360
 }
 
@@ -99,7 +99,7 @@ export function pickSpinRewardForCartTotal(cartTotal: number): SpinReward {
   return pool[Math.floor(Math.random() * pool.length)]!
 }
 
-export function getSpinLandingRotation(segmentIndex: number, extraSpins = 6): number {
+function getSpinLandingRotation(segmentIndex: number, extraSpins = 6): number {
   const segmentCenter = getSegmentCenterAngle(segmentIndex)
   return extraSpins * 360 + (360 - segmentCenter)
 }
@@ -147,25 +147,6 @@ export function describeWheelSegmentPath(
   const endPoint = polarFromTop(cx, cy, outerRadius, end)
   const largeArc = end - start > 180 ? 1 : 0
   return `M ${cx} ${cy} L ${startPoint.x} ${startPoint.y} A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${endPoint.x} ${endPoint.y} Z`
-}
-
-export function buildWheelGradient(): string {
-  const stops = SPIN_REWARDS.map((segment) => {
-    const start = segment.segmentIndex * SPIN_SEGMENT_DEGREES
-    const end = start + SPIN_SEGMENT_DEGREES
-    return `${segment.color} ${start}deg ${end}deg`
-  })
-  // 0deg = 12 o'clock in modern browsers — matches pointer and label layout.
-  return `conic-gradient(${stops.join(', ')})`
-}
-
-/** Spin rewards are free gifts — no monetary discount on the cart. */
-export function calculateSpinDiscount(_subtotal: number, _reward: SpinReward | null): number {
-  return 0
-}
-
-export function rewardHasMonetaryDiscount(_type: SpinRewardType): boolean {
-  return false
 }
 
 export function getSpinRewardMessage(reward: SpinReward): string {

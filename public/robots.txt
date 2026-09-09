@@ -7,5 +7,9 @@ Disallow: /account
 Disallow: /account/
 Disallow: /login
 Disallow: /register
+Disallow: /auth/
+Disallow: /cart
+Disallow: /wishlist
+Disallow: /search
 
 Sitemap: https://www.auracrackers.com/sitemap.xml

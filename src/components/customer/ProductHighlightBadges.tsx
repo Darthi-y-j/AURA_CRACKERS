@@ -78,11 +78,3 @@ export function ProductHighlightBadges({
   )
 }
 
-export function hasProductHighlights(product: HighlightProduct): boolean {
-  return Boolean(
-    product.is_recommended ||
-      product.is_best_seller ||
-      product.is_new_arrival ||
-      product.is_kids_special,
-  )
-}

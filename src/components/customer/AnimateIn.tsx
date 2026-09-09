@@ -62,22 +62,3 @@ export function AnimateIn({
   )
 }
 
-interface StaggerGridProps {
-  children: ReactNode
-  className?: string
-  stagger?: number
-}
-
-export function StaggerGrid({ children, className, stagger = 80 }: StaggerGridProps) {
-  return (
-    <div className={className}>
-      {Array.isArray(children)
-        ? children.map((child, i) => (
-            <AnimateIn key={i} delay={i * stagger} animation="fade-up">
-              {child}
-            </AnimateIn>
-          ))
-        : children}
-    </div>
-  )
-}

@@ -16,12 +16,12 @@ export function isNestedPackaging(sellUnit: PackagingUnit): boolean {
   return NESTED_SELL_UNITS.has(sellUnit)
 }
 
-export function getSellUnitCount(packaging: ProductPackaging): number {
+function getSellUnitCount(packaging: ProductPackaging): number {
   const count = packaging.sellUnitCount ?? 1
   return count >= 1 ? count : 1
 }
 
-export function normalizePackaging(raw: unknown): ProductPackaging | null {
+function normalizePackaging(raw: unknown): ProductPackaging | null {
   if (!raw || typeof raw !== 'object') return null
 
   const data = raw as Record<string, unknown>
@@ -73,7 +73,7 @@ export function resolveProductPackaging(product: {
   return null
 }
 
-export function computeTotalPieces(packaging: ProductPackaging | null): number | null {
+function computeTotalPieces(packaging: ProductPackaging | null): number | null {
   if (!packaging) return null
 
   const sellCount = getSellUnitCount(packaging)

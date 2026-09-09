@@ -132,11 +132,3 @@ export function buildMailtoUrl(email: string, subject?: string): string {
   return `mailto:${email}${params}`
 }
 
-export function cartItemToEnquiryItem(item: CartItem) {
-  return {
-    product_id: item.productId,
-    product_name: item.productName,
-    quantity: item.quantity,
-    price: item.price,
-  }
-}

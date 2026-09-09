@@ -1,6 +1,6 @@
 import type { Product } from '@/types/database'
 
-export const MAX_PRODUCT_GALLERY_IMAGES = 3
+const MAX_PRODUCT_GALLERY_IMAGES = 3
 
 type ProductImageSource = Pick<Product, 'image_url' | 'gallery_urls'>
 

@@ -28,7 +28,8 @@ const iconStyles = [
   'bg-festive-500/15 text-festive-300 ring-festive-400/25 group-hover:bg-festive-500/25',
 ]
 
-const VISION_BG = '/about-vision-bg.png'
+const VISION_BG = '/about-vision-bg.webp'
+const VISION_BG_FALLBACK = '/about-vision-bg.png'
 
 export function VisionPillars({
   items,
@@ -80,13 +81,16 @@ export function VisionPillars({
         )}
       >
         <div className="absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
-          <img
-            src={VISION_BG}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            className="h-full w-full scale-110 object-cover object-[center_38%] blur-[4px] transition-transform duration-700 group-hover:scale-[1.14]"
-          />
+          <picture className="block h-full w-full">
+            <source srcSet={VISION_BG} type="image/webp" />
+            <img
+              src={VISION_BG_FALLBACK}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full scale-110 object-cover object-[center_38%] blur-[4px] transition-transform duration-700 group-hover:scale-[1.14]"
+            />
+          </picture>
         </div>
         <div
           className="absolute inset-0 z-[1] bg-gradient-to-b from-black/35 via-black/45 to-black/75"
