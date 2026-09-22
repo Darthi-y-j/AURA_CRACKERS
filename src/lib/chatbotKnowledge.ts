@@ -38,7 +38,7 @@ export const CHATBOT_KNOWLEDGE = [
   {
     topic: 'ordering',
     q: 'Minimum order?',
-    a: 'Varies by product. WhatsApp us for the item you need.',
+    a: 'Minimum order value is ₹3,000. Add products to your cart until the estimated total reaches ₹3,000, then send your WhatsApp enquiry from Cart.',
   },
   {
     topic: 'support',

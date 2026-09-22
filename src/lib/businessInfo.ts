@@ -8,12 +8,20 @@ Tamil Nadu, India`
 
 export const WHATSAPP_NUMBERS = ['918825411254', '918825988269', '919789514191'] as const
 
+/** Minimum cart value (₹) required before sending a WhatsApp order enquiry */
+export const MIN_ORDER_AMOUNT = 3000
+
+export function meetsMinimumOrderAmount(cartTotal: number): boolean {
+  return cartTotal >= MIN_ORDER_AMOUNT
+}
+
 export const BUSINESS_POLICIES: BusinessPolicies = {
   delivery_areas: 'All over India',
   payment_methods: 'Pre-payment',
   whatsapp_response: '24/7',
   years_in_business: '4+ years',
   happy_customers: '5000+',
+  minimum_order_amount: MIN_ORDER_AMOUNT,
 }
 
 export const BUSINESS_HOURS_24_7 = {

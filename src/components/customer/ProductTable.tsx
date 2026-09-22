@@ -22,6 +22,7 @@ import { getDisplayBrand } from '@/lib/brand'
 import { Link } from 'react-router-dom'
 import { Eye, ShoppingCart } from 'lucide-react'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { ProductCodeLabel } from './ProductCodeLabel'
 
 interface ProductTableGroup {
   id: string
@@ -38,10 +39,10 @@ interface ProductTableProps {
 }
 
 const DESKTOP_ROW_GRID =
-  'grid grid-cols-[minmax(0,1.2fr)_minmax(5.75rem,7rem)_minmax(5.5rem,6.75rem)_4.25rem_3.25rem_5rem_minmax(10.75rem,11.5rem)] items-center gap-x-2 lg:gap-x-2.5'
+  'grid grid-cols-[2.75rem_minmax(0,1.15fr)_minmax(5.75rem,7rem)_minmax(5.5rem,6.75rem)_4.25rem_3.25rem_5rem_minmax(10.75rem,11.5rem)] items-center gap-x-2 lg:gap-x-2.5'
 
 const MOBILE_ROW_GRID =
-  'grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2'
+  'grid grid-cols-[2.25rem_minmax(0,1fr)_auto] items-center gap-x-1.5 sm:gap-x-2'
 
 const TABLE_CELL = 'min-w-0 overflow-hidden'
 
@@ -161,6 +162,7 @@ function ProductTableHeader({ className, sticky = true }: { className?: string; 
         className,
       )}
     >
+      <span className={cn(TABLE_CELL, 'text-center', TABLE_HEADER_LABEL)}>Code</span>
       <span className={TABLE_HEADER_LABEL}>Product</span>
       <span className={cn(TABLE_CELL, 'text-left', TABLE_HEADER_LABEL_MUTED)}>Pack</span>
       <span className={cn(TABLE_CELL, TABLE_HEADER_LABEL)}>Brand</span>
@@ -298,9 +300,13 @@ function MobileProductTableRow({ product, index }: { product: Product; index: nu
         inCart ? TABLE_IN_CART_BG : getTableStripeClass(index),
       )}
     >
+      <div className="flex justify-center self-center">
+        <ProductCodeLabel product={product} showLabel={false} variant="table" className="text-[11px]" />
+      </div>
+
       <div className="flex min-w-0 items-center gap-2 overflow-hidden">
-        <ProductLink product={product} className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
-          <div className={cn('h-full w-full', TABLE_THUMB_CLASS)}>
+        <ProductLink product={product} className="relative h-12 w-12 shrink-0 overflow-visible rounded-lg">
+          <div className={cn('h-full w-full overflow-hidden rounded-lg', TABLE_THUMB_CLASS)}>
             <img
               src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.thumb)}
               alt=""
@@ -309,10 +315,14 @@ function MobileProductTableRow({ product, index }: { product: Product; index: nu
               className="h-full w-full object-cover"
             />
           </div>
+          <ProductHighlightBadges
+            product={product}
+            variant="thumbOverlay"
+            className="pointer-events-none absolute left-0.5 top-0.5 z-10 max-w-[calc(100%-2px)]"
+          />
         </ProductLink>
 
         <div className="min-w-0 flex-1 overflow-hidden">
-          <ProductHighlightBadges product={product} compact className="mb-0.5 shrink-0 flex-nowrap gap-0.5" />
           <ProductLink product={product} className="block min-w-0">
             <h3 className={cn('truncate text-[13px] font-bold leading-tight', TABLE_TITLE_CLASS)}>
               {product.name}
@@ -412,6 +422,10 @@ function ProductTableRowCard({
         inCart ? TABLE_IN_CART_BG : getTableStripeClass(index),
       )}
     >
+          <div className={cn(TABLE_CELL, 'flex justify-center self-center')}>
+            <ProductCodeLabel product={product} showLabel={false} variant="table" />
+          </div>
+
           <div className={cn(TABLE_CELL, 'flex min-w-0 items-center gap-2.5 lg:gap-3')}>
             <ProductLink product={product} className="relative shrink-0">
               <div className={cn('relative h-16 w-16 overflow-hidden rounded-xl lg:h-[4.25rem] lg:w-[4.25rem]', TABLE_THUMB_CLASS)}>
@@ -693,6 +707,9 @@ export function ProductTable({
             TABLE_HEADER_HIGHLIGHT,
           )}
         >
+          <span className={cn(TABLE_CELL, 'text-center text-[10px] font-bold uppercase tracking-[0.14em] text-navy-950')}>
+            Code
+          </span>
           <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-navy-950">Product</span>
           <span className="text-right text-[10px] font-bold uppercase tracking-[0.14em] text-navy-950">
             Price · Add

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import type { Product, Category } from '@/types/database'
 import { slugify, formatPrice } from '@/lib/utils'
 import { getNextSortOrder, getSortOrderConflictMessage } from '@/lib/sortOrder'
+import { getProductCodeConflictMessage } from '@/lib/productCode'
 import {
   buildProductPricingPayload,
   formatPricingPreview,
@@ -104,6 +105,9 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
     is_kids_special: product?.is_kids_special ?? false,
     sort_order:
       product?.sort_order?.toString() || getNextSortOrder(existingProducts).toString(),
+    product_code:
+      product?.product_code?.trim() ||
+      (product?.sort_order ? String(product.sort_order) : getNextSortOrder(existingProducts).toString()),
     packaging_sell_unit: initialPackaging.sellUnit,
     packaging_sell_unit_count: initialPackaging.sellUnitCount,
     packaging_inner_count: initialPackaging.innerCount,
@@ -226,6 +230,16 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
       return
     }
 
+    const codeTrimmed = form.product_code.trim()
+    const effectiveCode = codeTrimmed || (sortOrder > 0 ? String(sortOrder) : '')
+    if (effectiveCode) {
+      const codeConflict = getProductCodeConflictMessage(existingProducts, effectiveCode, product?.id)
+      if (codeConflict) {
+        showToast(codeConflict, 'error')
+        return
+      }
+    }
+
     let originalInput = form.original_price.trim()
     if (!originalInput && form.selling_price.trim()) {
       const selling = parseMoney(form.selling_price)
@@ -325,6 +339,7 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
       is_new_arrival: form.is_new_arrival,
       is_kids_special: form.is_kids_special,
       sort_order: sortOrder,
+      product_code: form.product_code.trim() || null,
       specifications: Object.keys(specs).length > 0 ? specs : null,
     }
 
@@ -506,20 +521,36 @@ export function ProductForm({ product, categories, existingProducts }: ProductFo
             </div>
           </div>
 
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Sort Order</label>
-            <input
-              type="number"
-              min={0}
-              value={form.sort_order}
-              onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
-              className={inputClass}
-            />
-            {!product && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Product code</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={form.product_code}
+                onChange={(e) => setForm({ ...form, product_code: e.target.value })}
+                placeholder="e.g. 42"
+                className={inputClass}
+              />
               <p className="mt-1 text-xs text-slate-500">
-                Next available: {getNextSortOrder(existingProducts)}
+                Shown as &quot;Code&quot; on the site. Each code must be unique across products.
               </p>
-            )}
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Sort Order</label>
+              <input
+                type="number"
+                min={0}
+                value={form.sort_order}
+                onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
+                className={inputClass}
+              />
+              {!product && (
+                <p className="mt-1 text-xs text-slate-500">
+                  Next available: {getNextSortOrder(existingProducts)}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">

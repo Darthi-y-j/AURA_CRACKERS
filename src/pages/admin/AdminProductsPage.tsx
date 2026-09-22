@@ -27,6 +27,7 @@ import { getSupabaseErrorMessage } from '@/lib/supabase'
 import { downloadProductsExcel } from '@/lib/exportProductsExcel'
 import { clearCatalogOnly } from '@/services/catalogCleanup'
 import type { Product, Category } from '@/types/database'
+import { formatProductCode } from '@/lib/productCode'
 
 const TH = 'px-2 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500'
 const TD = 'px-2 py-2.5 align-middle'
@@ -89,7 +90,7 @@ export function AdminProductsPage() {
     [products, categories],
   )
 
-  const columnCount = canReorder ? 10 : 9
+  const columnCount = canReorder ? 11 : 10
 
   const loadProducts = async () => {
     setLoading(true)
@@ -382,25 +383,27 @@ export function AdminProductsPage() {
               {canReorder ? (
                 <>
                   <col style={{ width: '2.5%' }} />
-                  <col style={{ width: '21%' }} />
-                  <col style={{ width: '12%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '19%' }} />
+                  <col style={{ width: '11%' }} />
                   <col style={{ width: '8%' }} />
                   <col style={{ width: '7%' }} />
-                  <col style={{ width: '15%' }} />
+                  <col style={{ width: '14%' }} />
                   <col style={{ width: '9%' }} />
                   <col style={{ width: '10%' }} />
                   <col style={{ width: '7%' }} />
-                  <col style={{ width: '10%' }} />
+                  <col style={{ width: '9%' }} />
                 </>
               ) : (
                 <>
-                  <col style={{ width: '23%' }} />
-                  <col style={{ width: '14%' }} />
+                  <col style={{ width: '5%' }} />
+                  <col style={{ width: '21%' }} />
+                  <col style={{ width: '13%' }} />
                   <col style={{ width: '8%' }} />
                   <col style={{ width: '7%' }} />
-                  <col style={{ width: '17%' }} />
+                  <col style={{ width: '16%' }} />
                   <col style={{ width: '9%' }} />
-                  <col style={{ width: '11%' }} />
+                  <col style={{ width: '10%' }} />
                   <col style={{ width: '8%' }} />
                   <col style={{ width: '7%' }} />
                 </>
@@ -409,6 +412,7 @@ export function AdminProductsPage() {
               <thead className="border-b border-slate-200 bg-slate-50">
                 <tr>
                   {canReorder && <th className={TH} aria-label="Reorder" />}
+                  <th className={cn(TH, 'text-center')}>Code</th>
                   <th className={cn(TH, 'text-left')}>Product</th>
                   <th className={cn(TH, 'text-left')}>Brand</th>
                   <th className={cn(TH, 'text-left')}>Tag</th>
@@ -494,6 +498,9 @@ export function AdminProductsPage() {
                           </button>
                         </td>
                       )}
+                      <td className={cn(TD, 'text-center tabular-nums font-semibold text-slate-800')}>
+                        {formatProductCode(product)}
+                      </td>
                       <td className={TD}>
                         <div className="flex min-w-0 items-center gap-1.5">
                           <img

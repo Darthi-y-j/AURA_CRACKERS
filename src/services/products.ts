@@ -11,7 +11,9 @@ const inflight = new Map<string, Promise<Product[]>>()
 
 /** Catalogue pages — omit specifications & media URLs to cut payload size */
 const CATALOGUE_PRODUCT_SELECT =
-  'id, category_id, name, slug, description, price, original_price, discount_percentage, pieces, packaging, brand, tag, image_url, stock_quantity, stock_alert_limit, is_available, is_featured, is_recommended, is_best_seller, is_new_arrival, is_kids_special, is_archived, sort_order, created_at, category:categories(id, name, slug, sort_order, is_active, is_archived)'
+  'id, category_id, name, slug, description, price, original_price, discount_percentage, pieces, packaging, brand, tag, image_url, stock_quantity, stock_alert_limit, is_available, is_featured, is_recommended, is_best_seller, is_new_arrival, is_kids_special, is_archived, sort_order, product_code, created_at, category:categories(id, name, slug, sort_order, is_active, is_archived)'
+
+const CATALOGUE_PRODUCT_SELECT_NO_CODE = CATALOGUE_PRODUCT_SELECT.replace(', product_code', '')
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -91,9 +93,8 @@ async function queryProductsWithArchiveFallback(
   throw new Error(getSupabaseErrorMessage(error))
 }
 
-function buildProductsRestQuery(filters: ProductFilters, withArchiveFilter: boolean): string {
+function buildProductsRestQuery(filters: ProductFilters, withArchiveFilter: boolean, select = filters.lite ? CATALOGUE_PRODUCT_SELECT : '*,category:categories(*)'): string {
   const parts: string[] = []
-  const select = filters.lite ? CATALOGUE_PRODUCT_SELECT : '*,category:categories(*)'
   parts.push(`select=${encodeURIComponent(select)}`)
   parts.push('is_available=eq.true')
 
@@ -151,7 +152,15 @@ async function fetchProductsFromRest(
   filters: ProductFilters,
   withArchiveFilter: boolean,
 ): Promise<Product[]> {
-  const query = buildProductsRestQuery(filters, withArchiveFilter)
+  return fetchProductsFromRestWithSelect(filters, withArchiveFilter, filters.lite ? CATALOGUE_PRODUCT_SELECT : '*,category:categories(*)')
+}
+
+async function fetchProductsFromRestWithSelect(
+  filters: ProductFilters,
+  withArchiveFilter: boolean,
+  select: string,
+): Promise<Product[]> {
+  const query = buildProductsRestQuery(filters, withArchiveFilter, select)
   return supabaseRestGet<Product[]>('products', query)
 }
 
@@ -161,6 +170,9 @@ async function queryProductsWithArchiveFallbackRest(filters: ProductFilters): Pr
   try {
     return await fetchProductsFromRest(filters, true)
   } catch (error) {
+    if (filters.lite && isMissingColumnError(error, 'product_code')) {
+      return fetchProductsFromRestWithSelect(filters, true, CATALOGUE_PRODUCT_SELECT_NO_CODE)
+    }
     if (
       isMissingColumnError(error, 'is_recommended') ||
       isMissingColumnError(error, 'is_best_seller') ||

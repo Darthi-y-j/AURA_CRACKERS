@@ -55,6 +55,7 @@ export interface Product {
   is_archived: boolean
   archived_at: string | null
   sort_order: number
+  product_code?: string | null
   created_at: string
   updated_at: string
   category?: Category
@@ -170,6 +171,7 @@ export interface BusinessPolicies {
   whatsapp_response?: string
   years_in_business?: string
   happy_customers?: string
+  minimum_order_amount?: number
 }
 
 export interface SocialLinks {

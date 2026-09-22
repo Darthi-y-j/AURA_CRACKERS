@@ -40,7 +40,7 @@ import {
   type DeliveryAddressFields,
 } from '@/lib/deliveryAddress'
 import { formatPrice, validatePhone, cn } from '@/lib/utils'
-import { formatDisplayPhone } from '@/lib/businessInfo'
+import { formatDisplayPhone, MIN_ORDER_AMOUNT, meetsMinimumOrderAmount } from '@/lib/businessInfo'
 import type { CartItem } from '@/types/database'
 
 const HERO_BG = '/contact-section-bg.webp'
@@ -175,6 +175,7 @@ function EnquiryForm({
   settings,
   onUseLocation,
   onSendEnquiry,
+  enquiryBlocked = false,
   className,
 }: {
   customerName: string
@@ -192,6 +193,7 @@ function EnquiryForm({
   settings: ReturnType<typeof useSettings>['settings']
   onUseLocation: () => void
   onSendEnquiry: () => void
+  enquiryBlocked?: boolean
   className?: string
 }) {
   return (
@@ -354,8 +356,8 @@ function EnquiryForm({
                   <button
                     type="button"
           onClick={onSendEnquiry}
-                    disabled={loading}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3.5 text-sm font-bold text-white shadow-lg shadow-[#25D366]/30 transition hover:bg-[#20bd5a] hover:shadow-xl disabled:opacity-60"
+                    disabled={loading || enquiryBlocked}
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3.5 text-sm font-bold text-white shadow-lg shadow-[#25D366]/30 transition hover:bg-[#20bd5a] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <MessageCircle className="h-5 w-5" />}
                     Send Enquiry on WhatsApp
@@ -363,7 +365,9 @@ function EnquiryForm({
 
                   <p className="mt-3 flex items-start justify-center gap-1.5 text-center text-[11px] leading-relaxed text-navy-700/50">
                     <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-gold-500" />
-          WhatsApp opens with your order details pre-filled — just tap Send.
+          {enquiryBlocked
+            ? `Minimum order value is ${formatPrice(MIN_ORDER_AMOUNT)}. Add more items to send your enquiry.`
+            : 'WhatsApp opens with your order details pre-filled — just tap Send.'}
         </p>
       </div>
     </div>
@@ -424,6 +428,8 @@ export function CartPage() {
 
   const hasPricedItems = items.some((item) => item.price != null)
   const estimatedAfterSpin = Math.max(0, estimatedTotal - spinDiscount)
+  const belowMinimumOrder = hasPricedItems && !meetsMinimumOrderAmount(estimatedTotal)
+  const amountShortOfMinimum = belowMinimumOrder ? MIN_ORDER_AMOUNT - estimatedTotal : 0
 
   const updateAddress = (patch: Partial<DeliveryAddressFields>) => {
     setAddressFields((prev) => ({ ...prev, ...patch }))
@@ -448,6 +454,11 @@ export function CartPage() {
     const addressError = validateDeliveryAddress(addressFields)
     if (addressError) {
       showToast(addressError, 'error')
+      return null
+    }
+
+    if (hasPricedItems && !meetsMinimumOrderAmount(estimatedTotal)) {
+      showToast(`Minimum order value is ${formatPrice(MIN_ORDER_AMOUNT)}`, 'error')
       return null
     }
 
@@ -536,6 +547,7 @@ export function CartPage() {
     settings,
     onUseLocation: handleUseCurrentLocation,
     onSendEnquiry: handleSendEnquiry,
+    enquiryBlocked: belowMinimumOrder,
   }
 
   if (items.length === 0) {
@@ -745,10 +757,23 @@ export function CartPage() {
 
                 {hasPricedItems && (
                   <AnimateIn animation="fade-up" delay={150}>
-                    <div className="flex items-center justify-between rounded-2xl border border-gold-400/30 bg-gradient-to-r from-gold-50 to-white px-4 py-3.5 sm:px-5 sm:py-4">
+                    <div
+                      className={cn(
+                        'flex items-center justify-between rounded-2xl border px-4 py-3.5 sm:px-5 sm:py-4',
+                        belowMinimumOrder
+                          ? 'border-amber-400/40 bg-gradient-to-r from-amber-50 to-white'
+                          : 'border-gold-400/30 bg-gradient-to-r from-gold-50 to-white',
+                      )}
+                    >
                       <div>
                         <span className="text-sm font-semibold text-navy-800">Estimated total</span>
                         <p className="text-[11px] text-navy-700/55">Confirmed on WhatsApp</p>
+                        {belowMinimumOrder && (
+                          <p className="mt-1 text-[11px] font-semibold text-amber-800">
+                            Add {formatPrice(amountShortOfMinimum)} more — minimum order{' '}
+                            {formatPrice(MIN_ORDER_AMOUNT)}
+                          </p>
+                        )}
                         {spinReward && (
                           <p className="mt-1 text-[11px] font-semibold text-festive-600">
                             Spin gift: {spinReward.label}
@@ -788,8 +813,8 @@ export function CartPage() {
               <button
                 type="button"
                 onClick={handleSendEnquiry}
-                disabled={loading}
-                className="inline-flex flex-1 max-w-[220px] items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-sm font-bold text-white shadow-lg disabled:opacity-60"
+                disabled={loading || belowMinimumOrder}
+                className="inline-flex flex-1 max-w-[220px] items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-sm font-bold text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}
                 WhatsApp

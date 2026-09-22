@@ -14,6 +14,7 @@ import { ProductBrandBadge } from './ProductBrandBadge'
 import { ProductTagBadge } from './ProductTagBadge'
 import { WishlistButton } from './WishlistButton'
 import { ProductHighlightBadges } from './ProductHighlightBadges'
+import { ProductCodeLabel } from './ProductCodeLabel'
 import { isCardVisibleProductTag } from '@/lib/productTags'
 
 interface ProductCardProps {
@@ -212,6 +213,7 @@ export const ProductCard = memo(function ProductCard({
               )}
               <ProductBrandBadge brand={product.brand} variant="light" />
               <ProductTagBadge tag={product.tag} variant="light" />
+              <ProductCodeLabel product={product} variant="cardLight" />
               <ProductMetaBadges product={product} inCart={inCart} />
             </div>
             <ProductLink product={product}>
@@ -319,6 +321,12 @@ export const ProductCard = memo(function ProductCard({
                   size="sm"
                 />
               )}
+            </div>
+          )}
+
+          {!(compact && showQuickAdd) && !compact && (
+            <div className="pointer-events-none absolute right-2 top-2 z-20 sm:right-3 sm:top-3">
+              <ProductCodeLabel product={product} variant="overlay" />
             </div>
           )}
 
@@ -470,6 +478,7 @@ export const ProductCard = memo(function ProductCard({
               {product.tag && (
                 <ProductTagBadge tag={product.tag} variant="overlay" compact />
               )}
+              <ProductCodeLabel product={product} variant="overlay" className="sm:hidden" />
               <WishlistButton
                 product={product}
                 className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/55"
@@ -503,6 +512,7 @@ export const ProductCard = memo(function ProductCard({
         {/* Dark content panel */}
         <div className="flex flex-1 flex-col px-2.5 pb-2.5 pt-2 sm:px-3.5 sm:pb-3.5 sm:pt-2.5">
           <ProductLink product={product} className="block">
+            <ProductCodeLabel product={product} variant="card" className="mb-0.5 hidden sm:block" />
             <h3
               className={cn(
                 CARD_TITLE_BASE_CLASS,

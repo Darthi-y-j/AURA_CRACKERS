@@ -11,6 +11,7 @@ import { WishlistButton } from './WishlistButton'
 import { ProductBrandBadge } from './ProductBrandBadge'
 import { ProductTagBadge } from './ProductTagBadge'
 import { ProductHighlightBadges } from './ProductHighlightBadges'
+import { ProductCodeLabel } from './ProductCodeLabel'
 import { getCardDescriptionClass, getCardCategoryClass, getCardTitleClass, CARD_TITLE_BASE_CLASS, getCardViewButtonClass, getDiscountOfferTagVariant, getCardPerforationDotClass, getCardPerforationLineClass } from '@/lib/productCardThemes'
 import { isCardVisibleProductTag } from '@/lib/productTags'
 
@@ -54,6 +55,7 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({ product
             {product.tag && (
               <ProductTagBadge tag={product.tag} variant="overlay" compact />
             )}
+            <ProductCodeLabel product={product} variant="overlay" className="sm:hidden" />
             <WishlistButton
               product={product}
               className="rounded-full bg-black/40 p-1 backdrop-blur-sm hover:bg-black/55"
@@ -77,6 +79,7 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({ product
 
       <div className="flex flex-1 flex-col bg-black px-2.5 pb-2.5 pt-2 sm:px-4 sm:pb-4 sm:pt-2.5">
         <ProductLink product={product} className="block">
+          <ProductCodeLabel product={product} variant="card" className="mb-0.5 hidden sm:block" />
           <h3 className={cn(CARD_TITLE_BASE_CLASS, getCardTitleClass(product.tag))}>
             {product.name}
           </h3>

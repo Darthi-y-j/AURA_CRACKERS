@@ -85,10 +85,13 @@ const products = rows.map((row, index) => {
   const mrp = num(row['MRP (₹)'])
   const discount = num(row['Discount %'])
 
+  const sno = num(row['S.No']) ?? index + 1
+
   return {
     name: String(row['Product Name *']).trim(),
     slug: String(row['Slug *']).trim(),
     category_slug,
+    product_code: String(sno),
     description: cleanDescription(row.Description),
     specifications: {},
     price: sellingPrice ?? mrp ?? 0,
@@ -103,7 +106,7 @@ const products = rows.map((row, index) => {
     is_recommended: yesNo(row.Recommended),
     is_best_seller: yesNo(row['Best Seller']),
     is_available: yesNo(row.Available),
-    sort_order: index + 1,
+    sort_order: sno,
   }
 })
 
@@ -133,6 +136,7 @@ export interface AuraCatalogProduct {
   is_best_seller: boolean
   is_available: boolean
   sort_order: number
+  product_code: string
 }
 
 export const AURA_CATALOG_CATEGORIES: AuraCatalogCategory[] = ${JSON.stringify(categories, null, 2)}

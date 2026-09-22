@@ -40,7 +40,7 @@ const faqs = [
   },
   {
     q: 'What is the minimum order quantity?',
-    a: "Minimum quantities vary by product. Send an enquiry for the specific product you're interested in, and our team will inform you of any minimum requirements.",
+    a: 'Minimum order value is ₹3,000 for cart enquiries. Add items until your estimated cart total reaches ₹3,000, then send your enquiry on WhatsApp from the Cart page.',
   },
   {
     q: 'How quickly will you respond to my enquiry?',

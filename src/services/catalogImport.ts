@@ -100,6 +100,7 @@ async function upsertProducts(categoryIds: Map<string, string>) {
       is_archived: false,
       archived_at: null,
       sort_order: product.sort_order,
+      product_code: product.product_code ?? String(product.sort_order),
     }
   })
 
@@ -107,6 +108,13 @@ async function upsertProducts(categoryIds: Map<string, string>) {
     const chunk = rows.slice(i, i + PRODUCT_CHUNK)
     const { error } = await supabase.from('products').upsert(chunk, { onConflict: 'slug' })
     if (!error) continue
+
+    if (isMissingColumnError(error, 'product_code')) {
+      const fallback = chunk.map(({ product_code: _code, ...rest }) => rest)
+      const retry = await supabase.from('products').upsert(fallback, { onConflict: 'slug' })
+      if (retry.error) throw new Error(getSupabaseErrorMessage(retry.error))
+      continue
+    }
 
     if (isMissingColumnError(error, 'is_archived') || isMissingColumnError(error, 'stock_quantity')) {
       const fallback = chunk.map((row) => {
@@ -121,6 +129,7 @@ async function upsertProducts(categoryIds: Map<string, string>) {
           is_kids_special: _kidsSpecial,
           original_price: _original,
           discount_percentage: _discount,
+          product_code: _productCode,
           ...rest
         } = row
         return rest
