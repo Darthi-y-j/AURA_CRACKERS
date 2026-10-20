@@ -67,8 +67,8 @@ const SUPABASE_RENDER_PATH = '/storage/v1/render/image/public/'
 /** Display widths — request 2x for retina where noted in usage */
 export const IMAGE_WIDTH = {
   thumb: 160,
-  card: 480,
-  detail: 960,
+  card: 400,
+  detail: 880,
 } as const
 
 export function getImageUrl(
@@ -82,5 +82,5 @@ export function getImageUrl(
 
   const renderUrl = url.replace(SUPABASE_OBJECT_PATH, SUPABASE_RENDER_PATH)
   const h = height ?? Math.round((width * 3) / 4)
-  return `${renderUrl}?width=${width}&height=${h}&quality=80&resize=cover`
+  return `${renderUrl}?width=${width}&height=${h}&quality=72&resize=cover`
 }

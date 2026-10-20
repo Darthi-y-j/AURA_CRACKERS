@@ -146,6 +146,7 @@ export const ProductCard = memo(function ProductCard({
   const { inCart, quantity, price, originalPrice, handleQuantityChange, handleAddToCart } =
     useProductCartState(product)
   const isElite = isEliteProductTag(product.tag)
+  const prioritizeImage = index < 4
   if (variant === 'catalogue' || variant === 'default') {
     return <CatalogueProductCard product={product} index={index} />
   }
@@ -173,8 +174,9 @@ export const ProductCard = memo(function ProductCard({
             <img
               src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.card)}
               alt={product.name}
-              loading="lazy"
+              loading={prioritizeImage ? 'eager' : 'lazy'}
               decoding="async"
+              fetchPriority={prioritizeImage ? 'high' : 'low'}
               className="image-zoom h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-navy-950/50 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-navy-950/20" />
@@ -280,8 +282,9 @@ export const ProductCard = memo(function ProductCard({
           <img
             src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.card)}
             alt={product.name}
-            loading="lazy"
+            loading={prioritizeImage ? 'eager' : 'lazy'}
             decoding="async"
+            fetchPriority={prioritizeImage ? 'high' : 'low'}
             className={cn(
               'image-zoom object-cover',
               fillHeight ? 'absolute inset-0 h-full w-full' : 'h-full w-full',

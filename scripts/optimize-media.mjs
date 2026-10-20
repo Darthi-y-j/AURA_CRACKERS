@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const publicDir = path.resolve(__dirname, '..', 'public')
+const skipHeroVideo = !process.argv.includes('--with-hero-video')
 
 function kb(bytes) {
   return `${Math.round(bytes / 1024)} KB`
@@ -75,7 +76,7 @@ async function compressInPlace(filePath, { maxWidth, quality = 76 }) {
   return { before, after: before, skipped: true }
 }
 
-async function optimizeBackground({ name, maxWidth = 1600, webpQuality = 78, fallbackMax = 1100 }) {
+async function optimizeBackground({ name, maxWidth = 1200, webpQuality = 72, fallbackMax = 800 }) {
   const input = path.join(publicDir, name)
   if (!existsSync(input)) {
     console.log(`skip ${name} (missing)`)
@@ -88,7 +89,7 @@ async function optimizeBackground({ name, maxWidth = 1600, webpQuality = 78, fal
   const webpSize = await writeWebp(input, webpPath, { maxWidth, quality: webpQuality })
   console.log(`${name} -> ${webpName} (${kb(webpSize)})`)
 
-  const fallback = await compressInPlace(input, { maxWidth: fallbackMax, quality: 72 })
+  const fallback = await compressInPlace(input, { maxWidth: fallbackMax, quality: 68 })
   if (fallback) {
     const note = fallback.skipped ? 'unchanged' : `${kb(fallback.before)} -> ${kb(fallback.after)}`
     console.log(`  fallback ${name}: ${note}`)
@@ -152,6 +153,18 @@ async function optimizeInstagramTiles() {
   }
 }
 
+async function optimizeHeroPosterOnly() {
+  const posterJpg = path.join(publicDir, 'hero-poster.jpg')
+  const posterWebp = path.join(publicDir, 'hero-poster.webp')
+  if (!existsSync(posterJpg)) {
+    console.log('skip hero poster (missing)')
+    return
+  }
+  const webpSize = await writeWebp(posterJpg, posterWebp, { maxWidth: 1280, quality: 74 })
+  await compressInPlace(posterJpg, { maxWidth: 1280, quality: 76 })
+  console.log(`hero-poster.webp: ${kb(webpSize)} (hero.mp4 untouched)`)
+}
+
 async function optimizeHeroVideo() {
   const input = path.join(publicDir, 'hero.mp4')
   if (!existsSync(input)) {
@@ -199,25 +212,25 @@ async function optimizeHeroVideo() {
 }
 
 const backgrounds = [
-  { name: 'contact-section-bg.png', maxWidth: 1920 },
-  { name: 'how-it-works-bg.png', maxWidth: 1600 },
-  { name: 'products-hero.png', maxWidth: 1600 },
-  { name: 'about-vision-bg.png', maxWidth: 1400 },
-  { name: 'about-safety-bg.png', maxWidth: 1200 },
-  { name: 'premium-quality-card.png', maxWidth: 960 },
-  { name: 'wide-variety-card.png', maxWidth: 960 },
-  { name: 'competitive-pricing-card.png', maxWidth: 960 },
-  { name: 'customer-support-card.png', maxWidth: 960 },
-  { name: 'trusted-service-card.png', maxWidth: 960 },
-  { name: 'fast-delivery-card.png', maxWidth: 960 },
-  { name: 'browse-products-step-bg.png', maxWidth: 960 },
-  { name: 'add-to-cart-step-bg.png', maxWidth: 960 },
-  { name: 'review-cart-step-bg.png', maxWidth: 960 },
-  { name: 'whatsapp-enquiry-step-bg.png', maxWidth: 960 },
-  { name: 'we-contact-you-step-bg.png', maxWidth: 960 },
-  { name: 'special-colors-skyshot-bg.png', maxWidth: 960 },
-  { name: 'instagram-product-showcase.png', maxWidth: 960 },
-  { name: 'about-celebration-sparkler.jpg', maxWidth: 960 },
+  { name: 'contact-section-bg.png', maxWidth: 1280, webpQuality: 70, fallbackMax: 720 },
+  { name: 'how-it-works-bg.png', maxWidth: 1280, webpQuality: 70, fallbackMax: 720 },
+  { name: 'products-hero.png', maxWidth: 1280, webpQuality: 70, fallbackMax: 720 },
+  { name: 'about-vision-bg.png', maxWidth: 1100, webpQuality: 72, fallbackMax: 720 },
+  { name: 'about-safety-bg.png', maxWidth: 1000, webpQuality: 72, fallbackMax: 680 },
+  { name: 'premium-quality-card.png', maxWidth: 800, webpQuality: 70, fallbackMax: 640 },
+  { name: 'wide-variety-card.png', maxWidth: 800, webpQuality: 70, fallbackMax: 640 },
+  { name: 'competitive-pricing-card.png', maxWidth: 800, webpQuality: 70, fallbackMax: 640 },
+  { name: 'customer-support-card.png', maxWidth: 800, webpQuality: 70, fallbackMax: 640 },
+  { name: 'trusted-service-card.png', maxWidth: 800, webpQuality: 70, fallbackMax: 640 },
+  { name: 'fast-delivery-card.png', maxWidth: 800, webpQuality: 70, fallbackMax: 640 },
+  { name: 'browse-products-step-bg.png', maxWidth: 900, webpQuality: 70, fallbackMax: 680 },
+  { name: 'add-to-cart-step-bg.png', maxWidth: 900, webpQuality: 70, fallbackMax: 680 },
+  { name: 'review-cart-step-bg.png', maxWidth: 900, webpQuality: 70, fallbackMax: 680 },
+  { name: 'whatsapp-enquiry-step-bg.png', maxWidth: 900, webpQuality: 70, fallbackMax: 680 },
+  { name: 'we-contact-you-step-bg.png', maxWidth: 900, webpQuality: 70, fallbackMax: 680 },
+  { name: 'special-colors-skyshot-bg.png', maxWidth: 900, webpQuality: 70, fallbackMax: 680 },
+  { name: 'instagram-product-showcase.png', maxWidth: 900, webpQuality: 70, fallbackMax: 680 },
+  { name: 'about-celebration-sparkler.jpg', maxWidth: 900, webpQuality: 72, fallbackMax: 680 },
 ]
 
 console.log('Optimizing background images...')
@@ -234,7 +247,12 @@ await optimizeLogos()
 console.log('\nOptimizing Instagram tiles...')
 await optimizeInstagramTiles()
 
-console.log('\nOptimizing hero video + poster...')
-await optimizeHeroVideo()
+if (skipHeroVideo) {
+  console.log('\nOptimizing hero poster only (skipping hero.mp4)...')
+  await optimizeHeroPosterOnly()
+} else {
+  console.log('\nOptimizing hero video + poster...')
+  await optimizeHeroVideo()
+}
 
 console.log('\nDone.')

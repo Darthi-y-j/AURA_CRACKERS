@@ -31,7 +31,11 @@ interface CatalogueProductCardProps {
   index?: number
 }
 
-export const CatalogueProductCard = memo(function CatalogueProductCard({ product }: CatalogueProductCardProps) {
+export const CatalogueProductCard = memo(function CatalogueProductCard({
+  product,
+  index = 0,
+}: CatalogueProductCardProps) {
+  const prioritizeImage = index < 4
   const { inCart, quantity, price, originalPrice, handleQuantityChange, handleAddToCart } =
     useProductCartState(product)
 
@@ -50,8 +54,9 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({ product
           <img
             src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.card)}
             alt={product.name}
-            loading="lazy"
+            loading={prioritizeImage ? 'eager' : 'lazy'}
             decoding="async"
+            fetchPriority={prioritizeImage ? 'high' : 'low'}
             className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.03]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
