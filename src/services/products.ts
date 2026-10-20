@@ -1,4 +1,5 @@
 import { supabase, getSupabaseErrorMessage, isMissingColumnError } from '@/lib/supabase'
+import { prefetchCatalogueProductImages } from '@/lib/prefetchProductImages'
 import { supabaseRestGet } from '@/lib/supabaseRest'
 import { CACHE_KEYS, readSessionCache, writeSessionCache } from '@/lib/sessionCache'
 import { isLowStock } from '@/lib/stock'
@@ -216,6 +217,7 @@ export async function getProducts(filters: ProductFilters = {}): Promise<Product
     const data = await queryProductsWithArchiveFallbackRest(filters)
     if (isCatalogueFilters(filters) && data.length > 0) {
       writeSessionCache(CACHE_KEYS.catalogueProducts, data)
+      prefetchCatalogueProductImages(data)
     }
     return data
   })

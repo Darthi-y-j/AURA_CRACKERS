@@ -82,5 +82,15 @@ export function getImageUrl(
 
   const renderUrl = url.replace(SUPABASE_OBJECT_PATH, SUPABASE_RENDER_PATH)
   const h = height ?? Math.round((width * 3) / 4)
-  return `${renderUrl}?width=${width}&height=${h}&quality=72&resize=cover`
+  return `${renderUrl}?width=${width}&height=${h}&quality=68&resize=cover&format=webp`
+}
+
+export function getSupabaseHost(): string | null {
+  const raw = import.meta.env.VITE_SUPABASE_URL
+  if (!raw || typeof raw !== 'string') return null
+  try {
+    return new URL(raw).origin
+  } catch {
+    return null
+  }
 }

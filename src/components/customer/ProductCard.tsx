@@ -146,7 +146,8 @@ export const ProductCard = memo(function ProductCard({
   const { inCart, quantity, price, originalPrice, handleQuantityChange, handleAddToCart } =
     useProductCartState(product)
   const isElite = isEliteProductTag(product.tag)
-  const prioritizeImage = index < 4
+  const prioritizeImage = index < 6
+  const imageWidth = compact ? IMAGE_WIDTH.thumb : IMAGE_WIDTH.card
   if (variant === 'catalogue' || variant === 'default') {
     return <CatalogueProductCard product={product} index={index} />
   }
@@ -172,7 +173,7 @@ export const ProductCard = memo(function ProductCard({
             )}
           >
             <img
-              src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.card)}
+              src={getImageUrl(product.image_url, '/placeholder-product.svg', imageWidth)}
               alt={product.name}
               loading={prioritizeImage ? 'eager' : 'lazy'}
               decoding="async"
@@ -280,7 +281,7 @@ export const ProductCard = memo(function ProductCard({
           )}
         >
           <img
-            src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.card)}
+            src={getImageUrl(product.image_url, '/placeholder-product.svg', imageWidth)}
             alt={product.name}
             loading={prioritizeImage ? 'eager' : 'lazy'}
             decoding="async"

@@ -1,18 +1,12 @@
 import type { Product } from '@/types/database'
-import { getImageUrl } from '@/lib/utils'
+import { prefetchProductImage } from '@/lib/prefetchProductImages'
 
 type ProductLinkState = {
   product: Product
 }
 
-const preloadedImages = new Set<string>()
-
 export function preloadProductImage(url: string | null | undefined) {
-  const src = getImageUrl(url)
-  if (!src || preloadedImages.has(src)) return
-  preloadedImages.add(src)
-  const img = new Image()
-  img.src = src
+  prefetchProductImage(url)
 }
 
 function productDetailPath(slug: string) {

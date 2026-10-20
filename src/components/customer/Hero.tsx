@@ -7,6 +7,7 @@ import { TitleHighlight } from './TitleHighlight'
 import { AnimateIn } from './AnimateIn'
 import { FeaturedProductsShowcase } from './FeaturedProductsShowcase'
 import { WaveDivider } from './WaveDivider'
+import { cn } from '@/lib/utils'
 import type { Product } from '@/types/database'
 
 interface HeroProps {
@@ -20,8 +21,10 @@ const HERO_POSTER_WEBP = '/hero-poster.webp'
 function shouldPlayHeroVideo(): boolean {
   if (typeof window === 'undefined') return false
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false
-  const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
+  const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } })
+    .connection
   if (connection?.saveData) return false
+  if (connection?.effectiveType === 'slow-2g' || connection?.effectiveType === '2g') return false
   return true
 }
 
@@ -30,6 +33,7 @@ export function Hero({ heroSelectionProducts = [] }: HeroProps) {
   const { setTheme } = useHeroSlideTheme()
   const videoRef = useRef<HTMLVideoElement>(null)
   const [videoEnabled] = useState(shouldPlayHeroVideo)
+  const [videoPlaying, setVideoPlaying] = useState(false)
 
   useEffect(() => {
     setTheme('dark')
@@ -41,52 +45,22 @@ export function Hero({ heroSelectionProducts = [] }: HeroProps) {
     const video = videoRef.current
     if (!video) return
 
-    let loaded = false
-
     const playVideo = () => {
-      if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
-        video.play().catch(() => {})
-      }
+      void video.play().catch(() => {})
     }
-
-    const loadVideo = () => {
-      if (loaded) return
-      loaded = true
-      video.preload = 'auto'
-      video.load()
-      playVideo()
-    }
-
-    const onCanPlay = () => {
-      playVideo()
-    }
-
-    video.addEventListener('canplay', onCanPlay)
 
     const onVisibility = () => {
       if (document.hidden) video.pause()
       else playVideo()
     }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          loadVideo()
-          playVideo()
-        } else {
-          video.pause()
-        }
-      },
-      { threshold: 0.1 },
-    )
-
-    observer.observe(video)
+    video.addEventListener('canplay', playVideo)
     document.addEventListener('visibilitychange', onVisibility)
+    playVideo()
 
     return () => {
-      observer.disconnect()
       document.removeEventListener('visibilitychange', onVisibility)
-      video.removeEventListener('canplay', onCanPlay)
+      video.removeEventListener('canplay', playVideo)
     }
   }, [videoEnabled])
 
@@ -94,34 +68,39 @@ export function Hero({ heroSelectionProducts = [] }: HeroProps) {
     <section className="relative overflow-x-clip max-sm:overflow-x-visible">
       <div className="relative min-h-0 max-sm:min-h-[62vh]">
         <div className="absolute inset-0 min-h-full overflow-hidden bg-black max-sm:min-h-[62vh]">
+          <picture
+            className={cn(
+              'absolute inset-0 z-[1] transition-opacity duration-500',
+              videoEnabled && videoPlaying && 'pointer-events-none opacity-0',
+            )}
+            aria-hidden="true"
+          >
+            <source srcSet={HERO_POSTER_WEBP} type="image/webp" />
+            <img
+              src={HERO_POSTER}
+              alt=""
+              fetchPriority="high"
+              decoding="async"
+              className="h-full w-full object-cover object-center max-sm:object-[center_30%]"
+            />
+          </picture>
+
           {videoEnabled ? (
             <video
               ref={videoRef}
-              className="absolute inset-0 h-full w-full object-cover object-center max-sm:object-[center_30%]"
+              className="absolute inset-0 z-0 h-full w-full object-cover object-center max-sm:object-[center_30%]"
               muted
               loop
               playsInline
               autoPlay
               preload="auto"
-              poster={HERO_POSTER}
+              poster={HERO_POSTER_WEBP}
+              onPlaying={() => setVideoPlaying(true)}
               aria-hidden="true"
             >
               <source src={HERO_VIDEO_MP4} type="video/mp4" />
             </video>
-          ) : (
-            <picture className="absolute inset-0">
-              <source srcSet={HERO_POSTER_WEBP} type="image/webp" />
-              <img
-                src={HERO_POSTER}
-                alt=""
-                fetchPriority="high"
-                decoding="async"
-                className="h-full w-full object-cover object-center max-sm:object-[center_30%]"
-                aria-hidden="true"
-              />
-            </picture>
-          )}
-
+          ) : null}
         </div>
 
         <div className="relative z-10 mx-auto flex w-full min-w-0 max-w-7xl flex-col px-4 pb-4 pt-[3.75rem] max-sm:min-h-0 sm:px-6 sm:pb-5 sm:pt-20 lg:px-8 lg:pt-[5.25rem]">

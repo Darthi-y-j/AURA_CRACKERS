@@ -19,6 +19,7 @@ import { getCategories, getCachedCatalogueCategories } from '@/services/categori
 import { getProducts, getCachedCatalogueProducts } from '@/services/products'
 import { PRODUCT_TAGS } from '@/lib/productTags'
 import { pickHeroSelectionProducts } from '@/lib/heroSelection'
+import { prefetchCatalogueProductImages } from '@/lib/prefetchProductImages'
 import { useSettings } from '@/contexts/SettingsContext'
 import { HOME_PAGE_DESCRIPTION, HOME_PAGE_TITLE } from '@/lib/siteConfig'
 import { buildHomePageSchema } from '@/lib/structuredData'
@@ -46,6 +47,11 @@ export function HomePage() {
     () => (cachedProducts?.length ? buildTaggedSections(cachedProducts) : []),
   )
   const [loading, setLoading] = useState(() => !cachedProducts?.length)
+
+  useEffect(() => {
+    const cached = getCachedCatalogueProducts()
+    if (cached?.length) prefetchCatalogueProductImages(cached)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -106,7 +112,7 @@ export function HomePage() {
       ) : (
         <>
           {taggedSections.map((section) => (
-            <LazySection key={section.tag} minHeight="280px">
+            <LazySection key={section.tag} minHeight="280px" rootMargin="520px 0px">
               <TaggedProductsSection
                 tag={section.tag}
                 products={section.products}
