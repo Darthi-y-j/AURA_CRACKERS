@@ -146,9 +146,7 @@ export function HomePage() {
         <ContactSection />
       </LazySection>
 
-      <LazySection minHeight="280px">
-        <HomeSeoIntroSection />
-      </LazySection>
+      <HomeSeoIntroSection />
     </div>
   )
 }

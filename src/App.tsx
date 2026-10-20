@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -86,6 +86,10 @@ function PageLoader() {
 }
 
 function App() {
+  useEffect(() => {
+    document.getElementById('static-seo-fallback')?.remove()
+  }, [])
+
   return (
     <HelmetProvider>
       <AuthProvider>

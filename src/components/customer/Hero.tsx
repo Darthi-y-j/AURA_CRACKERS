@@ -102,7 +102,7 @@ export function Hero({ heroSelectionProducts = [] }: HeroProps) {
               loop
               playsInline
               autoPlay
-              preload="metadata"
+              preload="auto"
               poster={HERO_POSTER}
               aria-hidden="true"
             >

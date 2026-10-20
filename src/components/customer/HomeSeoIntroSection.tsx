@@ -254,12 +254,13 @@ export function HomeSeoIntroSection() {
 
               <div className="relative mt-6 flex flex-wrap gap-2" aria-label="Product types">
                 {productHighlights.map((name) => (
-                  <span
+                  <Link
                     key={name}
-                    className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-cream-100/80"
+                    to={`/search?q=${encodeURIComponent(name)}`}
+                    className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-cream-100/80 transition hover:border-gold-400/35 hover:text-gold-200"
                   >
                     {name}
-                  </span>
+                  </Link>
                 ))}
               </div>
             </div>
