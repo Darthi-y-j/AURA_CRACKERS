@@ -1,7 +1,7 @@
 import { Crown, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CARD_VISIBLE_PRODUCT_TAGS, type ProductTag } from '@/lib/productTags'
-import { SILVER_METALLIC_BG, GOLD_METALLIC_BG } from '@/lib/productCardThemes'
+import { UNIFIED_CARD_TAG_OVERLAY } from '@/lib/productCardThemes'
 interface ProductTagBadgeProps {
   tag?: string | null
   variant?: 'overlay' | 'dark' | 'light'
@@ -27,32 +27,25 @@ const TAG_STYLES: Record<
     label: 'Premium',
     compactLabel: 'Premium',
     icon: Crown,
-    overlay:
-      'border-gold-400/45 bg-navy-950/85 text-gold-300 shadow-[0_4px_14px_rgba(0,0,0,0.45)] backdrop-blur-md',
-    dark: 'border-gold-400/40 bg-gold-500/12 text-gold-300',
-    light: 'border-gold-500/30 bg-gold-500/8 text-festive-600',
+    overlay: UNIFIED_CARD_TAG_OVERLAY,
+    dark: 'border-festive-500/35 bg-festive-500/12 text-festive-500',
+    light: 'border-festive-500/30 bg-festive-500/8 text-festive-600',
   },
   'Premium Plus': {
     label: 'Premium Plus',
     compactLabel: 'Premium+',
     icon: Sparkles,
-    overlay: cn(
-      'border-[#c9a227]/70 text-black shadow-[0_4px_16px_rgba(212,175,55,0.4)]',
-      GOLD_METALLIC_BG,
-    ),
-    dark: cn('border-[#c9a227]/70 text-black', GOLD_METALLIC_BG),
-    light: cn('border-[#c9a227]/70 text-black', GOLD_METALLIC_BG),
+    overlay: UNIFIED_CARD_TAG_OVERLAY,
+    dark: 'border-festive-500/35 bg-festive-500/12 text-festive-500',
+    light: 'border-festive-500/30 bg-festive-500/8 text-festive-600',
   },
   'Elite Setout': {
     label: 'Elite',
     compactLabel: 'Elite',
     icon: Crown,
-    overlay: cn(
-      'border-[#a8b0b8]/75 text-navy-950 shadow-[0_4px_16px_rgba(148,163,184,0.4)]',
-      SILVER_METALLIC_BG,
-    ),
-    dark: cn('border-[#a8b0b8]/75 text-navy-950', SILVER_METALLIC_BG),
-    light: cn('border-[#a8b0b8]/75 text-navy-950', SILVER_METALLIC_BG),
+    overlay: UNIFIED_CARD_TAG_OVERLAY,
+    dark: 'border-festive-500/35 bg-festive-500/12 text-festive-500',
+    light: 'border-festive-500/30 bg-festive-500/8 text-festive-600',
   },
 }
 

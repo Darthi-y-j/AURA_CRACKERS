@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { ProductLink } from './ProductLink'
-import { Eye, ShoppingCart } from 'lucide-react'
+import { Eye, ShoppingCart, Tag } from 'lucide-react'
 import type { Product } from '@/types/database'
 import { getImageUrl, IMAGE_WIDTH, truncate, cn } from '@/lib/utils'
 import { useProductCartState } from '@/hooks/useProductCartState'
@@ -12,7 +12,18 @@ import { ProductBrandBadge } from './ProductBrandBadge'
 import { ProductTagBadge } from './ProductTagBadge'
 import { ProductHighlightBadges } from './ProductHighlightBadges'
 import { ProductCodeLabel } from './ProductCodeLabel'
-import { getCardDescriptionClass, getCardCategoryClass, getCardTitleClass, CARD_TITLE_BASE_CLASS, getCardViewButtonClass, getDiscountOfferTagVariant, getCardPerforationDotClass, getCardPerforationLineClass } from '@/lib/productCardThemes'
+import {
+  CARD_TITLE_BASE_CLASS,
+  UNIFIED_CARD_BODY,
+  UNIFIED_CARD_SHELL,
+  getCatalogueCardCategoryClass,
+  getCatalogueCardDescriptionClass,
+  getCatalogueCardTitleClass,
+  getCatalogueCardViewButtonClass,
+  getCardAddToCartButtonClass,
+  getDiscountOfferTagVariant,
+  UNIFIED_CARD_PRICE_PANEL,
+} from '@/lib/productCardThemes'
 import { isCardVisibleProductTag } from '@/lib/productTags'
 
 interface CatalogueProductCardProps {
@@ -29,10 +40,13 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({ product
 
   return (
     <article
-      className="product-grid-item group relative flex h-full flex-col overflow-hidden rounded-xl bg-black shadow-[0_4px_20px_rgba(0,0,0,0.3)] transition-[transform,box-shadow] duration-300 sm:rounded-2xl sm:shadow-[0_8px_32px_rgba(0,0,0,0.35)] sm:hover:-translate-y-0.5 sm:hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)]"
+      className={cn(
+        'product-grid-item group relative flex h-full flex-col overflow-hidden rounded-xl transition-[transform,box-shadow] duration-300 sm:rounded-2xl sm:hover:-translate-y-0.5 sm:hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)]',
+        UNIFIED_CARD_SHELL,
+      )}
     >
       <ProductLink product={product} className="relative block">
-        <div className="relative aspect-[4/3] overflow-hidden bg-[#1a120e]">
+        <div className="relative aspect-[4/3] overflow-hidden bg-white">
           <img
             src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.card)}
             alt={product.name}
@@ -40,7 +54,7 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({ product
             decoding="async"
             className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.03]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
 
           {hasDiscount && (
             <DiscountOfferTag
@@ -50,37 +64,42 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({ product
             />
           )}
 
-          <div className="absolute left-2 top-2 z-20 flex flex-col items-start gap-1.5 sm:left-2.5 sm:top-2.5">
+          <div className="absolute left-2 top-2 z-20 flex max-w-[70%] flex-col items-start gap-1.5 sm:left-2.5 sm:top-2.5">
             <ProductHighlightBadges product={product} />
-            {product.tag && (
-              <ProductTagBadge tag={product.tag} variant="overlay" compact />
-            )}
-            <ProductCodeLabel product={product} variant="overlay" className="sm:hidden" />
+            {product.tag && <ProductTagBadge tag={product.tag} variant="overlay" compact />}
+          </div>
+
+          <div className="absolute right-2 top-12 z-20 sm:right-2.5 sm:top-14">
             <WishlistButton
               product={product}
-              className="rounded-full bg-black/40 p-1 backdrop-blur-sm hover:bg-black/55"
+              className="rounded-full bg-white/95 p-1 shadow-md hover:bg-white"
               size="sm"
             />
           </div>
 
           {product.brand && (
             <div className="absolute inset-x-2 bottom-2 z-10 sm:inset-x-3 sm:bottom-3">
-              <ProductBrandBadge brand={product.brand} variant="overlay" className="max-w-full" />
+              <ProductBrandBadge
+                brand={product.brand}
+                variant="light"
+                className="!normal-case !border-navy-900/10 !bg-white/95 !text-navy-900 !shadow-sm"
+              />
             </div>
           )}
         </div>
-
-        <div className="relative hidden items-center bg-black px-3 py-1 sm:flex" aria-hidden="true">
-          <div className={cn('h-3 w-3 -translate-x-1/2 rounded-full', getCardPerforationDotClass(product.tag))} />
-          <div className={cn('mx-2 flex-1 border-t border-dashed', getCardPerforationLineClass(product.tag))} />
-          <div className={cn('h-3 w-3 translate-x-1/2 rounded-full', getCardPerforationDotClass(product.tag))} />
-        </div>
+        <div className="h-px bg-navy-900/[0.06]" aria-hidden="true" />
       </ProductLink>
 
-      <div className="flex flex-1 flex-col bg-black px-2.5 pb-2.5 pt-2 sm:px-4 sm:pb-4 sm:pt-2.5">
+      <div className={cn('flex flex-1 flex-col px-2 pb-2 pt-1.5 sm:px-3 sm:pb-2.5 sm:pt-2', UNIFIED_CARD_BODY)}>
         <ProductLink product={product} className="block">
-          <ProductCodeLabel product={product} variant="card" className="mb-0.5 hidden sm:block" />
-          <h3 className={cn(CARD_TITLE_BASE_CLASS, getCardTitleClass(product.tag))}>
+          <ProductCodeLabel product={product} variant="cardLight" className="mb-0.5 text-[8px] sm:text-[9px]" />
+          <h3
+            className={cn(
+              CARD_TITLE_BASE_CLASS,
+              'text-[13px] sm:text-[15px]',
+              getCatalogueCardTitleClass(),
+            )}
+          >
             {product.name}
           </h3>
         </ProductLink>
@@ -88,8 +107,8 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({ product
         {showCategory && (
           <span
             className={cn(
-              'mt-1 hidden text-[10px] font-semibold uppercase tracking-[0.18em] sm:inline',
-              getCardCategoryClass(product.tag),
+              'mt-1 text-[10px] font-semibold uppercase tracking-[0.18em]',
+              getCatalogueCardCategoryClass(),
             )}
           >
             {product.category!.name}
@@ -97,34 +116,54 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({ product
         )}
 
         {product.description && (
-          <p className={cn('mt-1.5 hidden line-clamp-2 text-xs leading-relaxed sm:block', getCardDescriptionClass(product.tag))}>
+          <p
+            className={cn(
+              'mt-1 line-clamp-2 text-[11px] leading-snug sm:text-xs',
+              getCatalogueCardDescriptionClass(),
+            )}
+          >
             {truncate(product.description, 90)}
           </p>
         )}
 
-        <div className="mt-1.5 flex items-center justify-between gap-1 rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1.5 sm:mt-3 sm:gap-2 sm:px-3 sm:py-2.5">
-          <div className="min-w-0">
+        <div
+          className={cn(
+            'mt-1.5 flex flex-col gap-1 rounded-md px-1.5 py-1 sm:mt-2 sm:px-2 sm:py-1.5',
+            UNIFIED_CARD_PRICE_PANEL,
+          )}
+        >
+          <div className="flex min-w-0 flex-wrap items-baseline gap-1">
             {price ? (
-              <div className="flex flex-col gap-0.5 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-2">
+              <>
                 {originalPrice && (
-                  <span className="text-[10px] leading-none text-white/40 line-through sm:text-sm">{originalPrice}</span>
+                  <span className="text-[9px] leading-none text-navy-700/45 line-through sm:text-[11px]">
+                    {originalPrice}
+                  </span>
                 )}
-                <span className="bg-gradient-to-r from-gold-300 via-amber-400 to-orange-400 bg-clip-text text-sm font-bold leading-none text-transparent sm:text-xl">
-                  {price}
-                </span>
-              </div>
+                <span className="text-xs font-bold leading-none text-festive-600 sm:text-base">{price}</span>
+                {hasDiscount && (
+                  <span
+                    className="inline-flex items-center gap-0.5 rounded-full border border-pink-200/90 bg-white px-1 py-px text-[7px] font-bold uppercase text-pink-600 sm:text-[8px]"
+                  >
+                    <Tag className="h-2 w-2 shrink-0" aria-hidden />
+                    {product.discount_percentage}% off
+                  </span>
+                )}
+              </>
             ) : (
-              <span className="bg-gradient-to-r from-gold-300 to-amber-400 bg-clip-text text-[11px] font-semibold text-transparent sm:text-sm">
-                Enquire
-              </span>
+              <span className="text-[10px] font-semibold text-festive-600 sm:text-xs">Enquire</span>
             )}
           </div>
-          <ProductPiecesBadge pieces={product.pieces} packaging={product.packaging} className="hidden shrink-0 sm:inline-flex" />
+          <ProductPiecesBadge
+            pieces={product.pieces}
+            packaging={product.packaging}
+            variant="light"
+            className="w-fit shrink-0 !border-navy-900/10 !bg-white/90 !px-1 !py-px !text-navy-800 text-[7px] sm:text-[8px] [&_svg]:!text-festive-500"
+          />
         </div>
 
         {product.is_available ? (
-          <div className="mt-auto pt-2 sm:mt-3 sm:pt-0">
-            {/* Mobile — compact single action */}
+          <div className="mt-auto pt-1.5 sm:pt-2">
             <div className="sm:hidden">
               {inCart ? (
                 <CartQuantityControl
@@ -138,26 +177,28 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({ product
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className="inline-flex w-full items-center justify-center gap-1 rounded-lg bg-gradient-to-r from-festive-500 to-gold-500 py-2 text-[11px] font-bold text-navy-950 transition-all active:scale-[0.98]"
+                  className={cn(
+                    'inline-flex w-full items-center justify-center gap-1 rounded-md py-1.5 text-[10px] font-bold transition-all active:scale-[0.98]',
+                    getCardAddToCartButtonClass(product.tag),
+                  )}
                 >
-                  <ShoppingCart className="h-3.5 w-3.5" />
-                  Add
+                  <ShoppingCart className="h-3 w-3" />
+                  Add to Cart
                 </button>
               )}
             </div>
 
-            {/* Desktop — full actions */}
             <div className="hidden sm:block">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 <ProductLink
                   product={product}
                   className={cn(
-                    'inline-flex items-center justify-center gap-1.5 rounded-lg border py-2.5 text-xs font-semibold transition-all',
-                    getCardViewButtonClass(product.tag),
+                    'inline-flex items-center justify-center gap-1 rounded-md border bg-white py-1.5 text-[10px] font-semibold transition-all sm:py-2 sm:text-[11px]',
+                    getCatalogueCardViewButtonClass(),
                   )}
                 >
-                  <Eye className="h-3.5 w-3.5" />
-                  View
+                  <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  View Details
                 </ProductLink>
                 {inCart ? (
                   <CartQuantityControl
@@ -170,16 +211,19 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({ product
                   <button
                     type="button"
                     onClick={handleAddToCart}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-festive-500 to-gold-500 py-2.5 text-xs font-bold text-navy-950 transition-all hover:brightness-110 active:scale-[0.98]"
+                    className={cn(
+                      'inline-flex items-center justify-center gap-1 rounded-md py-1.5 text-[10px] font-bold transition-all hover:brightness-110 active:scale-[0.98] sm:py-2 sm:text-[11px]',
+                      getCardAddToCartButtonClass(product.tag),
+                    )}
                   >
-                    <ShoppingCart className="h-3.5 w-3.5" />
+                    <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                     Add to Cart
                   </button>
                 )}
               </div>
               {inCart && (
-                <p className="mt-2 flex items-center justify-center gap-1 text-center text-[10px] font-medium tracking-wide bg-gradient-to-r from-gold-500/80 to-amber-400/80 bg-clip-text text-transparent">
-                  <ShoppingCart className="h-3 w-3 shrink-0 text-gold-400" aria-hidden="true" />
+                <p className="mt-1 flex items-center justify-center gap-1 text-center text-[9px] font-medium tracking-wide text-festive-600">
+                  <ShoppingCart className="h-3 w-3 shrink-0" aria-hidden="true" />
                   <span>Added to cart</span>
                 </p>
               )}
@@ -189,11 +233,11 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({ product
           <ProductLink
             product={product}
             className={cn(
-              'mt-auto inline-flex w-full items-center justify-center gap-1.5 rounded-lg border py-2 pt-2 text-[11px] font-semibold sm:mt-3 sm:py-2.5 sm:text-xs',
-              getCardViewButtonClass(product.tag),
+              'mt-auto inline-flex w-full items-center justify-center gap-1 rounded-md border bg-white py-1.5 text-[10px] font-semibold sm:mt-2 sm:py-2 sm:text-[11px]',
+              getCatalogueCardViewButtonClass(),
             )}
           >
-            View details
+            View Details
           </ProductLink>
         )}
       </div>

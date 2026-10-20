@@ -3,11 +3,10 @@ import { ProductLink } from './ProductLink'
 import { Eye, ShoppingCart, Check, ArrowRight, Sparkles } from 'lucide-react'
 import type { Product } from '@/types/database'
 import { getImageUrl, IMAGE_WIDTH, truncate, cn } from '@/lib/utils'
-import { isEliteProductTag, ELITE_BORDER_GLOW, ELITE_CARD_INNER, FEATURED_CARD_GRADIENT, getCardDescriptionClass, getCardCategoryClass, getCardTitleClass, CARD_TITLE_BASE_CLASS, getCardPricePanelClass, getCardViewButtonClass, getCardAddToCartButtonClass, getDiscountOfferTagVariant, getCardPerforationDotClass, getCardPerforationLineClass } from '@/lib/productCardThemes'
+import { isEliteProductTag, FEATURED_CARD_GRADIENT, getCardViewButtonClass, getCardAddToCartButtonClass, getDiscountOfferTagVariant } from '@/lib/productCardThemes'
 import { useProductCartState } from '@/hooks/useProductCartState'
 import { QuantitySelector } from './QuantitySelector'
 import { CartQuantityControl } from './CartQuantityControl'
-import { ProductPiecesBadge } from './ProductPiecesBadge'
 import { DiscountOfferTag } from './DiscountOfferTag'
 import { CatalogueProductCard } from './CatalogueProductCard'
 import { ProductBrandBadge } from './ProductBrandBadge'
@@ -15,8 +14,6 @@ import { ProductTagBadge } from './ProductTagBadge'
 import { WishlistButton } from './WishlistButton'
 import { ProductHighlightBadges } from './ProductHighlightBadges'
 import { ProductCodeLabel } from './ProductCodeLabel'
-import { isCardVisibleProductTag } from '@/lib/productTags'
-
 interface ProductCardProps {
   product: Product
   index?: number
@@ -80,10 +77,10 @@ function PriceBlock({
           'text-sm font-semibold',
           isDark
             ? theme === 'elite'
-              ? 'text-cyan-300/90'
+              ? 'text-festive-500'
               : theme === 'silver'
-                ? 'text-slate-300'
-                : 'text-gold-400'
+                ? 'text-festive-400'
+                : 'text-festive-500'
             : 'text-festive-600'
         )}
       >
@@ -106,7 +103,7 @@ function PriceBlock({
             theme === 'ember' || theme === 'silver' || theme === 'elite'
               ? cn(
                   'text-[11px] leading-none sm:text-sm',
-                  theme === 'elite' ? 'text-cyan-300/55' : 'text-white/55',
+                  theme === 'elite' ? 'text-navy-700/50' : 'text-navy-700/50',
                 )
               : isDark
                 ? 'text-cream-100/45'
@@ -120,14 +117,14 @@ function PriceBlock({
       <span
         className={cn(
           'font-bold tabular-nums',
-          theme === 'ember'
-            ? 'text-base text-gold-300 sm:text-xl'
+            theme === 'ember'
+            ? 'text-base text-festive-600 sm:text-xl'
             : theme === 'elite'
-              ? 'text-base bg-gradient-to-r from-slate-100 via-cyan-100 to-slate-200 bg-clip-text text-transparent sm:text-xl'
+              ? 'text-base font-bold text-festive-600 sm:text-xl'
               : theme === 'silver'
-                ? 'text-base text-slate-100 sm:text-xl'
+                ? 'text-base text-festive-500 sm:text-xl'
             : isDark
-              ? 'text-gold-300'
+              ? 'text-festive-400'
               : 'text-navy-900',
           size === 'large' ? 'text-2xl sm:text-3xl' : theme !== 'ember' && theme !== 'silver' && theme !== 'elite' && 'text-xl',
         )}
@@ -149,10 +146,7 @@ export const ProductCard = memo(function ProductCard({
   const { inCart, quantity, price, originalPrice, handleQuantityChange, handleAddToCart } =
     useProductCartState(product)
   const isElite = isEliteProductTag(product.tag)
-  const showCategory = product.category && !isCardVisibleProductTag(product.tag)
-  const hasProductImage = Boolean(product.image_url?.trim())
-
-  if (variant === 'catalogue') {
+  if (variant === 'catalogue' || variant === 'default') {
     return <CatalogueProductCard product={product} index={index} />
   }
 
@@ -416,7 +410,10 @@ export const ProductCard = memo(function ProductCard({
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="inline-flex flex-1 items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-festive-500 to-gold-500 py-2 text-xs font-bold text-white transition-transform active:scale-95"
+                className={cn(
+                  'inline-flex flex-1 items-center justify-center gap-1 rounded-xl py-2 text-xs font-bold transition-transform active:scale-95',
+                  getCardAddToCartButtonClass(product.tag),
+                )}
               >
                 <ShoppingCart className="h-3.5 w-3.5" />
                 Add
@@ -427,228 +424,5 @@ export const ProductCard = memo(function ProductCard({
       </article>
     )
   }
-
-  return (
-    <article
-      className={cn(
-        'product-ember-card product-grid-item group relative flex h-full flex-col overflow-hidden rounded-xl transition-[transform,box-shadow] duration-300 sm:rounded-[1.35rem] sm:hover:-translate-y-1',
-        isElite && 'product-elite-card',
-      )}
-    >
-      {/* Gradient border glow */}
-      <div
-        className={cn(
-          'pointer-events-none absolute -inset-px rounded-xl opacity-70 transition-opacity duration-500 group-hover:opacity-100 sm:rounded-[1.35rem]',
-          isElite
-            ? ELITE_BORDER_GLOW
-            : 'bg-gradient-to-br from-gold-400/50 via-festive-500/30 to-gold-600/40',
-        )}
-        aria-hidden="true"
-      />
-      <div className={cn('relative flex flex-1 flex-col overflow-hidden rounded-[calc(1rem-1px)] sm:rounded-[1.32rem]', isElite ? ELITE_CARD_INNER : 'bg-navy-950')}>
-        {/* Image stage */}
-        <ProductLink product={product} className="relative block shrink-0">
-          <div className="relative aspect-[4/3] overflow-hidden bg-[#1f1410] sm:aspect-[4/3.2]">
-            <img
-              src={getImageUrl(product.image_url, '/placeholder-product-dark.svg', IMAGE_WIDTH.card)}
-              alt={product.name}
-              loading="lazy"
-              decoding="async"
-              className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.04]"
-            />
-            {hasProductImage && (
-            <div className={cn(
-              'absolute inset-0',
-              isElite
-                ? 'bg-gradient-to-t from-navy-950 via-indigo-950/25 to-navy-950/30'
-                : 'bg-gradient-to-t from-navy-950 via-transparent to-navy-950/20',
-            )} />
-            )}
-
-            {product.discount_percentage != null && product.discount_percentage > 0 && (
-              <DiscountOfferTag
-                percentage={product.discount_percentage}
-                variant={getDiscountOfferTagVariant(product.tag)}
-                className="w-8 pt-1.5 pb-2.5 sm:w-[42px] sm:pt-2 sm:pb-3.5 [&_span:first-child]:text-[10px] sm:[&_span:first-child]:text-[13px]"
-              />
-            )}
-
-            <div className="absolute left-2 top-2 z-20 flex flex-col items-start gap-1.5 sm:left-2.5 sm:top-2.5">
-              <ProductHighlightBadges product={product} />
-              {product.tag && (
-                <ProductTagBadge tag={product.tag} variant="overlay" compact />
-              )}
-              <ProductCodeLabel product={product} variant="overlay" className="sm:hidden" />
-              <WishlistButton
-                product={product}
-                className="rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/55"
-                size="sm"
-              />
-            </div>
-
-            {product.brand && (
-              <div className="absolute inset-x-2 bottom-2 z-10 sm:inset-x-2.5 sm:bottom-2.5">
-                <ProductBrandBadge
-                  brand={product.brand}
-                  variant={isElite ? 'elite' : 'overlay'}
-                  className={cn(
-                    'max-w-full',
-                    isElite &&
-                      'border-slate-300/50 bg-navy-950/85 text-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.45)] backdrop-blur-md',
-                  )}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Ticket perforation — desktop only */}
-          <div className="relative hidden items-center bg-navy-950 px-3 py-1 sm:flex" aria-hidden="true">
-            <div className={cn('h-3 w-3 -translate-x-1/2 rounded-full', getCardPerforationDotClass(product.tag))} />
-            <div className={cn('mx-2 flex-1 border-t border-dashed', getCardPerforationLineClass(product.tag))} />
-            <div className={cn('h-3 w-3 translate-x-1/2 rounded-full', getCardPerforationDotClass(product.tag))} />
-          </div>
-        </ProductLink>
-
-        {/* Dark content panel */}
-        <div className="flex flex-1 flex-col px-2.5 pb-2.5 pt-2 sm:px-3.5 sm:pb-3.5 sm:pt-2.5">
-          <ProductLink product={product} className="block">
-            <ProductCodeLabel product={product} variant="card" className="mb-0.5 hidden sm:block" />
-            <h3
-              className={cn(
-                CARD_TITLE_BASE_CLASS,
-                getCardTitleClass(product.tag),
-              )}
-            >
-              {product.name}
-            </h3>
-          </ProductLink>
-
-          {showCategory && (
-            <span
-              className={cn(
-                'mt-1 text-[8px] font-semibold uppercase tracking-[0.14em] sm:text-[9px] sm:tracking-[0.16em]',
-                getCardCategoryClass(product.tag),
-              )}
-            >
-              {product.category!.name}
-            </span>
-          )}
-
-          {product.description && (
-            <p className={cn('mt-1.5 hidden line-clamp-2 text-[11px] leading-relaxed sm:block', getCardDescriptionClass(product.tag))}>
-              {truncate(product.description, 80)}
-            </p>
-          )}
-
-          <div
-            className={cn(
-              'mt-1.5 flex items-center justify-between gap-1.5 rounded-lg px-2 py-1.5 ring-1 ring-inset sm:mt-2.5 sm:gap-2 sm:px-2.5 sm:py-2',
-              getCardPricePanelClass(product.tag),
-            )}
-          >
-            <div className="min-w-0">
-              <PriceBlock
-                price={price}
-                originalPrice={originalPrice}
-                theme={isElite ? 'elite' : 'ember'}
-              />
-            </div>
-            <ProductPiecesBadge
-              pieces={product.pieces}
-              packaging={product.packaging}
-              variant={isElite ? 'elite' : 'ember'}
-              className="shrink-0 text-[8px] sm:text-[9px]"
-            />
-          </div>
-
-          {product.is_available ? (
-            <div className="mt-auto pt-2 sm:mt-2.5 sm:pt-0">
-              {/* Mobile — single compact action */}
-              <div className="sm:hidden">
-                {inCart ? (
-                  <CartQuantityControl
-                    value={quantity}
-                    onChange={handleQuantityChange}
-                    variant={isElite ? 'elite' : 'ember'}
-                    min={0}
-                    className="w-full"
-                  />
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleAddToCart}
-                    className={cn(
-                      'inline-flex w-full items-center justify-center gap-1 rounded-lg py-2 text-[11px] font-bold transition-all active:scale-[0.98]',
-                      getCardAddToCartButtonClass(product.tag),
-                    )}
-                  >
-                    <ShoppingCart className="h-3.5 w-3.5" />
-                    Add
-                  </button>
-                )}
-              </div>
-
-              {/* Desktop — view + cart */}
-              <div className="hidden sm:block">
-                <div className="grid grid-cols-2 gap-2">
-                  <ProductLink
-                    product={product}
-                    className={cn(
-                      'inline-flex items-center justify-center gap-1 rounded-lg border py-2 text-[11px] font-semibold transition-all',
-                      getCardViewButtonClass(product.tag),
-                    )}
-                  >
-                    <Eye className="h-3 w-3" />
-                    View
-                  </ProductLink>
-                  {inCart ? (
-                    <CartQuantityControl
-                      value={quantity}
-                      onChange={handleQuantityChange}
-                      variant={isElite ? 'elite' : 'ember'}
-                      min={0}
-                    />
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleAddToCart}
-                      className={cn(
-                        'inline-flex items-center justify-center gap-1 rounded-lg py-2 text-[11px] font-bold transition-all hover:brightness-110 active:scale-[0.98]',
-                        getCardAddToCartButtonClass(product.tag),
-                      )}
-                    >
-                      <ShoppingCart className="h-3 w-3" />
-                      Add to Cart
-                    </button>
-                  )}
-                </div>
-                {inCart && (
-                  <p
-                    className={cn(
-                      'mt-1.5 flex items-center justify-center gap-1 text-[9px] font-medium tracking-wide',
-                      isElite ? 'text-cyan-300/80' : 'text-gold-400/80',
-                    )}
-                  >
-                    <ShoppingCart className="h-3 w-3 shrink-0" aria-hidden="true" />
-                    Added to cart
-                  </p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <ProductLink
-              product={product}
-              className={cn(
-                'mt-auto inline-flex w-full items-center justify-center gap-1.5 rounded-lg border py-2 pt-2 text-[11px] font-semibold sm:mt-3 sm:py-2.5',
-                getCardViewButtonClass(product.tag),
-              )}
-            >
-              View details
-              <ArrowRight className="h-3 w-3" />
-            </ProductLink>
-          )}
-        </div>
-      </div>
-    </article>
-  )
+  return <CatalogueProductCard product={product} index={index} />
 })

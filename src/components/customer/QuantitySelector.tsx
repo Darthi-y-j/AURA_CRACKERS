@@ -7,7 +7,7 @@ interface QuantitySelectorProps {
   min?: number
   max?: number
   className?: string
-  variant?: 'default' | 'ember' | 'silver' | 'elite' | 'table'
+  variant?: 'default' | 'ember' | 'dark' | 'silver' | 'elite' | 'table'
   compact?: boolean
 }
 
@@ -29,6 +29,7 @@ export function QuantitySelector({
   }
 
   const isEmber = variant === 'ember'
+  const isDark = variant === 'dark'
   const isSilver = variant === 'silver'
   const isElite = variant === 'elite'
   const isTable = variant === 'table'
@@ -44,12 +45,14 @@ export function QuantitySelector({
           : cn(
               'rounded-lg border',
               !className?.includes('w-') && !className?.includes('min-w-') && 'w-full',
-              isEmber
+              isDark
+                ? 'border-festive-500/35 bg-black/30'
+                : isEmber
                 ? 'border-gold-500/25 bg-white/[0.04]'
                 : isElite
-                  ? 'border-cyan-400/28 bg-indigo-950/20'
+                  ? 'border-cream-200/28 bg-white/[0.04]'
                   : isSilver
-                    ? 'border-slate-400/30 bg-white/[0.04]'
+                    ? 'border-cream-200/30 bg-white/[0.04]'
                     : 'border-navy-800/20',
             ),
         className,
@@ -64,12 +67,14 @@ export function QuantitySelector({
           btnSize,
           isTable
             ? 'text-navy-700'
-            : isEmber
+            : isDark
+              ? 'text-festive-400 hover:bg-white/5'
+              : isEmber
               ? 'text-gold-400 hover:bg-white/5'
               : isElite
-                ? 'text-cyan-300 hover:bg-white/5'
+                ? 'text-cream-200 hover:bg-white/5'
                 : isSilver
-                  ? 'text-slate-300 hover:bg-white/5'
+                  ? 'text-cream-200 hover:bg-white/5'
                   : 'text-navy-700 hover:bg-navy-800/5',
         )}
         aria-label="Decrease quantity"
@@ -85,12 +90,14 @@ export function QuantitySelector({
             ? 'text-navy-950'
             : cn(
                 'flex-1 border-x',
-                isEmber
+                isDark
+                  ? 'border-festive-500/30 text-cream-50'
+                  : isEmber
                   ? 'border-gold-500/20 text-cream-50'
                   : isElite
-                    ? 'border-cyan-400/22 text-slate-100'
+                    ? 'border-cream-200/22 text-cream-50'
                     : isSilver
-                      ? 'border-slate-400/25 text-slate-100'
+                      ? 'border-cream-200/25 text-cream-50'
                       : 'border-navy-800/20',
               ),
         )}
@@ -106,12 +113,14 @@ export function QuantitySelector({
           btnSize,
           isTable
             ? 'text-navy-700'
-            : isEmber
+            : isDark
+              ? 'text-festive-400 hover:bg-white/5'
+              : isEmber
               ? 'text-gold-400 hover:bg-white/5'
               : isElite
-                ? 'text-cyan-300 hover:bg-white/5'
+                ? 'text-cream-200 hover:bg-white/5'
                 : isSilver
-                  ? 'text-slate-300 hover:bg-white/5'
+                  ? 'text-cream-200 hover:bg-white/5'
                   : 'text-navy-700 hover:bg-navy-800/5',
         )}
         aria-label="Increase quantity"

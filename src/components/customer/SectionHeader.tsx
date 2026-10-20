@@ -29,35 +29,54 @@ const ACCENT_LINE: Record<SectionAccent, string> = {
   gold: 'bg-gradient-to-r from-festive-500 to-gold-400',
   premium: 'bg-gradient-to-r from-amber-800 to-festive-600',
   'premium-plus': 'bg-[linear-gradient(90deg,#8a6b12_0%,#e8c547_50%,#8a6b12_100%)]',
-  silver: 'bg-gradient-to-r from-slate-600 to-cyan-600',
+  silver: 'bg-gradient-to-r from-gold-400 to-festive-500',
 }
 
 const ACCENT_LABEL: Record<SectionAccent, string> = {
   gold: 'text-festive-500',
   premium: 'text-amber-900',
   'premium-plus': 'text-amber-950',
-  silver: 'text-slate-700',
+  silver: 'text-navy-800',
 }
 
 const ACCENT_ICON: Record<SectionAccent, string> = {
   gold: 'text-gold-500',
   premium: 'text-festive-700',
   'premium-plus': 'text-amber-800',
-  silver: 'text-cyan-600',
+  silver: 'text-gold-500',
 }
 
 const ACCENT_DOT_SECONDARY: Record<SectionAccent, string> = {
   gold: 'bg-gold-400/70',
   premium: 'bg-festive-600/70',
   'premium-plus': 'bg-amber-500/70',
-  silver: 'bg-cyan-400/70',
+  silver: 'bg-gold-400/70',
 }
 
 const ACCENT_DOT_TERTIARY: Record<SectionAccent, string> = {
   gold: 'bg-gold-400/40',
   premium: 'bg-festive-500/40',
   'premium-plus': 'bg-amber-400/40',
-  silver: 'bg-slate-400/40',
+  silver: 'bg-gold-400/40',
+}
+
+function getCenterLabelClass(isDark: boolean, accent: SectionAccent): string {
+  if (isDark) {
+    if (accent === 'silver') {
+      return 'rounded-full border border-gold-400/35 bg-gold-400/10 px-3 py-1.5 text-cream-50 shadow-[0_2px_14px_rgba(245,158,11,0.12)]'
+    }
+    return 'rounded-full border border-gold-400/40 bg-gold-400/15 px-3 py-1.5 text-cream-50 shadow-[0_2px_14px_rgba(245,158,11,0.15)]'
+  }
+  if (accent === 'silver') {
+    return 'rounded-full border border-gold-500/25 bg-gradient-to-r from-gold-500/10 via-cream-200/15 to-gold-400/10 px-3 py-1.5 text-navy-800 shadow-[0_2px_14px_rgba(245,158,11,0.1)]'
+  }
+  if (accent === 'premium-plus') {
+    return 'rounded-full border border-amber-700/25 bg-gradient-to-r from-amber-500/10 via-yellow-500/8 to-amber-400/10 px-3 py-1.5 text-amber-950 shadow-[0_2px_14px_rgba(180,130,20,0.12)]'
+  }
+  if (accent === 'premium') {
+    return 'rounded-full border border-festive-500/25 bg-gradient-to-r from-festive-500/10 via-amber-600/8 to-festive-500/10 px-3 py-1.5 text-amber-900 shadow-[0_2px_14px_rgba(180,83,9,0.1)]'
+  }
+  return 'rounded-full border border-festive-500/25 bg-gradient-to-r from-festive-500/12 via-gold-500/10 to-gold-400/12 px-3 py-1.5 text-festive-500 shadow-[0_2px_14px_rgba(234,88,12,0.12)]'
 }
 
 export function SectionHeader({
@@ -76,7 +95,7 @@ export function SectionHeader({
   const isCenter = align === 'center'
   const isDark = theme === 'dark'
   const titleColor = isDark ? 'text-cream-50' : 'text-navy-900'
-  const descColor = isDark ? 'text-cream-100/70' : 'text-navy-700/75'
+  const descColor = isDark ? 'text-cream-100/85' : 'text-navy-700/75'
   const highlightVariant = getHighlightVariant(theme, accent)
   const badgeColor = isDark
     ? 'border-gold-400/30 bg-gold-500/15 text-gold-300'
@@ -106,20 +125,21 @@ export function SectionHeader({
         <p
           className={cn(
             'flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.22em] sm:text-xs sm:tracking-[0.24em]',
-            isCenter
-              ? accent === 'silver'
-                ? 'rounded-full border border-cyan-400/20 bg-gradient-to-r from-slate-400/10 via-cyan-400/8 to-slate-300/10 px-3 py-1.5 text-slate-600 shadow-[0_2px_14px_rgba(34,211,238,0.1)]'
-                : accent === 'premium-plus'
-                  ? 'rounded-full border border-amber-700/25 bg-gradient-to-r from-amber-500/10 via-yellow-500/8 to-amber-400/10 px-3 py-1.5 text-amber-950 shadow-[0_2px_14px_rgba(180,130,20,0.12)]'
-                  : accent === 'premium'
-                    ? 'rounded-full border border-festive-600/20 bg-gradient-to-r from-festive-600/10 via-amber-600/8 to-festive-500/10 px-3 py-1.5 text-amber-900 shadow-[0_2px_14px_rgba(180,83,9,0.1)]'
-                    : 'rounded-full border border-festive-500/25 bg-gradient-to-r from-festive-500/12 via-gold-500/10 to-gold-400/12 px-3 py-1.5 text-festive-600 shadow-[0_2px_14px_rgba(234,88,12,0.12)]'
-              : ACCENT_LABEL[accent],
+            isCenter ? getCenterLabelClass(isDark, accent) : isDark ? 'text-gold-300' : ACCENT_LABEL[accent],
           )}
         >
           {Icon && (
             <Icon
-              className={cn('h-3.5 w-3.5', ACCENT_ICON[accent])}
+              className={cn(
+                'h-3.5 w-3.5',
+                isDark && isCenter
+                  ? accent === 'silver'
+                    ? 'text-gold-400'
+                    : 'text-gold-400'
+                  : isDark
+                    ? 'text-gold-400'
+                    : ACCENT_ICON[accent],
+              )}
               strokeWidth={2.5}
             />
           )}

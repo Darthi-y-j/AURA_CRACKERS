@@ -6,7 +6,7 @@ import { formatPackagingShort } from '@/lib/productPackaging'
 interface ProductPiecesBadgeProps {
   pieces?: number | null
   packaging?: ProductPackaging | null
-  variant?: 'ember' | 'light' | 'silver' | 'elite' | 'table'
+  variant?: 'ember' | 'dark' | 'light' | 'silver' | 'elite' | 'table'
   suffix?: string
   className?: string
 }
@@ -25,30 +25,34 @@ export function ProductPiecesBadge({
     <span
       className={cn(
         'inline-flex items-center gap-1 rounded-md border font-bold uppercase tracking-[0.12em]',
-        variant === 'ember'
-          ? 'shrink-0 rounded-md bg-gold-500/10 px-1.5 py-0.5 text-[9px] tracking-wide text-gold-300 ring-1 ring-inset ring-gold-500/15'
+        variant === 'dark'
+          ? 'shrink-0 rounded-md border border-cream-200/30 bg-white/5 px-1.5 py-0.5 text-[9px] tracking-wide text-cream-200'
+          : variant === 'ember'
+          ? 'shrink-0 rounded-md bg-festive-500/8 px-1.5 py-0.5 text-[9px] tracking-wide text-festive-700 ring-1 ring-inset ring-festive-500/20'
           : variant === 'table'
             ? 'shrink-0 rounded-md border border-orange-300/60 bg-white/70 px-2 py-0.5 text-[10px] tracking-[0.12em] text-festive-700 shadow-sm'
           : variant === 'silver'
-            ? 'shrink-0 rounded-md bg-slate-400/10 px-1.5 py-0.5 text-[9px] tracking-wide text-slate-200 ring-1 ring-inset ring-slate-400/25'
+            ? 'shrink-0 rounded-md bg-cream-100/10 px-1.5 py-0.5 text-[9px] tracking-wide text-cream-200 ring-1 ring-inset ring-cream-200/25'
             : variant === 'elite'
-              ? 'shrink-0 rounded-md bg-indigo-500/10 px-1.5 py-0.5 text-[9px] tracking-wide text-cyan-100 ring-1 ring-inset ring-slate-400/20'
-            : 'border-festive-500/30 bg-gradient-to-r from-festive-500/10 to-gold-500/10 px-2.5 py-1 text-[11px] text-festive-600',
+              ? 'shrink-0 rounded-md bg-festive-500/10 px-1.5 py-0.5 text-[9px] tracking-wide text-festive-700 ring-1 ring-inset ring-festive-500/25'
+            : 'border-navy-900/10 bg-white px-1.5 py-0.5 text-[9px] font-semibold normal-case tracking-normal text-navy-700/85',
         className,
       )}
     >
-      {variant === 'ember' || variant === 'silver' || variant === 'elite' || variant === 'table' ? (
+      {variant === 'ember' || variant === 'dark' || variant === 'silver' || variant === 'elite' || variant === 'table' ? (
         <>
           <Package
             className={cn(
               'h-2.5 w-2.5 shrink-0',
               variant === 'table'
                 ? 'text-festive-500'
+                : variant === 'dark'
+                  ? 'text-cream-200/90'
                 : variant === 'elite'
-                ? 'text-slate-300/85'
+                ? 'text-festive-600/85'
                 : variant === 'silver'
-                  ? 'text-slate-300/80'
-                  : 'text-gold-400/80',
+                  ? 'text-festive-500/80'
+                  : 'text-festive-600/85',
             )}
           />
           <span className="normal-case tracking-normal">{label}</span>

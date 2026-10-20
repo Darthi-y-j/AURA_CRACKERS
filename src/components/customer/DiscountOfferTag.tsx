@@ -8,10 +8,9 @@ interface DiscountOfferTagProps {
 
 const DISCOUNT_TAG_STYLES = {
   festive: 'bg-gradient-to-b from-red-500 to-orange-500 text-white shadow-[0_4px_14px_rgba(234,88,12,0.45)]',
-  elite:
-    'bg-[linear-gradient(180deg,#475569_0%,#cbd5e1_48%,#67e8f9_100%)] text-navy-950 shadow-[0_4px_14px_rgba(34,211,238,0.22)]',
+  elite: 'bg-gradient-to-b from-festive-600 to-festive-500 text-cream-50 shadow-[0_4px_14px_rgba(234,88,12,0.4)]',
   'premium-plus':
-    'bg-[linear-gradient(180deg,#8a6b12_0%,#c9a227_48%,#f9e076_100%)] text-black shadow-[0_4px_14px_rgba(212,175,55,0.4)]',
+    'bg-gradient-to-b from-amber-700 to-festive-500 text-cream-50 shadow-[0_4px_14px_rgba(234,88,12,0.4)]',
 } as const
 
 /** Vertical ribbon with fishtail — pinned top-right */

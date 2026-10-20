@@ -1,5 +1,6 @@
 import type { ProductCodeSource } from '@/lib/productCode'
 import { formatProductCode } from '@/lib/productCode'
+import { ACCENT_SILVER_MUTED } from '@/lib/productCardThemes'
 import { cn } from '@/lib/utils'
 
 type ProductCodeLabelProps = {
@@ -7,15 +8,19 @@ type ProductCodeLabelProps = {
   className?: string
   /** Show "Code 12" vs "12" only */
   showLabel?: boolean
-  variant?: 'table' | 'card' | 'cardLight' | 'overlay'
+  variant?: 'table' | 'card' | 'cardDark' | 'cardLight' | 'overlay'
 }
 
 const VARIANT_CLASS: Record<NonNullable<ProductCodeLabelProps['variant']>, string> = {
   table: 'text-xs font-bold tabular-nums text-navy-950 lg:text-sm',
-  card: 'text-[9px] font-semibold uppercase tracking-[0.12em] text-gold-400/85 sm:text-[10px]',
+  card: 'text-[9px] font-semibold uppercase tracking-[0.12em] text-festive-500/75 sm:text-[10px]',
+  cardDark: cn(
+    'text-[9px] font-semibold uppercase tracking-[0.12em] sm:text-[10px]',
+    ACCENT_SILVER_MUTED,
+  ),
   cardLight: 'text-[10px] font-semibold text-navy-700/55',
   overlay:
-    'rounded-md border border-white/15 bg-black/45 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-gold-200/95 backdrop-blur-sm',
+    'rounded-md border border-white/15 bg-black/45 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-festive-300 backdrop-blur-sm',
 }
 
 export function ProductCodeLabel({

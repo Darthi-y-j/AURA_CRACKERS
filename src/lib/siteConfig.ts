@@ -14,8 +14,7 @@ export const DEFAULT_DESCRIPTION =
   'Premium fireworks and crackers catalogue from Sivakasi. Browse products by category and send enquiries on WhatsApp — delivery across India.'
 
 /** Homepage document title — includes official brand positioning for search. */
-export const HOME_PAGE_TITLE =
-  'Aura Crackers — Official Website | Premium Fireworks & Crackers'
+export const HOME_PAGE_TITLE = 'Aura Crackers | Premium Fireworks & Crackers'
 
 /** Homepage meta description — natural brand + product intent without keyword stuffing. */
 export const HOME_PAGE_DESCRIPTION =

@@ -12,6 +12,7 @@ import { LoadingState } from '@/components/customer/LoadingState'
 import { HowItWorksSection } from '@/components/customer/HowItWorksSection'
 import { WhyChooseUsSection } from '@/components/customer/WhyChooseUsSection'
 import { BrandMarquee } from '@/components/customer/BrandMarquee'
+import { HomeSeoIntroSection } from '@/components/customer/HomeSeoIntroSection'
 import { GiftBoxPromoSection } from '@/components/customer/GiftBoxPromoSection'
 import { LazySection } from '@/components/customer/LazySection'
 import { getCategories, getCachedCatalogueCategories } from '@/services/categories'
@@ -143,6 +144,10 @@ export function HomePage() {
 
       <LazySection minHeight="200px">
         <ContactSection />
+      </LazySection>
+
+      <LazySection minHeight="280px">
+        <HomeSeoIntroSection />
       </LazySection>
     </div>
   )

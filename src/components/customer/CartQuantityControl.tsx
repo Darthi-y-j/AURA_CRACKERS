@@ -5,7 +5,7 @@ import { QuantitySelector } from './QuantitySelector'
 interface CartQuantityControlProps {
   value: number
   onChange: (value: number) => void
-  variant?: 'default' | 'ember' | 'silver' | 'elite' | 'table'
+  variant?: 'default' | 'ember' | 'dark' | 'silver' | 'elite' | 'table'
   compact?: boolean
   min?: number
   className?: string
@@ -20,6 +20,7 @@ export function CartQuantityControl({
   className,
 }: CartQuantityControlProps) {
   const isEmber = variant === 'ember'
+  const isDark = variant === 'dark'
   const isSilver = variant === 'silver'
   const isElite = variant === 'elite'
 
@@ -29,12 +30,14 @@ export function CartQuantityControl({
         className={cn(
           'inline-flex shrink-0 items-center justify-center rounded-lg border',
           compact ? 'w-8 sm:w-9' : 'w-10',
-          isEmber
-            ? 'border-gold-500/25 bg-gold-500/10 text-gold-400'
+          isDark
+            ? 'border-festive-500/35 bg-white/5 text-festive-400'
+            : isEmber
+            ? 'border-festive-500/25 bg-festive-500/10 text-festive-600'
             : isElite
-              ? 'border-slate-400/30 bg-indigo-500/12 text-slate-200'
+              ? 'border-cream-200/30 bg-white/5 text-cream-200'
               : isSilver
-                ? 'border-slate-400/30 bg-slate-400/10 text-slate-300'
+                ? 'border-cream-200/30 bg-white/5 text-cream-200'
                 : 'border-navy-800/12 bg-gold-500/10 text-festive-600',
         )}
         aria-hidden="true"

@@ -16,22 +16,28 @@ export function CategoryCard({ category }: CategoryCardProps) {
       className="group relative isolate flex flex-col overflow-hidden rounded-2xl border border-festive-500/10 bg-[#12100e] shadow-[0_0_0_1px_rgba(234,88,12,0.08),0_12px_40px_rgba(0,0,0,0.45)] transition-[box-shadow,border-color] duration-300 hover:border-festive-500/25 hover:shadow-[0_0_24px_rgba(234,88,12,0.12),0_16px_48px_rgba(0,0,0,0.5)] lg:min-h-[210px] lg:flex-row"
     >
       {/* Image */}
-      <div className="relative h-28 w-full shrink-0 overflow-hidden sm:h-36 lg:absolute lg:inset-y-0 lg:right-0 lg:h-auto lg:w-[46%]">
+      <div className="relative h-28 w-full shrink-0 overflow-hidden sm:h-36 lg:absolute lg:inset-y-0 lg:right-0 lg:h-auto lg:w-[50%]">
         <img
           src={getImageUrl(category.image_url, '/placeholder-category.svg')}
           alt={category.name}
           loading="lazy"
           decoding="async"
-          className="h-full w-full object-cover transition-[filter,transform] duration-500 ease-out group-hover:scale-[1.04] group-hover:brightness-110"
+          className="h-full w-full object-cover brightness-[1.03] contrast-[1.05] transition-[filter,transform] duration-500 ease-out group-hover:scale-[1.04] group-hover:brightness-110"
         />
+        {/* Mobile: soft fade under stacked text only */}
         <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#12100e] via-[#12100e]/35 to-transparent transition-opacity duration-300 group-hover:opacity-90 lg:bg-gradient-to-r lg:from-[#12100e] lg:via-[#12100e]/60 lg:to-transparent"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#12100e] via-[#12100e]/25 to-transparent lg:hidden"
+          aria-hidden="true"
+        />
+        {/* Desktop: narrow seam blend — image stays bright */}
+        <div
+          className="pointer-events-none absolute inset-y-0 left-0 hidden w-14 bg-gradient-to-r from-[#12100e] to-transparent lg:block"
           aria-hidden="true"
         />
       </div>
 
       {/* Text */}
-      <div className="relative z-[1] flex flex-1 flex-col justify-center p-3 sm:p-5 lg:max-w-[58%] lg:p-6">
+      <div className="relative z-[1] flex flex-1 flex-col justify-center bg-[#12100e] p-3 sm:p-5 lg:max-w-[55%] lg:bg-gradient-to-r lg:from-[#12100e] lg:via-[#12100e] lg:to-[#12100e]/92 lg:p-6">
         <div>
           <h3 className="font-display text-sm font-bold leading-tight text-gold-400 sm:text-lg lg:text-[1.35rem]">
             {category.name}

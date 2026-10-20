@@ -63,7 +63,7 @@ export function FeaturedProductsShowcase({
             {loopProducts.map((product, i) => (
               <div
                 key={`${product.id}-${i}`}
-                className="w-[128px] shrink-0 self-start sm:w-[142px]"
+                className="w-[118px] shrink-0 self-start sm:w-[128px]"
               >
                 <ProductCard
                   product={product}
