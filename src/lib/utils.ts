@@ -66,23 +66,43 @@ const SUPABASE_RENDER_PATH = '/storage/v1/render/image/public/'
 
 /** Display widths — request 2x for retina where noted in usage */
 export const IMAGE_WIDTH = {
+  /** Instant LQIP from Supabase image transform */
+  placeholder: 56,
   thumb: 160,
   card: 400,
   detail: 880,
 } as const
+
+export function isSupabaseStorageUrl(url: string | null | undefined): boolean {
+  return Boolean(url && url.includes(SUPABASE_OBJECT_PATH))
+}
+
+type ImageTransformOptions = {
+  quality?: number
+}
 
 export function getImageUrl(
   url: string | null | undefined,
   fallback = '/placeholder-product.svg',
   width?: number,
   height?: number,
+  options?: ImageTransformOptions,
 ): string {
   if (!url) return fallback
-  if (!width || !url.includes(SUPABASE_OBJECT_PATH)) return url
+  if (!width || !isSupabaseStorageUrl(url)) return url
 
   const renderUrl = url.replace(SUPABASE_OBJECT_PATH, SUPABASE_RENDER_PATH)
   const h = height ?? Math.round((width * 3) / 4)
-  return `${renderUrl}?width=${width}&height=${h}&quality=68&resize=cover&format=webp`
+  const quality = options?.quality ?? 68
+  return `${renderUrl}?width=${width}&height=${h}&quality=${quality}&resize=cover&format=webp`
+}
+
+/** Tiny WebP for blurred placeholder while the full image loads. */
+export function getImagePlaceholderUrl(
+  url: string | null | undefined,
+  fallback = '/placeholder-product.svg',
+): string {
+  return getImageUrl(url, fallback, IMAGE_WIDTH.placeholder, IMAGE_WIDTH.placeholder, { quality: 42 })
 }
 
 export function getSupabaseHost(): string | null {

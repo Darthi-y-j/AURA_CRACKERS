@@ -2,7 +2,8 @@ import { memo } from 'react'
 import { ProductLink } from './ProductLink'
 import { Eye, ShoppingCart, Tag } from 'lucide-react'
 import type { Product } from '@/types/database'
-import { getImageUrl, IMAGE_WIDTH, truncate, cn } from '@/lib/utils'
+import { IMAGE_WIDTH, truncate, cn } from '@/lib/utils'
+import { ProductImage } from './ProductImage'
 import { useProductCartState } from '@/hooks/useProductCartState'
 import { CartQuantityControl } from './CartQuantityControl'
 import { ProductPiecesBadge } from './ProductPiecesBadge'
@@ -51,13 +52,13 @@ export const CatalogueProductCard = memo(function CatalogueProductCard({
     >
       <ProductLink product={product} className="relative block">
         <div className="relative aspect-[4/3] overflow-hidden bg-white">
-          <img
-            src={getImageUrl(product.image_url, '/placeholder-product.svg', IMAGE_WIDTH.card)}
+          <ProductImage
+            src={product.image_url}
             alt={product.name}
-            loading={prioritizeImage ? 'eager' : 'lazy'}
-            decoding="async"
+            width={IMAGE_WIDTH.card}
+            priority={prioritizeImage}
             fetchPriority={prioritizeImage ? 'high' : 'low'}
-            className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.03]"
+            className="transition-transform duration-300 group-hover:scale-[1.03]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
 

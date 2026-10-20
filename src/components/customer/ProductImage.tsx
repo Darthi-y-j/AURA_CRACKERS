@@ -1,5 +1,11 @@
-import { useCallback, useState } from 'react'
-import { getImageUrl, IMAGE_WIDTH, cn } from '@/lib/utils'
+import { useCallback, useEffect, useState } from 'react'
+import {
+  getImagePlaceholderUrl,
+  getImageUrl,
+  IMAGE_WIDTH,
+  isSupabaseStorageUrl,
+  cn,
+} from '@/lib/utils'
 
 interface ProductImageProps {
   src: string | null | undefined
@@ -7,11 +13,28 @@ interface ProductImageProps {
   className?: string
   priority?: boolean
   width?: number
+  fallback?: string
+  fetchPriority?: 'high' | 'low' | 'auto'
 }
 
-export function ProductImage({ src, alt, className, priority = false, width = IMAGE_WIDTH.detail }: ProductImageProps) {
+export function ProductImage({
+  src,
+  alt,
+  className,
+  priority = false,
+  width = IMAGE_WIDTH.detail,
+  fallback = '/placeholder-product.svg',
+  fetchPriority,
+}: ProductImageProps) {
   const [loaded, setLoaded] = useState(false)
-  const imageSrc = getImageUrl(src, '/placeholder-product.svg', width, width)
+  const usePlaceholder = isSupabaseStorageUrl(src)
+  const imageSrc = getImageUrl(src, fallback, width, width)
+  const placeholderSrc = usePlaceholder ? getImagePlaceholderUrl(src, fallback) : null
+  const resolvedFetchPriority = fetchPriority ?? (priority ? 'high' : 'auto')
+
+  useEffect(() => {
+    setLoaded(false)
+  }, [imageSrc])
 
   const imgRef = useCallback(
     (node: HTMLImageElement | null) => {
@@ -23,19 +46,33 @@ export function ProductImage({ src, alt, className, priority = false, width = IM
   )
 
   return (
-    <img
-      ref={imgRef}
-      src={imageSrc}
-      alt={alt}
-      loading={priority ? 'eager' : 'lazy'}
-      decoding="async"
-      fetchPriority={priority ? 'high' : 'auto'}
-      onLoad={() => setLoaded(true)}
-      className={cn(
-        priority ? 'opacity-100' : loaded ? 'opacity-100' : 'opacity-0',
-        !priority && 'transition-opacity duration-200',
-        className,
+    <span className={cn('relative block h-full w-full overflow-hidden bg-[#1a1412]', className)}>
+      {placeholderSrc && (
+        <img
+          src={placeholderSrc}
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+          className={cn(
+            'absolute inset-0 h-full w-full object-cover object-center scale-110 blur-lg brightness-95',
+            loaded && 'opacity-0 transition-opacity duration-300',
+          )}
+        />
       )}
-    />
+      <img
+        ref={imgRef}
+        src={imageSrc}
+        alt={alt}
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchPriority={resolvedFetchPriority}
+        onLoad={() => setLoaded(true)}
+        className={cn(
+          'relative z-[1] h-full w-full object-cover object-center',
+          loaded || priority ? 'opacity-100' : 'opacity-0',
+          'transition-opacity duration-300',
+        )}
+      />
+    </span>
   )
 }

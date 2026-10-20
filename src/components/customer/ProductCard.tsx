@@ -2,7 +2,8 @@ import { memo } from 'react'
 import { ProductLink } from './ProductLink'
 import { Eye, ShoppingCart, Check, ArrowRight, Sparkles } from 'lucide-react'
 import type { Product } from '@/types/database'
-import { getImageUrl, IMAGE_WIDTH, truncate, cn } from '@/lib/utils'
+import { IMAGE_WIDTH, truncate, cn } from '@/lib/utils'
+import { ProductImage } from './ProductImage'
 import { isEliteProductTag, FEATURED_CARD_GRADIENT, getCardViewButtonClass, getCardAddToCartButtonClass, getDiscountOfferTagVariant } from '@/lib/productCardThemes'
 import { useProductCartState } from '@/hooks/useProductCartState'
 import { QuantitySelector } from './QuantitySelector'
@@ -172,13 +173,13 @@ export const ProductCard = memo(function ProductCard({
                 : 'aspect-[16/10] sm:aspect-[4/3] lg:aspect-auto lg:min-h-[340px] lg:w-[52%]',
             )}
           >
-            <img
-              src={getImageUrl(product.image_url, '/placeholder-product.svg', imageWidth)}
+            <ProductImage
+              src={product.image_url}
               alt={product.name}
-              loading={prioritizeImage ? 'eager' : 'lazy'}
-              decoding="async"
+              width={imageWidth}
+              priority={prioritizeImage}
               fetchPriority={prioritizeImage ? 'high' : 'low'}
-              className="image-zoom h-full w-full object-cover"
+              className="image-zoom"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-navy-950/50 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-navy-950/20" />
             <div className="absolute right-3 top-3 z-20 sm:right-4 sm:top-4">
@@ -280,16 +281,13 @@ export const ProductCard = memo(function ProductCard({
                 : 'block aspect-[4/3] sm:aspect-[5/4]',
           )}
         >
-          <img
-            src={getImageUrl(product.image_url, '/placeholder-product.svg', imageWidth)}
+          <ProductImage
+            src={product.image_url}
             alt={product.name}
-            loading={prioritizeImage ? 'eager' : 'lazy'}
-            decoding="async"
+            width={imageWidth}
+            priority={prioritizeImage}
             fetchPriority={prioritizeImage ? 'high' : 'low'}
-            className={cn(
-              'image-zoom object-cover',
-              fillHeight ? 'absolute inset-0 h-full w-full' : 'h-full w-full',
-            )}
+            className={cn('image-zoom', fillHeight && 'absolute inset-0')}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#140f0d]/75 via-[#43302b]/15 to-transparent opacity-90 transition-opacity group-hover:opacity-95" />
 

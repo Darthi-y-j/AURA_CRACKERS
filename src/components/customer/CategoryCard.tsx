@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 import type { Category } from '@/types/database'
-import { getImageUrl } from '@/lib/utils'
+import { IMAGE_WIDTH } from '@/lib/utils'
+import { ProductImage } from './ProductImage'
 
 interface CategoryCardProps {
   category: Category
@@ -17,12 +18,12 @@ export function CategoryCard({ category }: CategoryCardProps) {
     >
       {/* Image */}
       <div className="relative h-28 w-full shrink-0 overflow-hidden sm:h-36 lg:absolute lg:inset-y-0 lg:right-0 lg:h-auto lg:w-[50%]">
-        <img
-          src={getImageUrl(category.image_url, '/placeholder-category.svg')}
+        <ProductImage
+          src={category.image_url}
           alt={category.name}
-          loading="lazy"
-          decoding="async"
-          className="h-full w-full object-cover brightness-[1.03] contrast-[1.05] transition-[filter,transform] duration-500 ease-out group-hover:scale-[1.04] group-hover:brightness-110"
+          width={IMAGE_WIDTH.card}
+          fallback="/placeholder-category.svg"
+          className="brightness-[1.03] contrast-[1.05] transition-[filter,transform] duration-500 ease-out group-hover:scale-[1.04] group-hover:brightness-110"
         />
         {/* Mobile: soft fade under stacked text only */}
         <div

@@ -1,13 +1,23 @@
 import type { Product } from '@/types/database'
 import { pickHeroSelectionProducts } from '@/lib/heroSelection'
 import { PRODUCT_TAGS } from '@/lib/productTags'
-import { getImageUrl, IMAGE_WIDTH } from '@/lib/utils'
+import { getImagePlaceholderUrl, getImageUrl, IMAGE_WIDTH, isSupabaseStorageUrl } from '@/lib/utils'
 
 const prefetched = new Set<string>()
 
 function prefetchUrl(url: string | null | undefined, width: number) {
   const src = getImageUrl(url, '', width)
   if (!src || src === '/placeholder-product.svg' || prefetched.has(src)) return
+  prefetched.add(src)
+  const img = new Image()
+  img.decoding = 'async'
+  img.src = src
+}
+
+function prefetchPlaceholder(url: string | null | undefined) {
+  if (!isSupabaseStorageUrl(url)) return
+  const src = getImagePlaceholderUrl(url, '')
+  if (!src || prefetched.has(src)) return
   prefetched.add(src)
   const img = new Image()
   img.decoding = 'async'
@@ -33,6 +43,7 @@ export function prefetchCatalogueProductImages(products: Product[]) {
     }
 
     for (const { url, width } of urls.slice(0, 36)) {
+      prefetchPlaceholder(url)
       prefetchUrl(url, width)
     }
   }
@@ -45,5 +56,6 @@ export function prefetchCatalogueProductImages(products: Product[]) {
 }
 
 export function prefetchProductImage(url: string | null | undefined, width = IMAGE_WIDTH.card) {
+  prefetchPlaceholder(url)
   prefetchUrl(url, width)
 }
